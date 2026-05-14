@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { studentAPI } from '../services/api';
-import { generateGradePDF } from './PDFGenerator';
-import SubjectRegistration from './Student/SubjectRegistration';
+import { studentAPI } from '../../services/api';
+import { generateGradePDF } from '../PDFGenerator';
+import SubjectRegistration from '../Student/StudentRegistration';
 
 function StudentDashboard() {
   const [user, setUser] = useState(null);

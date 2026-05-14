@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TeacherManagement from './Admin/TeacherManagement';
-import ClassManagement from './Admin/ClassManagement';
-import SubjectAllocation from './Admin/SubjectAllocation';
-import ResultsApproval from './Admin/ResultsApproval';
-import StudentList from './StudentList';
+import TeacherManagement from './TeacherManagement';
+import ClassManagement from './ClassManagement';
+import SubjectAllocation from './SubjectAllocation';
+import ResultsApproval from './ResultsApproval';
+import StudentList from '../StudentList';
 import UserManagement from './UserManagement';
-import Rankings from './Rankings';
+import Rankings from '../Rankings';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
