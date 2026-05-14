@@ -27,25 +27,25 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/Auth/login" element={<Login setUser={setUser} />} />
+        <Route path="/Auth/register" element={<Register />} />
         
         <Route 
-          path="/admin-dashboard" 
+          path="/components/AdminDashboard" 
           element={user?.role === 'Admin' ? <AdminDashboard /> : <Navigate to="/login" />} 
         />
         
         <Route 
-          path="/teacherDashboard" 
+          path="/components/TeacherDashboard" 
           element={user?.role === 'Teacher' ? <TeacherDashboard /> : <Navigate to="/login" />} 
         />
         
         <Route 
-          path="/student-dashboard" 
+          path="/components/StudentDashboard" 
           element={user?.role === 'Student' ? <StudentDashboard /> : <Navigate to="/login" />} 
         />
         
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/Auth/login" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );
