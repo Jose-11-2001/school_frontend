@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { studentAPI, subjectAPI } from '../services/api';
+import { studentAPI, subjectAPI } from '../../services/api';
 
 function MarksEntry() {
   const [students, setStudents] = useState([]);
