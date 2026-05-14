@@ -175,7 +175,7 @@ function ResultsApproval() {
                           {result.grade}
                         </span>
                       </td>
-                    </table>
+                    </tr>
                   ))}
                 </tbody>
               </table>

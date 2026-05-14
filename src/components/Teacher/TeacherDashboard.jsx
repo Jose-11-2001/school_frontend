@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import MyStudents from '../MyStudents';
+import MyStudents from '../Teacher/MySubjects';
 import TeacherMarksEntry from './TeacherMarksEntry';
 import MySubjects from '../Teacher/MySubjects';
 import AddStudent from '../AddStudent';
