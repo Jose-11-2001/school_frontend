@@ -28,13 +28,11 @@ function TeacherMarksEntry() {
   const loadMyStudents = async () => {
     try {
       const token = localStorage.getItem('token');
-      // Try both endpoints to ensure we get students
       let response = await fetch('http://localhost:5123/api/TeacherMarks/my-students', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (!response.ok) {
-        // Fallback to StudentSubject endpoint
         response = await fetch('http://localhost:5123/api/StudentSubject/teacher-students', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -114,27 +112,124 @@ function TeacherMarksEntry() {
     }
   };
 
+  // Get student class level (Form 1, Form 2, Form 3, Form 4)
+  const getStudentClassLevel = () => {
+    if (!selectedStudent) return null;
+    const className = selectedStudent.class || selectedStudent.className || '';
+    if (className.includes('Form 1') || className.includes('Form1')) return 'form1';
+    if (className.includes('Form 2') || className.includes('Form2')) return 'form2';
+    if (className.includes('Form 3') || className.includes('Form3')) return 'form3';
+    if (className.includes('Form 4') || className.includes('Form4')) return 'form4';
+    return null;
+  };
+
+  // Convert percentage score to points for Form 3 & Form 4
+  const convertToPoints = (percentage) => {
+    if (percentage >= 85) return 1;
+    if (percentage >= 80) return 2;
+    if (percentage >= 70) return 3;
+    if (percentage >= 60) return 4;
+    if (percentage >= 55) return 5;
+    if (percentage >= 50) return 6;
+    if (percentage >= 45) return 7;
+    if (percentage >= 40) return 8;
+    return 9;
+  };
+
+  // Convert points back to percentage for display
+  const convertPointsToPercentage = (points) => {
+    if (points === 1) return 90;
+    if (points === 2) return 82;
+    if (points === 3) return 75;
+    if (points === 4) return 65;
+    if (points === 5) return 57;
+    if (points === 6) return 52;
+    if (points === 7) return 47;
+    if (points === 8) return 42;
+    return 35;
+  };
+
+  // Calculate total based on class level
   const calculateTotal = () => {
     const ct1 = parseFloat(marks.continuousTest1) || 0;
     const ct2 = parseFloat(marks.continuousTest2) || 0;
     const endTerm = parseFloat(marks.endTermExam) || 0;
+    const classLevel = getStudentClassLevel();
+    
+    // For Form 1 & Form 2: Use percentage scores directly
+    if (classLevel === 'form1' || classLevel === 'form2') {
+      const total = (ct1 * 0.20) + (ct2 * 0.20) + (endTerm * 0.60);
+      return { total: total.toFixed(2), display: `${total.toFixed(2)}%`, points: null };
+    }
+    
+    // For Form 3 & Form 4: Convert to points first
+    if (classLevel === 'form3' || classLevel === 'form4') {
+      const ct1Points = ct1 > 0 ? convertToPoints(ct1) : 0;
+      const ct2Points = ct2 > 0 ? convertToPoints(ct2) : 0;
+      const endTermPoints = endTerm > 0 ? convertToPoints(endTerm) : 0;
+      
+      // Weighted average of points (20% + 20% + 60%)
+      let totalPoints = 0;
+      let hasMarks = false;
+      
+      if (ct1Points > 0) {
+        totalPoints += ct1Points * 0.20;
+        hasMarks = true;
+      }
+      if (ct2Points > 0) {
+        totalPoints += ct2Points * 0.20;
+        hasMarks = true;
+      }
+      if (endTermPoints > 0) {
+        totalPoints += endTermPoints * 0.60;
+        hasMarks = true;
+      }
+      
+      if (!hasMarks) return { total: 0, display: '0 pts', points: 0 };
+      
+      const finalPoints = Math.round(totalPoints);
+      const equivalentPercentage = convertPointsToPercentage(finalPoints);
+      return { total: finalPoints, display: `${finalPoints} points`, points: finalPoints, percentage: equivalentPercentage };
+    }
+    
+    // Default: percentage based
     const total = (ct1 * 0.20) + (ct2 * 0.20) + (endTerm * 0.60);
-    return total.toFixed(2);
+    return { total: total.toFixed(2), display: `${total.toFixed(2)}%`, points: null };
   };
 
-  const getGrade = (total) => {
-    const score = parseFloat(total);
-    if (score >= 90) return 'A+';
-    if (score >= 80) return 'A';
-    if (score >= 75) return 'A-';
-    if (score >= 70) return 'B+';
-    if (score >= 65) return 'B';
-    if (score >= 60) return 'B-';
-    if (score >= 55) return 'C+';
-    if (score >= 50) return 'C';
-    if (score >= 45) return 'C-';
-    if (score >= 40) return 'D';
-    return 'E';
+  // Get grade based on class level
+  const getGrade = (result) => {
+    const classLevel = getStudentClassLevel();
+    
+    if ((classLevel === 'form1' || classLevel === 'form2') && result.total) {
+      const score = parseFloat(result.total);
+      if (score >= 90) return 'A+';
+      if (score >= 80) return 'A';
+      if (score >= 75) return 'A-';
+      if (score >= 70) return 'B+';
+      if (score >= 65) return 'B';
+      if (score >= 60) return 'B-';
+      if (score >= 55) return 'C+';
+      if (score >= 50) return 'C';
+      if (score >= 45) return 'C-';
+      if (score >= 40) return 'D';
+      return 'E';
+    }
+    
+    if ((classLevel === 'form3' || classLevel === 'form4') && result.points) {
+      const points = result.points;
+      if (points === 1) return 'A+ (Excellent)';
+      if (points === 2) return 'A (Very Good)';
+      if (points === 3) return 'B+ (Good)';
+      if (points === 4) return 'B (Above Average)';
+      if (points === 5) return 'C+ (Average)';
+      if (points === 6) return 'C (Satisfactory)';
+      if (points === 7) return 'D+ (Below Average)';
+      if (points === 8) return 'D (Poor)';
+      return 'E (Fail)';
+    }
+    
+    return 'N/A';
   };
 
   const handleSubmit = async (e) => {
@@ -147,6 +242,17 @@ function TeacherMarksEntry() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      const classLevel = getStudentClassLevel();
+      const result = calculateTotal();
+      
+      let totalScore = result.total;
+      let grade = getGrade(result);
+      
+      // For Form 3 & Form 4, store points as totalScore
+      if (classLevel === 'form3' || classLevel === 'form4') {
+        totalScore = result.points;
+      }
+      
       const response = await fetch('http://localhost:5123/api/TeacherMarks/enter-marks', {
         method: 'POST',
         headers: {
@@ -166,7 +272,7 @@ function TeacherMarksEntry() {
 
       const data = await response.json();
       if (response.ok) {
-        setMessage(`✅ Marks saved! Total: ${data.totalScore}%, Grade: ${data.grade}`);
+        setMessage(`✅ Marks saved! ${classLevel === 'form3' || classLevel === 'form4' ? `Points: ${totalScore}` : `Total: ${result.display}`}, Grade: ${grade}`);
         setMarks({ continuousTest1: '', continuousTest2: '', endTermExam: '' });
         loadNotifications();
         loadUnreadCount();
@@ -210,8 +316,9 @@ function TeacherMarksEntry() {
     }
   };
 
-  const total = calculateTotal();
-  const grade = getGrade(total);
+  const result = calculateTotal();
+  const grade = getGrade(result);
+  const classLevel = getStudentClassLevel();
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
@@ -281,6 +388,8 @@ function TeacherMarksEntry() {
             onChange={(e) => {
               const student = students.find(s => (s.studentId || s.id) === parseInt(e.target.value));
               setSelectedStudent(student);
+              // Reset marks when student changes
+              setMarks({ continuousTest1: '', continuousTest2: '', endTermExam: '' });
             }}
             value={selectedStudent?.studentId || selectedStudent?.id || ''}
           >
@@ -337,10 +446,25 @@ function TeacherMarksEntry() {
       </div>
       
       <div className="bg-gray-50 p-4 rounded-lg mb-4">
-        <h3 className="font-semibold mb-3">Marks Entry (Weighted: Continuous Tests 20% each, End Term 60%)</h3>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="font-semibold">Marks Entry</h3>
+          {classLevel && (
+            <span className={`text-sm px-2 py-1 rounded ${
+              classLevel === 'form1' || classLevel === 'form2' 
+                ? 'bg-blue-100 text-blue-800' 
+                : 'bg-purple-100 text-purple-800'
+            }`}>
+              {classLevel === 'form1' || classLevel === 'form2' ? '📊 Percentage Based' : '🎯 Points Based (1-9)'}
+            </span>
+          )}
+        </div>
+        
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-gray-700 mb-2">Continuous Test 1 (20%)</label>
+            <label className="block text-gray-700 mb-2">
+              Continuous Test 1 (20%)
+              {(classLevel === 'form3' || classLevel === 'form4') && <span className="text-xs text-gray-500 ml-1">(Convert to points)</span>}
+            </label>
             <input
               type="number"
               min="0"
@@ -349,9 +473,17 @@ function TeacherMarksEntry() {
               value={marks.continuousTest1}
               onChange={(e) => setMarks({...marks, continuousTest1: e.target.value})}
             />
+            {marks.continuousTest1 && (classLevel === 'form3' || classLevel === 'form4') && (
+              <div className="text-xs text-gray-500 mt-1">
+                Points: {convertToPoints(parseInt(marks.continuousTest1))}
+              </div>
+            )}
           </div>
           <div>
-            <label className="block text-gray-700 mb-2">Continuous Test 2 (20%)</label>
+            <label className="block text-gray-700 mb-2">
+              Continuous Test 2 (20%)
+              {(classLevel === 'form3' || classLevel === 'form4') && <span className="text-xs text-gray-500 ml-1">(Convert to points)</span>}
+            </label>
             <input
               type="number"
               min="0"
@@ -360,9 +492,17 @@ function TeacherMarksEntry() {
               value={marks.continuousTest2}
               onChange={(e) => setMarks({...marks, continuousTest2: e.target.value})}
             />
+            {marks.continuousTest2 && (classLevel === 'form3' || classLevel === 'form4') && (
+              <div className="text-xs text-gray-500 mt-1">
+                Points: {convertToPoints(parseInt(marks.continuousTest2))}
+              </div>
+            )}
           </div>
           <div>
-            <label className="block text-gray-700 mb-2">End Term Exam (60%)</label>
+            <label className="block text-gray-700 mb-2">
+              End Term Exam (60%)
+              {(classLevel === 'form3' || classLevel === 'form4') && <span className="text-xs text-gray-500 ml-1">(Convert to points)</span>}
+            </label>
             <input
               type="number"
               min="0"
@@ -371,6 +511,11 @@ function TeacherMarksEntry() {
               value={marks.endTermExam}
               onChange={(e) => setMarks({...marks, endTermExam: e.target.value})}
             />
+            {marks.endTermExam && (classLevel === 'form3' || classLevel === 'form4') && (
+              <div className="text-xs text-gray-500 mt-1">
+                Points: {convertToPoints(parseInt(marks.endTermExam))}
+              </div>
+            )}
           </div>
         </div>
         
@@ -378,8 +523,8 @@ function TeacherMarksEntry() {
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-sm text-gray-600">Total Score</p>
-                <p className="text-2xl font-bold text-blue-700">{total}%</p>
+                <p className="text-sm text-gray-600">Final Score</p>
+                <p className="text-2xl font-bold text-blue-700">{result.display}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Grade</p>
@@ -410,6 +555,43 @@ function TeacherMarksEntry() {
           📢 Publish Results & Notify Students
         </button>
       </div>
+
+      {/* Grading Guide */}
+      {(classLevel === 'form3' || classLevel === 'form4') && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-bold mb-2">Points Grading Guide (Form 3 & Form 4):</h3>
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            <div>85-100% → 1 point (A+)</div>
+            <div>80-84% → 2 points (A)</div>
+            <div>70-79% → 3 points (B+)</div>
+            <div>60-69% → 4 points (B)</div>
+            <div>55-59% → 5 points (C+)</div>
+            <div>50-54% → 6 points (C)</div>
+            <div>45-49% → 7 points (D+)</div>
+            <div>40-44% → 8 points (D)</div>
+            <div>0-39% → 9 points (E)</div>
+          </div>
+        </div>
+      )}
+
+      {(classLevel === 'form1' || classLevel === 'form2') && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-bold mb-2">Percentage Grading Guide (Form 1 & Form 2):</h3>
+          <div className="grid grid-cols-5 gap-2 text-sm">
+            <div className="bg-green-100 p-1 rounded">90-100: A+ (Excellent)</div>
+            <div className="bg-green-50 p-1 rounded">80-89: A (Very Good)</div>
+            <div className="bg-blue-50 p-1 rounded">75-79: A- (Good)</div>
+            <div className="bg-blue-50 p-1 rounded">70-74: B+ (Above Average)</div>
+            <div className="bg-yellow-50 p-1 rounded">65-69: B (Satisfactory)</div>
+            <div className="bg-yellow-50 p-1 rounded">60-64: B- (Average)</div>
+            <div className="bg-orange-50 p-1 rounded">55-59: C+ (Fair)</div>
+            <div className="bg-orange-50 p-1 rounded">50-54: C (Pass)</div>
+            <div className="bg-red-50 p-1 rounded">45-49: C- (Below Average)</div>
+            <div className="bg-red-50 p-1 rounded">40-44: D (Needs Improvement)</div>
+            <div className="bg-red-100 p-1 rounded">0-39: E (Fail)</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
