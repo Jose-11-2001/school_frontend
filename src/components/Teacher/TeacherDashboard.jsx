@@ -5,7 +5,7 @@ import TeacherMarksEntry from './TeacherMarksEntry';
 import MySubjects from '../Teacher/MySubjects';
 import AddStudent from '../AddStudent';
 import Rankings from '../Rankings';
-import StudentList from './StudentList';
+import StudentList from '..StudentList/';
 
 function TeacherDashboard() {
   const [user, setUser] = useState(null);
