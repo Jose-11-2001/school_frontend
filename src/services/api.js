@@ -24,15 +24,15 @@ export const authAPI = {
   login: (data) => api.post('/auth/login', data),
 };
 
-// Student APIs
+// Student APIs - NOTE: endpoint is '/Student' (capital S), not '/students'
 export const studentAPI = {
-  getAll: () => api.get('/students'),
-  getById: (id) => api.get(`/students/${id}`),
-  create: (data) => api.post('/students', data),
+  getAll: () => api.get('/Student'),
+  getById: (id) => api.get(`/Student/${id}`),
+  create: (data) => api.post('/Student', data),
   getStudentMarks: (studentId, year, term) => 
-    api.get(`/students/marks/${studentId}?year=${year}&term=${term}`),
+    api.get(`/Student/marks/${studentId}?year=${year}&term=${term}`),
   getStudentRank: (studentId, year, term) => 
-    api.get(`/students/rank/${studentId}?year=${year}&term=${term}`),
+    api.get(`/Student/rank/${studentId}?year=${year}&term=${term}`),
 };
 
 // Teacher Marks APIs

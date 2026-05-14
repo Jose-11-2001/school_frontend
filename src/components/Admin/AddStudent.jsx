@@ -11,6 +11,20 @@ function AddStudent() {
   const [messageType, setMessageType] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const generateRandomPassword = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let password = "";
+    for (let i = 0; i < 8; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  };
+
+  const generateEmail = (name) => {
+    const cleanName = name.toLowerCase().replace(/\s/g, '');
+    return `${cleanName}@gmail.com`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -23,49 +37,65 @@ function AddStudent() {
       return;
     }
     
+    const password = generateRandomPassword();
+    const email = generateEmail(formData.fullName);
+    
     try {
       const token = localStorage.getItem('token');
-      console.log('=== Adding Student ===');
-      console.log('Token:', token);
-      console.log('Data:', formData);
       
-      const response = await fetch('http://localhost:5123/api/students', {
+      // First, create Student record
+      const studentResponse = await fetch('http://localhost:5123/api/Student', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          admissionNumber: formData.admissionNumber,
+          fullName: formData.fullName,
+          class: formData.class,
+          stream: formData.stream
+        })
       });
       
-      console.log('Response status:', response.status);
+      const studentData = await studentResponse.json();
       
-      // Get the response as text first
-      const responseText = await response.text();
-      console.log('Raw response:', responseText);
+      if (!studentResponse.ok) {
+        setMessage(`❌ ${studentData.message || 'Error adding student'}`);
+        setMessageType('error');
+        setLoading(false);
+        return;
+      }
       
-      if (response.ok) {
-        setMessage(`✅ Student "${formData.fullName}" added successfully!`);
+      // Then, create User account for the student
+      const userResponse = await fetch('http://localhost:5123/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: email,
+          name: formData.fullName,
+          password: password,
+          role: 'Student'
+        })
+      });
+      
+      const userData = await userResponse.json();
+      
+      if (userResponse.ok) {
+        setMessage(`✅ Student "${formData.fullName}" added successfully!\n\n📧 Login Email: ${email}\n🔑 Temporary Password: ${password}\n\n⚠️ Student must change password on first login.`);
         setMessageType('success');
         setFormData({ admissionNumber: '', fullName: '', class: '', stream: '' });
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+        window.dispatchEvent(new Event('studentAdded'));
       } else {
-        // Try to parse as JSON if possible
-        let errorMessage = `Server error: ${response.status}`;
-        try {
-          const errorData = JSON.parse(responseText);
-          errorMessage = errorData.message || errorData.title || errorMessage;
-        } catch (e) {
-          errorMessage = responseText || errorMessage;
-        }
-        setMessage(`❌ ${errorMessage}`);
-        setMessageType('error');
+        setMessage(`⚠️ Student added but user account creation failed: ${userData.message}`);
+        setMessageType('warning');
       }
     } catch (error) {
-      console.error('Fetch error:', error);
-      setMessage(`❌ Network error: ${error.message}`);
+      console.error('Error:', error);
+      setMessage(`❌ ${error.message || 'Network error'}`);
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -77,9 +107,11 @@ function AddStudent() {
       <h2 className="text-2xl font-bold mb-4">Add New Student</h2>
       
       {message && (
-        <div className={`p-3 rounded mb-4 ${
+        <div className={`p-3 rounded mb-4 whitespace-pre-line ${
           messageType === 'success' 
             ? 'bg-green-100 text-green-700 border border-green-300' 
+            : messageType === 'warning'
+            ? 'bg-yellow-100 text-yellow-700 border border-yellow-300'
             : 'bg-red-100 text-red-700 border border-red-300'
         }`}>
           {message}
@@ -135,11 +167,21 @@ function AddStudent() {
         <button 
           type="submit" 
           disabled={loading}
-          className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400"
         >
           {loading ? 'Adding Student...' : 'Add Student'}
         </button>
       </form>
+      
+      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+        <p className="text-sm text-blue-800 font-semibold">📝 How students login:</p>
+        <ul className="text-xs text-blue-700 mt-1 list-disc list-inside space-y-1">
+          <li>Email is auto-generated from name (e.g., josembukwa@gmail.com)</li>
+          <li>Auto-generated password (8 characters)</li>
+          <li>Student must change password on first login</li>
+          <li>After login, student can view their marks and results</li>
+        </ul>
+      </div>
     </div>
   );
 }

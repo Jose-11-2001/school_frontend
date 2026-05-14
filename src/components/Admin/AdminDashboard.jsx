@@ -5,6 +5,7 @@ import ClassManagement from './ClassManagement';
 import SubjectAllocation from './SubjectAllocation';
 import ResultsApproval from './ResultsApproval';
 import StudentList from '../StudentList';
+import AddStudent from './AddStudent';
 import UserManagement from './UserManagement';
 import Rankings from '../Rankings';
 
@@ -36,10 +37,10 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md">
+      <nav className="bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold">School Marks System - Admin Panel</h1>
+            <h1 className="text-xl font-bold">Loyola School System - Admin Panel</h1>
             <p className="text-sm opacity-90">Administrator Access</p>
           </div>
           <div className="flex items-center gap-4">
@@ -60,7 +61,7 @@ function AdminDashboard() {
             onClick={() => setActiveTab('teachers')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'teachers' 
-                ? 'border-b-2 border-red-600 text-red-600' 
+                ? 'border-b-2 border-green-600 text-green-600' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -70,7 +71,7 @@ function AdminDashboard() {
             onClick={() => setActiveTab('classes')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'classes' 
-                ? 'border-b-2 border-red-600 text-red-600' 
+                ? 'border-b-2 border-green-600 text-green-600' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -80,7 +81,7 @@ function AdminDashboard() {
             onClick={() => setActiveTab('allocation')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'allocation' 
-                ? 'border-b-2 border-red-600 text-red-600' 
+                ? 'border-b-2 border-green-600 text-green-600' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -90,7 +91,7 @@ function AdminDashboard() {
             onClick={() => setActiveTab('students')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'students' 
-                ? 'border-b-2 border-red-600 text-red-600' 
+                ? 'border-b-2 border-green-600 text-green-600' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -100,7 +101,7 @@ function AdminDashboard() {
             onClick={() => setActiveTab('users')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'users' 
-                ? 'border-b-2 border-red-600 text-red-600' 
+                ? 'border-b-2 border-green-600 text-green-600' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -110,7 +111,7 @@ function AdminDashboard() {
             onClick={() => setActiveTab('approval')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'approval' 
-                ? 'border-b-2 border-red-600 text-red-600' 
+                ? 'border-b-2 border-green-600 text-green-600' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -120,7 +121,7 @@ function AdminDashboard() {
             onClick={() => setActiveTab('rankings')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'rankings' 
-                ? 'border-b-2 border-red-600 text-red-600' 
+                ? 'border-b-2 border-green-600 text-green-600' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -132,7 +133,14 @@ function AdminDashboard() {
           {activeTab === 'teachers' && <TeacherManagement />}
           {activeTab === 'classes' && <ClassManagement />}
           {activeTab === 'allocation' && <SubjectAllocation />}
-          {activeTab === 'students' && <StudentList />}
+          {activeTab === 'students' && (
+            <div className="space-y-6">
+              <AddStudent />
+              <div className="mt-8">
+                <StudentList />
+              </div>
+            </div>
+          )}
           {activeTab === 'users' && <UserManagement />}
           {activeTab === 'approval' && <ResultsApproval />}
           {activeTab === 'rankings' && <Rankings />}
