@@ -26,8 +26,8 @@ function SubjectRegistration() {
     }
   };
 
-  const handleRegister = async (subjectId, subjectName, teacherName) => {
-    if (!confirm(`Register for ${subjectName} taught by ${teacherName}?`)) return;
+  const handleRegister = async (subjectId, subjectName, teacherName, teacherId) => {
+    if (!confirm(`📚 Register for ${subjectName} taught by ${teacherName}?\n\nThe teacher will be notified of your registration.`)) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -42,7 +42,7 @@ function SubjectRegistration() {
       
       const data = await response.json();
       if (response.ok) {
-        setMessage(`✅ ${data.message}`);
+        setMessage(`✅ ${data.message} Teacher has been notified.`);
         loadSubjects(); // Refresh list
       } else {
         setMessage(`❌ ${data.message}`);
@@ -73,8 +73,8 @@ function SubjectRegistration() {
             {registeredSubjects.map(sub => (
               <div key={sub.subjectId} className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="font-semibold text-green-800">{sub.subjectName}</div>
-                <div className="text-sm text-gray-600">Teacher: {sub.teacherName}</div>
-                <div className="text-xs text-gray-400">Registered: {new Date(sub.registeredAt).toLocaleDateString()}</div>
+                <div className="text-sm text-gray-600">👨‍🏫 Teacher: {sub.teacherName}</div>
+                <div className="text-xs text-gray-400">📅 Registered: {new Date(sub.registeredAt).toLocaleDateString()}</div>
               </div>
             ))}
           </div>
@@ -92,11 +92,11 @@ function SubjectRegistration() {
               <div key={sub.subjectId} className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex justify-between items-center">
                 <div>
                   <div className="font-semibold text-blue-800">{sub.subjectName}</div>
-                  <div className="text-sm text-gray-600">Taught by: {sub.teacherName}</div>
+                  <div className="text-sm text-gray-600">👨‍🏫 Taught by: {sub.teacherName}</div>
                 </div>
                 <button
-                  onClick={() => handleRegister(sub.subjectId, sub.subjectName, sub.teacherName)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  onClick={() => handleRegister(sub.subjectId, sub.subjectName, sub.teacherName, sub.teacherId)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
                 >
                   Register
                 </button>
