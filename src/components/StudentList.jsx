@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { studentAPI } from '../services/api';
 
@@ -6,10 +5,6 @@ function StudentList() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    fetchStudents();
-  }, []);
 
   const fetchStudents = async () => {
     try {
@@ -24,6 +19,10 @@ function StudentList() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
 
   if (loading) {
     return (
