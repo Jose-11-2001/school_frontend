@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MyStudents from '../MyStudents';
 import TeacherMarksEntry from './TeacherMarksEntry';
-import MySubjects from './MySubjects';
+import MySubjects from '../Teacher/MySubjects';
 import AddStudent from '../AddStudent';
 import Rankings from '../Rankings';
 import StudentList from './StudentList';
