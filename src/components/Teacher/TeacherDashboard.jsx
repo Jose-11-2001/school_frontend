@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MyStudents from '../MyStudents';
-import TeacherMarksEntry from './Teacher/TeacherMarksEntry';
+import TeacherMarksEntry from './TeacherMarksEntry';
 import MySubjects from './MySubjects';
 import AddStudent from '../AddStudent';
 import Rankings from '../Rankings';
