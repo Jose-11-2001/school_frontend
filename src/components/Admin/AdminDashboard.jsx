@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StudentList from '../StudentList';
-import UserManagement from '../UserManagement';
+import TeacherManagement from './Admin/TeacherManagement';
+import ClassManagement from './Admin/ClassManagement';
+import SubjectAllocation from './Admin/SubjectAllocation';
+import ResultsApproval from './Admin/ResultsApproval';
+import StudentList from './StudentList';
+import UserManagement from './UserManagement';
+import Rankings from './Rankings';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('students');
+  const [activeTab, setActiveTab] = useState('teachers');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,7 +46,7 @@ function AdminDashboard() {
             <span>Welcome, {user?.name}</span>
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
             >
               Logout
             </button>
@@ -50,7 +55,37 @@ function AdminDashboard() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex gap-2 mb-6 border-b">
+        <div className="flex gap-2 mb-6 border-b flex-wrap">
+          <button
+            onClick={() => setActiveTab('teachers')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'teachers' 
+                ? 'border-b-2 border-red-600 text-red-600' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            👨‍🏫 Teacher Management
+          </button>
+          <button
+            onClick={() => setActiveTab('classes')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'classes' 
+                ? 'border-b-2 border-red-600 text-red-600' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            📚 Class Management
+          </button>
+          <button
+            onClick={() => setActiveTab('allocation')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'allocation' 
+                ? 'border-b-2 border-red-600 text-red-600' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            🎯 Subject Allocation
+          </button>
           <button
             onClick={() => setActiveTab('students')}
             className={`px-4 py-2 font-medium transition-colors ${
@@ -59,7 +94,7 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            Manage Students
+            👨‍🎓 Manage Students
           </button>
           <button
             onClick={() => setActiveTab('users')}
@@ -69,17 +104,17 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            Manage Users
+            👤 Manage Users
           </button>
           <button
-            onClick={() => setActiveTab('marks')}
+            onClick={() => setActiveTab('approval')}
             className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'marks' 
+              activeTab === 'approval' 
                 ? 'border-b-2 border-red-600 text-red-600' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            View All Marks
+            ✅ Results Approval
           </button>
           <button
             onClick={() => setActiveTab('rankings')}
@@ -89,23 +124,18 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            View Rankings
+            🏆 View Rankings
           </button>
         </div>
 
         <div>
+          {activeTab === 'teachers' && <TeacherManagement />}
+          {activeTab === 'classes' && <ClassManagement />}
+          {activeTab === 'allocation' && <SubjectAllocation />}
           {activeTab === 'students' && <StudentList />}
           {activeTab === 'users' && <UserManagement />}
-          {activeTab === 'marks' && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600">All marks view coming soon...</p>
-            </div>
-          )}
-          {activeTab === 'rankings' && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600">Rankings view coming soon...</p>
-            </div>
-          )}
+          {activeTab === 'approval' && <ResultsApproval />}
+          {activeTab === 'rankings' && <Rankings />}
         </div>
       </div>
     </div>
