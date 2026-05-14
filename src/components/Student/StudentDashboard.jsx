@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { studentAPI } from '../services/api';
-import { generateGradePDF } from './PDFGenerator';
+import { studentAPI } from '../../services/api';
+import { generateGradePDF } from '../PDFGenerator';
 
 function StudentDashboard() {
   const [user, setUser] = useState(null);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StudentList from './StudentList';
-import UserManagement from './UserManagement';
+import StudentList from '../StudentList';
+import UserManagement from '../UserManagement';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
