@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 
 function ClassManagement() {
@@ -5,6 +6,7 @@ function ClassManagement() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingClass, setEditingClass] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     stream: '',
@@ -39,7 +41,7 @@ function ClassManagement() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      setTeachers(data);
+      setTeachers(data.filter(t => t.isActive !== false));
     } catch (error) {
       console.error('Error loading teachers:', error);
     }
@@ -55,7 +57,12 @@ function ClassManagement() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          name: formData.name,
+          stream: formData.stream,
+          teacherId: formData.teacherId ? parseInt(formData.teacherId) : null,
+          capacity: formData.capacity ? parseInt(formData.capacity) : null
+        })
       });
       
       if (response.ok) {
@@ -73,8 +80,41 @@ function ClassManagement() {
     }
   };
 
+  const handleUpdateClass = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5123/api/admin/classes/${editingClass.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          stream: formData.stream,
+          teacherId: formData.teacherId ? parseInt(formData.teacherId) : null,
+          capacity: formData.capacity ? parseInt(formData.capacity) : null
+        })
+      });
+      
+      if (response.ok) {
+        alert('Class updated successfully!');
+        setEditingClass(null);
+        setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
+        loadClasses();
+      } else {
+        const error = await response.json();
+        alert('Error: ' + (error.message || 'Failed to update class'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error updating class');
+    }
+  };
+
   const handleDeleteClass = async (id, name) => {
-    if (confirm(`Are you sure you want to delete class "${name}"? This will also remove all students in this class.`)) {
+    if (confirm(`Are you sure you want to delete class "${name}"?`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`http://localhost:5123/api/admin/classes/${id}`, {
@@ -96,6 +136,21 @@ function ClassManagement() {
     }
   };
 
+  const startEdit = (cls) => {
+    setEditingClass(cls);
+    setFormData({
+      name: cls.name,
+      stream: cls.stream || '',
+      teacherId: cls.teacherId || '',
+      capacity: cls.capacity || ''
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingClass(null);
+    setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
+  };
+
   if (loading) return <div className="text-center py-8">Loading classes...</div>;
 
   return (
@@ -110,13 +165,14 @@ function ClassManagement() {
         </button>
       </div>
 
+      {/* Add Class Form */}
       {showAddForm && (
         <div className="bg-gray-50 p-6 rounded-lg mb-6">
           <h3 className="text-xl font-semibold mb-4">Add New Class</h3>
           <form onSubmit={handleAddClass} className="grid grid-cols-2 gap-4">
             <input
               type="text"
-              placeholder="Class Name * (e.g., Form 1, Form 2)"
+              placeholder="Class Name * (e.g., Form 1)"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
               className="px-3 py-2 border rounded"
@@ -124,7 +180,7 @@ function ClassManagement() {
             />
             <input
               type="text"
-              placeholder="Stream (e.g., East, West, Science)"
+              placeholder="Stream (e.g., East)"
               value={formData.stream}
               onChange={(e) => setFormData({...formData, stream: e.target.value})}
               className="px-3 py-2 border rounded"
@@ -134,9 +190,9 @@ function ClassManagement() {
               onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
               className="px-3 py-2 border rounded"
             >
-              <option value="">Select Class Teacher (Optional)</option>
+              <option value="">Select Class Teacher</option>
               {teachers.map(teacher => (
-                <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
+                <option key={teacher.id} value={teacher.id}>{teacher.name} ({teacher.email})</option>
               ))}
             </select>
             <input
@@ -154,6 +210,52 @@ function ClassManagement() {
         </div>
       )}
 
+      {/* Edit Class Form */}
+      {editingClass && (
+        <div className="bg-yellow-50 p-6 rounded-lg mb-6 border border-yellow-300">
+          <h3 className="text-xl font-semibold mb-4">Edit Class: {editingClass.name}</h3>
+          <form onSubmit={handleUpdateClass} className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Class Name"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="px-3 py-2 border rounded"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Stream"
+              value={formData.stream}
+              onChange={(e) => setFormData({...formData, stream: e.target.value})}
+              className="px-3 py-2 border rounded"
+            />
+            <select
+              value={formData.teacherId}
+              onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
+              className="px-3 py-2 border rounded"
+            >
+              <option value="">Select Class Teacher</option>
+              {teachers.map(teacher => (
+                <option key={teacher.id} value={teacher.id}>{teacher.name} ({teacher.email})</option>
+              ))}
+            </select>
+            <input
+              type="number"
+              placeholder="Capacity"
+              value={formData.capacity}
+              onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+              className="px-3 py-2 border rounded"
+            />
+            <div className="col-span-2 flex gap-2">
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update</button>
+              <button type="button" onClick={cancelEdit} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Classes Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -171,13 +273,25 @@ function ClassManagement() {
               <tr key={cls.id}>
                 <td className="px-6 py-4 font-medium">{cls.name}</td>
                 <td className="px-6 py-4">{cls.stream || '-'}</td>
-                <td className="px-6 py-4">{cls.teacherName || 'Not Assigned'}</td>
+                <td className="px-6 py-4">
+                  {cls.teacherName ? (
+                    <span className="text-green-600 font-medium">{cls.teacherName}</span>
+                  ) : (
+                    <span className="text-red-500">Not Assigned</span>
+                  )}
+                </td>
                 <td className="px-6 py-4">{cls.studentCount || 0}</td>
                 <td className="px-6 py-4">{cls.capacity || '-'}</td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 space-x-2">
+                  <button
+                    onClick={() => startEdit(cls)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDeleteClass(cls.id, `${cls.name} ${cls.stream}`)}
-                    className="text-red-600 hover:text-red-800"
+                    className="text-red-600 hover:text-red-800 ml-2"
                   >
                     Delete
                   </button>
@@ -187,6 +301,12 @@ function ClassManagement() {
           </tbody>
         </table>
       </div>
+      
+      {teachers.length === 0 && (
+        <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+          <p className="text-yellow-800">⚠️ No teachers available. Please add teachers first in Teacher Management tab.</p>
+        </div>
+      )}
     </div>
   );
 }
