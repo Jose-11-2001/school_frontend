@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 function TeacherMarksEntry() {
@@ -29,9 +28,18 @@ function TeacherMarksEntry() {
   const loadMyStudents = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5123/api/TeacherMarks/my-students', {
+      // Try both endpoints to ensure we get students
+      let response = await fetch('http://localhost:5123/api/TeacherMarks/my-students', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      if (!response.ok) {
+        // Fallback to StudentSubject endpoint
+        response = await fetch('http://localhost:5123/api/StudentSubject/teacher-students', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      }
+      
       const data = await response.json();
       setStudents(data);
     } catch (error) {
@@ -110,7 +118,6 @@ function TeacherMarksEntry() {
     const ct1 = parseFloat(marks.continuousTest1) || 0;
     const ct2 = parseFloat(marks.continuousTest2) || 0;
     const endTerm = parseFloat(marks.endTermExam) || 0;
-    
     const total = (ct1 * 0.20) + (ct2 * 0.20) + (endTerm * 0.60);
     return total.toFixed(2);
   };
@@ -147,7 +154,7 @@ function TeacherMarksEntry() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          studentId: selectedStudent.id,
+          studentId: selectedStudent.studentId || selectedStudent.id,
           subjectId: selectedSubject.id,
           year: year,
           term: term,
@@ -161,8 +168,8 @@ function TeacherMarksEntry() {
       if (response.ok) {
         setMessage(`✅ Marks saved! Total: ${data.totalScore}%, Grade: ${data.grade}`);
         setMarks({ continuousTest1: '', continuousTest2: '', endTermExam: '' });
-        loadNotifications(); // Refresh notifications
-        loadUnreadCount(); // Refresh unread count
+        loadNotifications();
+        loadUnreadCount();
       } else {
         setMessage(`❌ ${data.message}`);
       }
@@ -180,7 +187,7 @@ function TeacherMarksEntry() {
       return;
     }
 
-    if (confirm(`Are you sure you want to publish ${term} results for ${selectedSubject.name}? Students will be notified.`)) {
+    if (confirm(`📢 Publish ${term} results for ${selectedSubject.name}?\n\nStudents will receive a notification that results are out.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`http://localhost:5123/api/TeacherMarks/publish-results/${selectedSubject.id}/${year}/${term}`, {
@@ -225,7 +232,7 @@ function TeacherMarksEntry() {
           
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border z-10">
-              <div className="p-3 border-b flex justify-between items-center">
+              <div className="p-3 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
                 <h3 className="font-semibold">Notifications</h3>
                 {unreadCount > 0 && (
                   <button
@@ -244,7 +251,9 @@ function TeacherMarksEntry() {
                     <div
                       key={notif.id}
                       onClick={() => handleMarkNotificationAsRead(notif.id)}
-                      className={`p-3 border-b cursor-pointer hover:bg-gray-50 ${!notif.isRead ? 'bg-blue-50' : ''}`}
+                      className={`p-3 border-b cursor-pointer hover:bg-gray-50 transition ${
+                        !notif.isRead ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                      }`}
                     >
                       <div className="font-medium text-sm">{notif.title}</div>
                       <div className="text-xs text-gray-600 mt-1">{notif.message}</div>
@@ -270,15 +279,15 @@ function TeacherMarksEntry() {
           <select
             className="w-full px-3 py-2 border rounded-lg"
             onChange={(e) => {
-              const student = students.find(s => s.id === parseInt(e.target.value));
+              const student = students.find(s => (s.studentId || s.id) === parseInt(e.target.value));
               setSelectedStudent(student);
             }}
-            value={selectedStudent?.id || ''}
+            value={selectedStudent?.studentId || selectedStudent?.id || ''}
           >
             <option value="">Select a student</option>
             {students.map(student => (
-              <option key={student.id} value={student.id}>
-                {student.admissionNumber} - {student.fullName} ({student.class})
+              <option key={student.studentId || student.id} value={student.studentId || student.id}>
+                {student.admissionNumber} - {student.studentName || student.fullName} ({student.class})
               </option>
             ))}
           </select>
@@ -398,7 +407,7 @@ function TeacherMarksEntry() {
           onClick={handlePublishResults}
           className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
         >
-          📢 Publish Results
+          📢 Publish Results & Notify Students
         </button>
       </div>
     </div>
