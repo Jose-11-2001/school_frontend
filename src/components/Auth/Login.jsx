@@ -1,6 +1,9 @@
+
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../../services/api';
+import schoolLogo from '../../assets/images/logoo.jpg';
+import backgroundImage from '../../assets/images/home.jpg';
 
 function Login({ setUser }) {
   const [email, setEmail] = useState('');
@@ -22,7 +25,9 @@ function Login({ setUser }) {
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
-      if (userData.role === 'Admin') {
+      if (userData.mustChangePassword) {
+        navigate('/change-password');
+      } else if (userData.role === 'Admin') {
         navigate('/admin-dashboard');
       } else if (userData.role === 'Teacher') {
         navigate('/teacher-dashboard');
@@ -31,24 +36,35 @@ function Login({ setUser }) {
       }
       
     } catch (err) {
-      setError('Invalid email or password');
+      setError(err.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-96">
-        <Link to="/" className="text-blue-500 hover:text-blue-600 text-sm mb-4 inline-block">
-          ← Back to Home
-        </Link>
-        
+    <div 
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+      }}
+    >
+      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      
+      <div className="relative z-10 bg-white p-8 rounded-xl shadow-2xl w-96">
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">SM</span>
+          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg bg-white">
+            <img 
+              src={schoolLogo}
+              alt="School Logo"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "";
+              }}
+            />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">School Marks System</h2>
+          <h2 className="text-2xl font-bold text-gray-800">School Grading System</h2>
           <p className="text-gray-600 mt-2">Login to your account</p>
         </div>
         
@@ -91,13 +107,6 @@ function Login({ setUser }) {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        
-        <p className="mt-6 text-center text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-blue-500 hover:text-blue-600 font-semibold">
-            Register
-          </Link>
-        </p>
       </div>
     </div>
   );

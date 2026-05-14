@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
 import Login from './components/Auth/Login';
-import Register from './components/Auth/Register';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import TeacherDashboard from './components/Teacher/TeacherDashboard';
 import StudentDashboard from './components/Student/StudentDashboard';
+import ChangePassword from './components/ChangePassword';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -31,7 +31,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/change-password" element={<ChangePassword />} />
         
         {/* Protected Routes */}
         <Route 
