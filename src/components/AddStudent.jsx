@@ -1,4 +1,3 @@
-cat > src/components/AddStudent.jsx << 'EOF'
 import React, { useState } from 'react';
 
 function AddStudent() {
