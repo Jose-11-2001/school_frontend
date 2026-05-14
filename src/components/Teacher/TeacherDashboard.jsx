@@ -4,7 +4,7 @@ import MyStudents from './Teacher/MyStudents';
 import TeacherMarksEntry from './Teacher/TeacherMarksEntry';
 import MySubjects from './MySubjects';
 import AddStudent from './AddStudent';
-import Rankings from './Rankings';
+import Rankings from '../Rankings';
 import StudentList from './StudentList';
 
 function TeacherDashboard() {
