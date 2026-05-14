@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StudentList from './StudentList';
-import TeacherMarksEntry from './TeacherMarksEntry';
-import Rankings from './Rankings';
-import AddStudent from './AddStudent';
+import MyStudents from './Teacher/MyStudents';
+import TeacherMarksEntry from './Teacher/TeacherMarksEntry';
 import MySubjects from './MySubjects';
+import AddStudent from './AddStudent';
+import Rankings from './Rankings';
+import StudentList from './StudentList';
 
 function TeacherDashboard() {
   const [user, setUser] = useState(null);
@@ -62,7 +63,17 @@ function TeacherDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            My Students
+            👥 My Registered Students
+          </button>
+          <button
+            onClick={() => setActiveTab('all-students')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'all-students' 
+                ? 'border-b-2 border-blue-600 text-blue-600' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            📋 All Students
           </button>
           <button
             onClick={() => setActiveTab('my-subjects')}
@@ -72,7 +83,7 @@ function TeacherDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            My Subjects
+            📚 My Subjects
           </button>
           <button
             onClick={() => setActiveTab('add-student')}
@@ -82,7 +93,7 @@ function TeacherDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            + Add Student
+            ➕ Add Student
           </button>
           <button
             onClick={() => setActiveTab('marks')}
@@ -92,7 +103,7 @@ function TeacherDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            Enter Marks
+            ✍️ Enter Marks
           </button>
           <button
             onClick={() => setActiveTab('rankings')}
@@ -102,12 +113,13 @@ function TeacherDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            View Rankings
+            🏆 Rankings
           </button>
         </div>
 
         <div>
-          {activeTab === 'students' && <StudentList />}
+          {activeTab === 'students' && <MyStudents />}
+          {activeTab === 'all-students' && <StudentList />}
           {activeTab === 'my-subjects' && <MySubjects />}
           {activeTab === 'add-student' && <AddStudent />}
           {activeTab === 'marks' && <TeacherMarksEntry />}
