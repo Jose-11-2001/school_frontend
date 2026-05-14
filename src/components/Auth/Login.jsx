@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../../services/api';
-import logo from '../assets/images/logo.svg'; // Add your logo file to this path
+import logo from '../../assets/images/logo'; // Add your logo file to this path
 
 function Login({ setUser }) {
   const [email, setEmail] = useState('');
