@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { studentAPI } from '../services/api';
@@ -13,6 +12,9 @@ function StudentDashboard() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
   const [activeTab, setActiveTab] = useState('subjects');
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,11 +29,67 @@ function StudentDashboard() {
         navigate('/login');
       }
       setUser(parsedUser);
+      loadNotifications();
+      loadUnreadCount();
       if (activeTab === 'results') {
         fetchStudentData(parsedUser.id);
       }
     }
   }, [navigate, activeTab]);
+
+  const loadNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5123/api/StudentNotifications/my-notifications', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setNotifications(data);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    }
+  };
+
+  const loadUnreadCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5123/api/StudentNotifications/unread-count', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setUnreadCount(data.unreadCount);
+    } catch (error) {
+      console.error('Error loading unread count:', error);
+    }
+  };
+
+  const markAsRead = async (notificationId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`http://localhost:5123/api/StudentNotifications/${notificationId}/read`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      loadNotifications();
+      loadUnreadCount();
+    } catch (error) {
+      console.error('Error marking as read:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('http://localhost:5123/api/StudentNotifications/mark-all-read', {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      loadNotifications();
+      loadUnreadCount();
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
 
   const fetchStudentData = async (studentId) => {
     try {
@@ -83,6 +141,15 @@ function StudentDashboard() {
     navigate('/login');
   };
 
+  const getNotificationIcon = (type) => {
+    switch(type) {
+      case 'ExamResults': return '📢';
+      case 'Success': return '✅';
+      case 'Warning': return '⚠️';
+      default: return '🔔';
+    }
+  };
+
   const calculateGrade = (score) => {
     if (score >= 90) return { grade: 'A+', remark: 'Excellent' };
     if (score >= 80) return { grade: 'A', remark: 'Very Good' };
@@ -106,6 +173,66 @@ function StudentDashboard() {
             <p className="text-sm opacity-90">Student Access</p>
           </div>
           <div className="flex items-center gap-4">
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative focus:outline-none"
+              >
+                <span className="text-2xl">🔔</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+              
+              {/* Notification Dropdown */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border z-50">
+                  <div className="p-3 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                    <h3 className="font-semibold text-gray-800">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={markAllAsRead}
+                        className="text-xs text-blue-500 hover:text-blue-700"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="p-4 text-gray-500 text-center">No notifications</p>
+                    ) : (
+                      notifications.map(notif => (
+                        <div
+                          key={notif.id}
+                          onClick={() => markAsRead(notif.id)}
+                          className={`p-3 border-b cursor-pointer hover:bg-gray-50 transition ${
+                            !notif.isRead ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                          }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            <span className="text-xl">{getNotificationIcon(notif.type)}</span>
+                            <div className="flex-1">
+                              <div className="font-medium text-sm text-gray-800">{notif.title}</div>
+                              <div className="text-xs text-gray-600 mt-1">{notif.message}</div>
+                              <div className="text-xs text-gray-400 mt-1">
+                                {new Date(notif.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                            {!notif.isRead && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <span>Welcome, {user?.name}</span>
             <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
               Logout
@@ -148,7 +275,7 @@ function StudentDashboard() {
               <>
                 {/* Filters */}
                 <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-                  <div className="flex gap-4 items-end">
+                  <div className="flex gap-4 items-end flex-wrap">
                     <div>
                       <label className="block text-gray-700 text-sm font-bold mb-2">Year</label>
                       <select
@@ -181,7 +308,7 @@ function StudentDashboard() {
                     {marks.length > 0 && ranking && (
                       <div>
                         <button onClick={handleDownloadPDF} className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                          Download PDF Report
+                          📄 Download PDF Report
                         </button>
                       </div>
                     )}
@@ -222,7 +349,10 @@ function StudentDashboard() {
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-2xl font-bold text-gray-800 mb-4">My Marks</h2>
                   {marks.length === 0 ? (
-                    <p className="text-gray-500 text-center py-8">No marks available yet.</p>
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No marks available yet.</p>
+                      <p className="text-sm text-gray-400 mt-2">Check back later when teachers publish results.</p>
+                    </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
@@ -237,27 +367,30 @@ function StudentDashboard() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {marks.map((mark, index) => (
-                            <tr key={index}>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{mark.subjectName || mark.subject}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">{mark.score}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                <span className={`px-2 py-1 rounded text-sm font-medium ${
-                                  mark.grade === 'A+' ? 'bg-green-100 text-green-800' :
-                                  mark.grade === 'A' ? 'bg-green-50 text-green-700' :
-                                  mark.grade === 'E' ? 'bg-red-100 text-red-800' :
-                                  'bg-blue-100 text-blue-800'
-                                }`}>
-                                  {mark.grade || calculateGrade(mark.score).grade}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {mark.remark || calculateGrade(mark.score).remark}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{mark.term}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{mark.year}</td>
-                            </tr>
-                          ))}
+                          {marks.map((mark, index) => {
+                            const gradeInfo = calculateGrade(mark.score);
+                            return (
+                              <tr key={index}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{mark.subjectName || mark.subject}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">{mark.score}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                  <span className={`px-2 py-1 rounded text-sm font-medium ${
+                                    mark.grade === 'A+' || gradeInfo.grade === 'A+' ? 'bg-green-100 text-green-800' :
+                                    mark.grade === 'A' || gradeInfo.grade === 'A' ? 'bg-green-50 text-green-700' :
+                                    mark.grade === 'E' || gradeInfo.grade === 'E' ? 'bg-red-100 text-red-800' :
+                                    'bg-blue-100 text-blue-800'
+                                  }`}>
+                                    {mark.grade || gradeInfo.grade}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                  {mark.remark || gradeInfo.remark}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{mark.term || selectedTerm}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{mark.year || selectedYear}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
