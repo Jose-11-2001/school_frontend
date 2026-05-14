@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import MyStudents from './Teacher/MyStudents';
 import TeacherMarksEntry from './Teacher/TeacherMarksEntry';
 import MySubjects from './MySubjects';
-import AddStudent from './AddStudent';
+import AddStudent from '../AddStudent';
 import Rankings from '../Rankings';
 import StudentList from './StudentList';
 
