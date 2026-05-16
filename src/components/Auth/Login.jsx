@@ -66,7 +66,7 @@ function Login({ setUser }) {
               }}
             />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">Loyola Jesuit</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Mbukwa Joseph</h2>
           <p className="text-gray-600 mt-2">School Grading System</p>
         </div>
         

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../assets/images/home.jpg';
@@ -15,12 +14,26 @@ function Home() {
     >
       <div className="absolute inset-0 bg-black bg-opacity-60"></div>
       
-      {/* Rest of the component remains the same */}
+      {/* Top Navigation Bar */}
+      <div className="relative z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-end">
+            <button
+              onClick={() => navigate('/login')}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+            >
+              Login
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Hero Section */}
       <div className="relative z-10 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="text-center">
             <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
-              <span className="block">Loyola Jesuit Secondary School</span>
+              <span className="block">Mbukwa Joseph Secondary School</span>
               <span className="block text-blue-300">Grading System</span>
             </h1>
             <p className="mt-3 max-w-md mx-auto text-base text-gray-200 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
@@ -41,7 +54,7 @@ function Home() {
         </div>
       </div>
 
-      {/* Features Section - same as above */}
+      {/* Features Section */}
       <div className="relative z-10 py-12 bg-white bg-opacity-95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:text-center">
@@ -53,7 +66,6 @@ function Home() {
 
           <div className="mt-10">
             <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
-              {/* Feature items - keep the same as before */}
               <div className="relative">
                 <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -117,7 +129,7 @@ function Home() {
       {/* Footer */}
       <footer className="relative z-10 bg-gray-900 text-white py-8 bg-opacity-95">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p>&copy; 2026 Loyola Jesuit Secondary School. All rights reserved.</p>
+          <p>&copy; 2026 Mbukwa Joseph Secondary School. All rights reserved.</p>
         </div>
       </footer>
     </div>
