@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import TeacherMarksEntry from './TeacherMarksEntry';
 import MySubjects from './MySubjects';
 import Rankings from '../Rankings';
+import MyStudents from './MyStudents';
 
 function TeacherDashboard() {
   const [user, setUser] = useState(null);

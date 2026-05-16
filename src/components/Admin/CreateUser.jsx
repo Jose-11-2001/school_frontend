@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 function CreateUser() {
@@ -14,7 +15,6 @@ function CreateUser() {
   const [messageType, setMessageType] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Generate email based on name and role
   const generateEmail = async () => {
     if (!formData.name) {
       setMessage('Please enter name first');
@@ -22,48 +22,30 @@ function CreateUser() {
       return;
     }
 
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5123/api/auth/generate-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          role: formData.role
-        })
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setGeneratedEmail(data.email);
+    const cleanName = formData.name.toLowerCase().replace(/\s/g, '');
+    
+    if (formData.role === 'Teacher') {
+      const parts = formData.name.trim().split(' ');
+      if (parts.length >= 2) {
+        const firstNameInitial = parts[0].substring(0, 1);
+        const lastName = parts[parts.length - 1];
+        const email = `${firstNameInitial}${lastName}@gmail.com`.toLowerCase();
+        setGeneratedEmail(email);
+      } else {
+        setGeneratedEmail(`${cleanName}@gmail.com`.toLowerCase());
       }
-    } catch (error) {
-      console.error('Error generating email:', error);
+    } else {
+      setGeneratedEmail(`${cleanName}@gmail.com`.toLowerCase());
     }
   };
 
-  // Generate random password
-  const generatePassword = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5123/api/auth/generate-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setGeneratedPassword(data.password);
-      }
-    } catch (error) {
-      console.error('Error generating password:', error);
+  const generatePassword = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let password = "";
+    for (let i = 0; i < 8; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
+    setGeneratedPassword(password);
   };
 
   const handleSubmit = async (e) => {
@@ -73,6 +55,13 @@ function CreateUser() {
 
     if (!generatedEmail || !generatedPassword) {
       setMessage('Please generate email and password first');
+      setMessageType('error');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.role === 'Teacher' && !generatedEmail.endsWith('@gmail.com')) {
+      setMessage('Teacher email must end with @gmail.com');
       setMessageType('error');
       setLoading(false);
       return;
@@ -91,15 +80,18 @@ function CreateUser() {
           email: generatedEmail,
           password: generatedPassword,
           phoneNumber: formData.phoneNumber,
+          employeeId: formData.employeeId,
+          qualification: formData.qualification,
+          hireDate: formData.hireDate,
           role: formData.role
         })
       });
 
       const data = await response.json();
       if (response.ok) {
-        setMessage(`✅ User created successfully!\nEmail: ${generatedEmail}\nPassword: ${generatedPassword}\nPlease provide these credentials to the user.`);
+        setMessage(`✅ User created successfully!\n\nEmail: ${data.email}\nPassword: ${data.password}\n\n⚠️ User must change password on first login.`);
         setMessageType('success');
-        setFormData({ name: '', role: 'Student', phoneNumber: '', employeeId: '', qualification: '' });
+        setFormData({ name: '', role: 'Student', phoneNumber: '', employeeId: '', qualification: '', hireDate: '' });
         setGeneratedEmail('');
         setGeneratedPassword('');
       } else {
@@ -107,6 +99,7 @@ function CreateUser() {
         setMessageType('error');
       }
     } catch (error) {
+      console.error('Error:', error);
       setMessage('❌ Error creating user');
       setMessageType('error');
     } finally {
@@ -137,7 +130,7 @@ function CreateUser() {
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., John Mbukwa"
+              placeholder="e.g., Joseph Mbukwa"
               required
               onBlur={() => {
                 if (formData.name) {
@@ -146,7 +139,11 @@ function CreateUser() {
                 }
               }}
             />
-            <p className="text-xs text-gray-500 mt-1">Email will be auto-generated from name</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {formData.role === 'Teacher' 
+                ? 'Teacher email format: first initial + lastname@gmail.com (e.g., jmbukwa@gmail.com)' 
+                : 'Student email format: fullname@gmail.com (e.g., josephmbukwa@gmail.com)'}
+            </p>
           </div>
           
           <div>
@@ -173,7 +170,7 @@ function CreateUser() {
               value={formData.phoneNumber}
               onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., +265 888 123 456"
+              placeholder="e.g., 0888765111"
             />
           </div>
           
@@ -196,7 +193,16 @@ function CreateUser() {
                   value={formData.qualification}
                   onChange={(e) => setFormData({...formData, qualification: e.target.value})}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Bachelor of Education"
+                  placeholder="e.g., Degree in Education"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Hire Date</label>
+                <input
+                  type="date"
+                  value={formData.hireDate}
+                  onChange={(e) => setFormData({...formData, hireDate: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </>
@@ -222,7 +228,7 @@ function CreateUser() {
               className="w-full px-3 py-2 border rounded-lg bg-gray-50"
               placeholder="Password will appear here"
             />
-            <p className="text-xs text-gray-500 mt-1">User will be required to change password on first login</p>
+            <p className="text-xs text-yellow-600 mt-1">⚠️ User will be required to change password on first login</p>
           </div>
         </div>
         
@@ -255,12 +261,13 @@ function CreateUser() {
       </form>
       
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <h3 className="font-semibold text-blue-800 mb-2">📝 Email Generation Rules:</h3>
+        <h3 className="font-semibold text-blue-800 mb-2">📝 Important Notes:</h3>
         <ul className="text-sm text-blue-700 space-y-1">
-          <li><strong>Teacher:</strong> First letter of first name + full surname @gmail.com</li>
-          <li><strong>Example:</strong> John Mbukwa → jmbukwa@gmail.com</li>
-          <li><strong>Student:</strong> Full name without spaces @gmail.com</li>
-          <li><strong>Example:</strong> Jose Mbukwa → josembukwa@gmail.com</li>
+          <li><strong>Teacher Email Format:</strong> first initial + lastname@gmail.com</li>
+          <li><strong>Student Email Format:</strong> fullname@gmail.com</li>
+          <li><strong>Default Password:</strong> Random 8-character password shown above</li>
+          <li><strong>First Login:</strong> User must change their password</li>
+          <li><strong>Save credentials:</strong> Copy the password before closing this form</li>
         </ul>
       </div>
     </div>

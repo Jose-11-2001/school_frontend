@@ -33,7 +33,7 @@ function Home() {
                   onClick={() => navigate('/login')}
                   className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
                 >
-                  Login
+                  Get Started
                 </button>
               </div>
             </div>
@@ -117,7 +117,7 @@ function Home() {
       {/* Footer */}
       <footer className="relative z-10 bg-gray-900 text-white py-8 bg-opacity-95">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p>&copy; 2024 Loyola Jesuit Secondary School. All rights reserved.</p>
+          <p>&copy; 2026 Loyola Jesuit Secondary School. All rights reserved.</p>
         </div>
       </footer>
     </div>

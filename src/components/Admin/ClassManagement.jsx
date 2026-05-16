@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 function ClassManagement() {
@@ -26,6 +25,7 @@ function ClassManagement() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
+      console.log('Classes loaded:', data);
       setClasses(data);
     } catch (error) {
       console.error('Error loading classes:', error);
@@ -41,6 +41,7 @@ function ClassManagement() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
+      console.log('Teachers loaded:', data);
       setTeachers(data.filter(t => t.isActive !== false));
     } catch (error) {
       console.error('Error loading teachers:', error);
@@ -82,6 +83,15 @@ function ClassManagement() {
 
   const handleUpdateClass = async (e) => {
     e.preventDefault();
+    
+    console.log('Updating class with data:', {
+      id: editingClass.id,
+      name: formData.name,
+      stream: formData.stream,
+      teacherId: formData.teacherId,
+      capacity: formData.capacity
+    });
+    
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5123/api/admin/classes/${editingClass.id}`, {
@@ -98,18 +108,20 @@ function ClassManagement() {
         })
       });
       
+      const data = await response.json();
+      console.log('Update response:', data);
+      
       if (response.ok) {
         alert('Class updated successfully!');
         setEditingClass(null);
         setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
-        loadClasses();
+        loadClasses(); // Refresh the list
       } else {
-        const error = await response.json();
-        alert('Error: ' + (error.message || 'Failed to update class'));
+        alert('Error: ' + (data.message || 'Failed to update class'));
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error updating class');
+      alert('Error updating class: ' + error.message);
     }
   };
 
@@ -137,6 +149,7 @@ function ClassManagement() {
   };
 
   const startEdit = (cls) => {
+    console.log('Editing class:', cls);
     setEditingClass(cls);
     setFormData({
       name: cls.name,
@@ -149,6 +162,12 @@ function ClassManagement() {
   const cancelEdit = () => {
     setEditingClass(null);
     setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
+  };
+
+  const getTeacherName = (teacherId) => {
+    if (!teacherId) return 'Not Assigned';
+    const teacher = teachers.find(t => t.id === teacherId);
+    return teacher ? teacher.name : 'Not Assigned';
   };
 
   if (loading) return <div className="text-center py-8">Loading classes...</div>;
@@ -165,59 +184,13 @@ function ClassManagement() {
         </button>
       </div>
 
-      {/* Add Class Form */}
       {showAddForm && (
         <div className="bg-gray-50 p-6 rounded-lg mb-6">
           <h3 className="text-xl font-semibold mb-4">Add New Class</h3>
           <form onSubmit={handleAddClass} className="grid grid-cols-2 gap-4">
             <input
               type="text"
-              placeholder="Class Name * (e.g., Form 1)"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="px-3 py-2 border rounded"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Stream (e.g., East)"
-              value={formData.stream}
-              onChange={(e) => setFormData({...formData, stream: e.target.value})}
-              className="px-3 py-2 border rounded"
-            />
-            <select
-              value={formData.teacherId}
-              onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
-              className="px-3 py-2 border rounded"
-            >
-              <option value="">Select Class Teacher</option>
-              {teachers.map(teacher => (
-                <option key={teacher.id} value={teacher.id}>{teacher.name} ({teacher.email})</option>
-              ))}
-            </select>
-            <input
-              type="number"
-              placeholder="Capacity"
-              value={formData.capacity}
-              onChange={(e) => setFormData({...formData, capacity: e.target.value})}
-              className="px-3 py-2 border rounded"
-            />
-            <div className="col-span-2 flex gap-2">
-              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save</button>
-              <button type="button" onClick={() => setShowAddForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Edit Class Form */}
-      {editingClass && (
-        <div className="bg-yellow-50 p-6 rounded-lg mb-6 border border-yellow-300">
-          <h3 className="text-xl font-semibold mb-4">Edit Class: {editingClass.name}</h3>
-          <form onSubmit={handleUpdateClass} className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Class Name"
+              placeholder="Class Name *"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
               className="px-3 py-2 border rounded"
@@ -248,14 +221,54 @@ function ClassManagement() {
               className="px-3 py-2 border rounded"
             />
             <div className="col-span-2 flex gap-2">
-              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update</button>
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save</button>
+              <button type="button" onClick={() => setShowAddForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {editingClass && (
+        <div className="bg-yellow-50 p-6 rounded-lg mb-6 border border-yellow-300">
+          <h3 className="text-xl font-semibold mb-4">Edit Class: {editingClass.name}</h3>
+          <form onSubmit={handleUpdateClass} className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="px-3 py-2 border rounded"
+              required
+            />
+            <input
+              type="text"
+              value={formData.stream}
+              onChange={(e) => setFormData({...formData, stream: e.target.value})}
+              className="px-3 py-2 border rounded"
+            />
+            <select
+              value={formData.teacherId}
+              onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
+              className="px-3 py-2 border rounded"
+            >
+              <option value="">Select Class Teacher</option>
+              {teachers.map(teacher => (
+                <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
+              ))}
+            </select>
+            <input
+              type="number"
+              value={formData.capacity}
+              onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+              className="px-3 py-2 border rounded"
+            />
+            <div className="col-span-2 flex gap-2">
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update Class</button>
               <button type="button" onClick={cancelEdit} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Classes Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -274,24 +287,24 @@ function ClassManagement() {
                 <td className="px-6 py-4 font-medium">{cls.name}</td>
                 <td className="px-6 py-4">{cls.stream || '-'}</td>
                 <td className="px-6 py-4">
-                  {cls.teacherName ? (
-                    <span className="text-green-600 font-medium">{cls.teacherName}</span>
+                  {cls.teacherId ? (
+                    <span className="text-green-600 font-medium">{getTeacherName(cls.teacherId)}</span>
                   ) : (
                     <span className="text-red-500">Not Assigned</span>
                   )}
                 </td>
                 <td className="px-6 py-4">{cls.studentCount || 0}</td>
                 <td className="px-6 py-4">{cls.capacity || '-'}</td>
-                <td className="px-6 py-4 space-x-2">
+                <td className="px-6 py-4">
                   <button
                     onClick={() => startEdit(cls)}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-blue-600 hover:text-blue-800 mr-3"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteClass(cls.id, `${cls.name} ${cls.stream}`)}
-                    className="text-red-600 hover:text-red-800 ml-2"
+                    onClick={() => handleDeleteClass(cls.id, `${cls.name}`)}
+                    className="text-red-600 hover:text-red-800"
                   >
                     Delete
                   </button>

@@ -172,16 +172,6 @@ function AddStudent() {
           {loading ? 'Adding Student...' : 'Add Student'}
         </button>
       </form>
-      
-      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-        <p className="text-sm text-blue-800 font-semibold">📝 How students login:</p>
-        <ul className="text-xs text-blue-700 mt-1 list-disc list-inside space-y-1">
-          <li>Email is auto-generated from name (e.g., josembukwa@gmail.com)</li>
-          <li>Auto-generated password (8 characters)</li>
-          <li>Student must change password on first login</li>
-          <li>After login, student can view their marks and results</li>
-        </ul>
-      </div>
     </div>
   );
 }

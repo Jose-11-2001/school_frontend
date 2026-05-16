@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TeacherManagement from './TeacherManagement';
@@ -8,6 +9,7 @@ import StudentList from '../StudentList';
 import AddStudent from './AddStudent';
 import UserManagement from './UserManagement';
 import Rankings from '../Rankings';
+import AdminNotifications from './AdminNotifications';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
@@ -44,6 +46,7 @@ function AdminDashboard() {
             <p className="text-sm opacity-90">Administrator Access</p>
           </div>
           <div className="flex items-center gap-4">
+            <AdminNotifications />
             <span>Welcome, {user?.name}</span>
             <button
               onClick={handleLogout}
@@ -65,7 +68,7 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            👨‍🏫 Teacher Management
+             Teacher Management
           </button>
           <button
             onClick={() => setActiveTab('classes')}
@@ -75,7 +78,7 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            📚 Class Management
+             Class Management
           </button>
           <button
             onClick={() => setActiveTab('allocation')}
@@ -85,7 +88,7 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            🎯 Subject Allocation
+             Subject Allocation
           </button>
           <button
             onClick={() => setActiveTab('students')}
@@ -95,7 +98,7 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            👨‍🎓 Manage Students
+             Manage Students
           </button>
           <button
             onClick={() => setActiveTab('users')}
@@ -105,7 +108,7 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            👤 Manage Users
+             Manage Users
           </button>
           <button
             onClick={() => setActiveTab('approval')}
@@ -115,7 +118,7 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            ✅ Results Approval
+             Results Approval
           </button>
           <button
             onClick={() => setActiveTab('rankings')}
@@ -125,7 +128,7 @@ function AdminDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            🏆 View Rankings
+             View Rankings
           </button>
         </div>
 

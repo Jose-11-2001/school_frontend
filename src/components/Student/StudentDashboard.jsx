@@ -251,7 +251,7 @@ function StudentDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            📚 Subject Registration
+            Subject Registration
           </button>
           <button
             onClick={() => setActiveTab('results')}
@@ -261,7 +261,7 @@ function StudentDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            📊 My Results
+             My Results
           </button>
         </div>
 
