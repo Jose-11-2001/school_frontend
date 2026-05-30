@@ -16,13 +16,18 @@ export default defineConfig({
     postcss: './postcss.config.cjs',
   },
   build: {
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1500, // Increased to 1500 kB
     rollupOptions: {
       output: {
-        // Let Vite handle splitting automatically
         manualChunks: (id) => {
-          // Only split node_modules into vendor chunk
+          // Better code splitting
           if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor'
+            }
+            if (id.includes('html2canvas')) {
+              return 'html2canvas' // Lazy load this
+            }
             return 'vendor'
           }
         }
