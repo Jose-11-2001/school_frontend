@@ -43,7 +43,23 @@ function Home() {
             <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
               <div className="rounded-md shadow">
                 <button
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/Admin')}
+                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
+                >
+                  Get Started
+                </button>
+              </div>
+              <div className="rounded-md shadow">
+                <button
+                  onClick={() => navigate('/Teacher')}
+                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
+                >
+                  Get Started
+                </button>
+              </div>
+              <div className="rounded-md shadow">
+                <button
+                  onClick={() => navigate('/Student')}
                   className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
                 >
                   Get Started
@@ -129,7 +145,7 @@ function Home() {
       {/* Footer */}
       <footer className="relative z-10 bg-gray-900 text-white py-8 bg-opacity-95">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p>&copy; 2026 Mbukwa Joseph Secondary School. All rights reserved.</p>
+          <span>{currentYear} Joseph Mbukwa. All rights reserved.</span>
         </div>
       </footer>
     </div>
