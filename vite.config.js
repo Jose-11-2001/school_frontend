@@ -14,5 +14,19 @@ export default defineConfig({
   },
   css: {
     postcss: './postcss.config.cjs',
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        // Let Vite handle splitting automatically
+        manualChunks: (id) => {
+          // Only split node_modules into vendor chunk
+          if (id.includes('node_modules')) {
+            return 'vendor'
+          }
+        }
+      }
+    }
   }
 })
