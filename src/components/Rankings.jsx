@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { studentAPI } from '../services/api';
 
 function Rankings() {
   const [className, setClassName] = useState('');
@@ -16,8 +15,12 @@ function Rankings() {
     
     setLoading(true);
     try {
-      const response = await studentAPI.getClassRanking(className, year, term);
-      setRankings(response.data);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`https://school-yathu.onrender.com/api/Student/class-ranking?className=${className}&year=${year}&term=${term}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setRankings(data);
     } catch (error) {
       console.error('Error fetching rankings:', error);
       alert('Error fetching rankings. Make sure marks have been entered.');

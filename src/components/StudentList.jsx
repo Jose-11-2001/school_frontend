@@ -1,5 +1,6 @@
+
+
 import React, { useState, useEffect } from 'react';
-import { studentAPI } from '../services/api';
 
 function StudentList() {
   const [students, setStudents] = useState([]);
@@ -17,12 +18,15 @@ function StudentList() {
         return;
       }
       
-      const response = await studentAPI.getAll();
-      setStudents(response.data);
+      const response = await fetch('https://school-yathu.onrender.com/api/Student', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setStudents(data);
       setError('');
     } catch (err) {
       console.error('Error fetching students:', err);
-      setError('Failed to load students. Make sure the backend is running on port 5123.');
+      setError('Failed to load students.');
     } finally {
       setLoading(false);
     }
