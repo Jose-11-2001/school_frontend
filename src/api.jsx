@@ -1,5 +1,5 @@
 import axios from 'axios'
-const API_BASE_URL = 'https://school-yathu.onrender.com/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://school-yathu.onrender.com/api';
 const USE_MOCK_DATA = false;
 
 const api = axios.create({
@@ -17,50 +17,6 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
-
-// Mock responses for testing (only when USE_MOCK_DATA is true)
-if (USE_MOCK_DATA) {
-  // Intercept requests and return mock data
-  api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      console.log('API Error (using mock data):', error.config?.url);
-      
-      // Mock responses based on URL
-      const url = error.config?.url || '';
-      
-      if (url.includes('/auth/login')) {
-        return Promise.resolve({
-          data: {
-            token: 'mock-token-123',
-            user: { id: 1, name: 'Test User', role: 'Admin' }
-          }
-        });
-      }
-      
-      if (url.includes('/admin/teachers')) {
-        return Promise.resolve({
-          data: [
-            { id: 1, name: 'John Doe', email: 'john@example.com', subject: 'Mathematics' },
-            { id: 2, name: 'Jane Smith', email: 'jane@example.com', subject: 'English' }
-          ]
-        });
-      }
-      
-      if (url.includes('/admin/classes')) {
-        return Promise.resolve({
-          data: [
-            { id: 1, name: 'Form 1A', capacity: 40 },
-            { id: 2, name: 'Form 1B', capacity: 38 }
-          ]
-        });
-      }
-      
-      // Default mock response
-      return Promise.resolve({ data: [] });
-    }
-  );
-}
 
 // ============= API Exports =============
 
