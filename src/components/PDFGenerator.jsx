@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 // Grade calculation for Form 1 & Form 2 (Letter grades)
-const getLetterGrade = (percentage) => {
+export const getLetterGrade = (percentage) => {
   if (percentage >= 80) return 'A';
   if (percentage >= 65) return 'B';
   if (percentage >= 50) return 'C';
@@ -12,7 +12,7 @@ const getLetterGrade = (percentage) => {
 };
 
 // Get points for Form 3 & Form 4 based on percentage
-const getPoints = (percentage) => {
+export const getPoints = (percentage) => {
   if (percentage >= 85) return 1;
   if (percentage >= 80) return 2;
   if (percentage >= 65) return 3;
@@ -25,7 +25,7 @@ const getPoints = (percentage) => {
 };
 
 // Get grade description based on points for Form 3 & Form 4
-const getPointsGrade = (points) => {
+export const getPointsGrade = (points) => {
   if (points === 1) return 'Excellent';
   if (points === 2) return 'Very Good';
   if (points === 3) return 'Good';
@@ -38,8 +38,10 @@ const getPointsGrade = (points) => {
 };
 
 // Get remark based on grade
-const getRemark = (grade, points, classLevel) => {
-  if (classLevel === 'form3' || classLevel === 'form4') {
+export const getRemark = (grade, points, classLevel) => {
+  const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
+  
+  if (isUpperForm) {
     switch(points) {
       case 1: return 'Excellent performance! Keep it up!';
       case 2: return 'Very good performance!';
@@ -213,6 +215,3 @@ export const generateGradePDF = (studentData, marks, ranking, classLevel) => {
   const fileName = `${studentData.name.replace(/\s/g, '_')}_Report_${studentData.term}_${studentData.year}.pdf`;
   doc.save(fileName);
 };
-
-// Export helper functions for use in components
-export { getLetterGrade, getPoints, getPointsGrade, getRemark };

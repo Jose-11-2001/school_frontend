@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { generateGradePDF, getLetterGrade, getPoints, getPointsGrade } from './pdfGenerator';
+import { generateGradePDF, getLetterGrade, getPoints, getPointsGrade } from './PDFGenerator';
 
 function TeacherMarksEntry() {
   const [students, setStudents] = useState([]);
@@ -174,42 +174,6 @@ function TeacherMarksEntry() {
 
   const overallPercentage = calculateOverallPercentage();
 
-  // Get grade for Form 1 & Form 2 (Letter grades)
-  const getLetterGrade = (percentage) => {
-    if (percentage >= 80) return 'A';
-    if (percentage >= 65) return 'B';
-    if (percentage >= 50) return 'C';
-    if (percentage >= 45) return 'D';
-    if (percentage >= 40) return 'E';
-    return 'F';
-  };
-
-  // Get points for Form 3 & Form 4 based on percentage
-  const getPoints = (percentage) => {
-    if (percentage >= 85) return 1;
-    if (percentage >= 80) return 2;
-    if (percentage >= 65) return 3;
-    if (percentage >= 60) return 4;
-    if (percentage >= 55) return 5;
-    if (percentage >= 50) return 6;
-    if (percentage >= 45) return 7;
-    if (percentage >= 40) return 8;
-    return 9;
-  };
-
-  // Get grade description based on points for Form 3 & Form 4
-  const getPointsGrade = (points) => {
-    if (points === 1) return 'Excellent';
-    if (points === 2) return 'Very Good';
-    if (points === 3) return 'Good';
-    if (points === 4) return 'Above Average';
-    if (points === 5) return 'Average';
-    if (points === 6) return 'Satisfactory';
-    if (points === 7) return 'Below Average';
-    if (points === 8) return 'Poor';
-    return 'Fail';
-  };
-
   // Generate PDF report for selected student
   const handleGeneratePDF = async () => {
     if (!selectedStudent) {
@@ -329,7 +293,7 @@ function TeacherMarksEntry() {
       const data = await response.json();
       if (response.ok) {
         setMessage(`✅ Marks saved! Overall: ${finalDisplay}, Grade: ${grade}`);
-        await loadSavedMarks(); // Reload saved marks
+        await loadSavedMarks();
       } else {
         setMessage(`❌ ${data.message}`);
       }
@@ -437,24 +401,16 @@ function TeacherMarksEntry() {
               onClick={handleGeneratePDF}
               disabled={generatingPDF}
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:bg-gray-400"
-              title="Generate Student Report PDF"
             >
-              {generatingPDF ? 'Generating...' : ' Generate PDF Report'}
+              {generatingPDF ? 'Generating...' : 'Generate PDF Report'}
             </button>
           )}
-          <button
-            onClick={() => setShowSavedMarks(!showSavedMarks)}
-            className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"
-            title="View all saved marks"
-          >
-            <span className="text-xl"></span>
-          </button>
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative bg-gray-100 p-2 rounded-full hover:bg-gray-200"
             >
-              <span className="text-xl">🔔</span>
+              <span className="text-xl"></span>
               {unreadCount > 0 && (
                 <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {unreadCount}
@@ -570,7 +526,6 @@ function TeacherMarksEntry() {
         </div>
       </div>
 
-      {/* Display saved marks if they exist */}
       {getSavedMarksDisplay()}
       
       <div className="bg-gray-50 p-4 rounded-lg mb-4 mt-4">
@@ -582,16 +537,14 @@ function TeacherMarksEntry() {
                 ? 'bg-blue-100 text-blue-800' 
                 : 'bg-purple-100 text-purple-800'
             }`}>
-              {classLevel === 'form1' || classLevel === 'form2' ? 'Letter Grades (A-F)' : 'Points System (1-9 points)'}
+              {classLevel === 'form1' || classLevel === 'form2' ? 'Letter Grades (A-F)' : ' Points System (1-9 points)'}
             </span>
           )}
         </div>
         
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-gray-700 mb-2">
-              Continuous Test 1 (20%)
-            </label>
+            <label className="block text-gray-700 mb-2">Continuous Test 1 (20%)</label>
             <input
               type="number"
               min="0"
@@ -602,9 +555,7 @@ function TeacherMarksEntry() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 mb-2">
-              Continuous Test 2 (20%)
-            </label>
+            <label className="block text-gray-700 mb-2">Continuous Test 2 (20%)</label>
             <input
               type="number"
               min="0"
@@ -615,9 +566,7 @@ function TeacherMarksEntry() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 mb-2">
-              End Term Exam (60%)
-            </label>
+            <label className="block text-gray-700 mb-2">End Term Exam (60%)</label>
             <input
               type="number"
               min="0"
@@ -629,7 +578,6 @@ function TeacherMarksEntry() {
           </div>
         </div>
         
-        {/* Show overall result after computation */}
         {(marks.continuousTest1 || marks.continuousTest2 || marks.endTermExam) && (
           <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
             <h4 className="font-bold text-center text-gray-700 mb-3">FINAL COMPUTED RESULT</h4>
@@ -646,18 +594,6 @@ function TeacherMarksEntry() {
               <div className="bg-white p-3 rounded-lg shadow-sm">
                 <p className="text-sm text-gray-600">Final Score Display</p>
                 <p className="text-xl font-bold text-purple-600">{finalDisplayText}</p>
-                <p className="text-xs text-gray-500 mt-1">Final computed score</p>
-              </div>
-            </div>
-            
-            {/* Detailed calculation breakdown */}
-            <div className="mt-3 p-3 bg-white rounded-lg">
-              <p className="text-sm font-semibold text-gray-700 mb-2">Calculation Breakdown:</p>
-              <div className="text-xs text-gray-600 space-y-1">
-                <p>• Test 1: {marks.continuousTest1 || 0} × 20% = {((parseFloat(marks.continuousTest1) || 0) * 0.20).toFixed(2)}%</p>
-                <p>• Test 2: {marks.continuousTest2 || 0} × 20% = {((parseFloat(marks.continuousTest2) || 0) * 0.20).toFixed(2)}%</p>
-                <p>• End Term: {marks.endTermExam || 0} × 60% = {((parseFloat(marks.endTermExam) || 0) * 0.60).toFixed(2)}%</p>
-                <p className="font-semibold text-blue-600 mt-1">• TOTAL: {overallPercentage.toFixed(2)}%</p>
               </div>
             </div>
           </div>
@@ -680,41 +616,6 @@ function TeacherMarksEntry() {
           Publish Results & Notify Students
         </button>
       </div>
-
-      {/* Grading Guide for Form 3 & Form 4 - Points System */}
-      {(classLevel === 'form3' || classLevel === 'form4') && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h3 className="font-bold mb-2">Points Grading Guide (Form 3 & Form 4):</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-            <div className="bg-green-100 p-2 rounded">85-100% → 1 point (Excellent)</div>
-            <div className="bg-green-50 p-2 rounded">80-84% → 2 points (Very Good)</div>
-            <div className="bg-blue-50 p-2 rounded">65-79% → 3 points (Good)</div>
-            <div className="bg-blue-50 p-2 rounded">60-64% → 4 points (Above Average)</div>
-            <div className="bg-yellow-50 p-2 rounded">55-59% → 5 points (Average)</div>
-            <div className="bg-yellow-50 p-2 rounded">50-54% → 6 points (Satisfactory)</div>
-            <div className="bg-orange-50 p-2 rounded">45-49% → 7 points (Below Average)</div>
-            <div className="bg-orange-50 p-2 rounded">40-44% → 8 points (Poor)</div>
-            <div className="bg-red-100 p-2 rounded">0-39% → 9 points (Fail)</div>
-          </div>
-          <p className="text-xs text-gray-500 mt-2">Note: Test1(20%) + Test2(20%) + End Term(60%) = Overall Percentage</p>
-        </div>
-      )}
-
-      {/* Grading Guide for Form 1 & Form 2 - Letter Grades */}
-      {(classLevel === 'form1' || classLevel === 'form2') && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h3 className="font-bold mb-2">Letter Grade Guide (Form 1 & Form 2):</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-            <div className="bg-green-100 p-2 rounded">80-100% → A (Excellent)</div>
-            <div className="bg-blue-100 p-2 rounded">65-79% → B (Good)</div>
-            <div className="bg-yellow-100 p-2 rounded">50-64% → C (Average)</div>
-            <div className="bg-orange-100 p-2 rounded">45-49% → D (Below Average)</div>
-            <div className="bg-red-100 p-2 rounded">40-44% → E (Poor)</div>
-            <div className="bg-red-200 p-2 rounded">0-39% → F (Fail)</div>
-          </div>
-          <p className="text-xs text-gray-500 mt-2">Note: Test1(20%) + Test2(20%) + End Term(60%) = Overall Percentage</p>
-        </div>
-      )}
     </div>
   );
 }
