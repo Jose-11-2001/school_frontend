@@ -92,14 +92,14 @@ function ResultsApproval() {
       <h2 className="text-2xl font-bold">Results Approval (Headteacher)</h2>
       
       {message && (
-        <div className={`p-3 rounded ${message.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+        <div className={`p-3 rounded ${message.includes('') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
           {message}
         </div>
       )}
 
       {/* Pending Results for Approval */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-bold mb-4 text-yellow-600">⏳ Pending Results for Approval</h3>
+        <h3 className="text-xl font-bold mb-4 text-yellow-600">Pending Results for Approval</h3>
         {pendingResults.length === 0 ? (
           <p className="text-gray-500">No pending results waiting for approval.</p>
         ) : (
@@ -194,7 +194,7 @@ function ResultsApproval() {
 
       {/* Approved Results */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-bold mb-4 text-green-600">✅ Approved & Published Results</h3>
+        <h3 className="text-xl font-bold mb-4 text-green-600"> Approved & Published Results</h3>
         {approvedResults.length === 0 ? (
           <p className="text-gray-500">No approved results yet.</p>
         ) : (

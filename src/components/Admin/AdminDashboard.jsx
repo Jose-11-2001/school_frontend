@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TeacherManagement from './TeacherManagement';
@@ -7,9 +6,11 @@ import SubjectAllocation from './SubjectAllocation';
 import ResultsApproval from './ResultsApproval';
 import StudentList from '../StudentList';
 import AddStudent from './AddStudent';
-import UserManagement from './UserManagement';
+import AdminUserManagement from './AdminUserManagement';
 import Rankings from '../Rankings';
 import AdminNotifications from './AdminNotifications';
+import AdminSubjectAllocation from './AdminSubjectAllocation';
+import StudentRegistration from './StudentRegistration'; // Import the new component
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
@@ -39,10 +40,10 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md">
+      <nav className="bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold">Loyola School System - Admin Panel</h1>
+            <h1 className="text-xl font-bold">Ntcheu School System - Admin Panel</h1>
             <p className="text-sm opacity-90">Administrator Access</p>
           </div>
           <div className="flex items-center gap-4">
@@ -64,71 +65,91 @@ function AdminDashboard() {
             onClick={() => setActiveTab('teachers')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'teachers' 
-                ? 'border-b-2 border-green-600 text-green-600' 
+                ? 'border-b-2 border-blue-800 text-blue-900' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-             Teacher Management
+            Teacher Management
           </button>
           <button
             onClick={() => setActiveTab('classes')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'classes' 
-                ? 'border-b-2 border-green-600 text-green-600' 
+                ? 'border-b-2 border-blue-800 text-blue-900' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-             Class Management
+            Class Management
           </button>
           <button
             onClick={() => setActiveTab('allocation')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'allocation' 
-                ? 'border-b-2 border-green-600 text-green-600' 
+                ? 'border-b-2 border-blue-800 text-blue-900' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-             Subject Allocation
+            Subject Allocation (Teachers)
+          </button>
+          <button
+            onClick={() => setActiveTab('student-subjects')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'student-subjects' 
+                ? 'border-b-2 border-blue-800 text-blue-900' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Student Subject Allocation
+          </button>
+          <button
+            onClick={() => setActiveTab('student-registration')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'student-registration' 
+                ? 'border-b-2 border-blue-800 text-blue-900' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Register Students
           </button>
           <button
             onClick={() => setActiveTab('students')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'students' 
-                ? 'border-b-2 border-green-600 text-green-600' 
+                ? 'border-b-2 border-blue-800 text-blue-900' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-             Manage Students
+            Manage Students
           </button>
           <button
             onClick={() => setActiveTab('users')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'users' 
-                ? 'border-b-2 border-green-600 text-green-600' 
+                ? 'border-b-2 border-blue-800 text-blue-900' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-             Manage Users
+            Manage Users
           </button>
           <button
             onClick={() => setActiveTab('approval')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'approval' 
-                ? 'border-b-2 border-green-600 text-green-600' 
+                ? 'border-b-2 border-blue-800 text-blue-900' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-             Results Approval
+            Results Approval
           </button>
           <button
             onClick={() => setActiveTab('rankings')}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'rankings' 
-                ? 'border-b-2 border-green-600 text-green-600' 
+                ? 'border-b-2 border-blue-800 text-blue-900'  
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-             View Rankings
+            View Rankings
           </button>
         </div>
 
@@ -136,6 +157,8 @@ function AdminDashboard() {
           {activeTab === 'teachers' && <TeacherManagement />}
           {activeTab === 'classes' && <ClassManagement />}
           {activeTab === 'allocation' && <SubjectAllocation />}
+          {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
+          {activeTab === 'student-registration' && <StudentRegistration />}
           {activeTab === 'students' && (
             <div className="space-y-6">
               <AddStudent />
@@ -144,7 +167,7 @@ function AdminDashboard() {
               </div>
             </div>
           )}
-          {activeTab === 'users' && <UserManagement />}
+          {activeTab === 'users' && <AdminUserManagement />}
           {activeTab === 'approval' && <ResultsApproval />}
           {activeTab === 'rankings' && <Rankings />}
         </div>

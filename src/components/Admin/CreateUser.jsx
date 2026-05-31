@@ -259,17 +259,6 @@ function CreateUser() {
           </button>
         </div>
       </form>
-      
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <h3 className="font-semibold text-blue-800 mb-2">📝 Important Notes:</h3>
-        <ul className="text-sm text-blue-700 space-y-1">
-          <li><strong>Teacher Email Format:</strong> first initial + lastname@gmail.com</li>
-          <li><strong>Student Email Format:</strong> fullname@gmail.com</li>
-          <li><strong>Default Password:</strong> Random 8-character password shown above</li>
-          <li><strong>First Login:</strong> User must change their password</li>
-          <li><strong>Save credentials:</strong> Copy the password before closing this form</li>
-        </ul>
-      </div>
     </div>
   );
 }

@@ -317,7 +317,7 @@ function ClassManagement() {
       
       {teachers.length === 0 && (
         <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-          <p className="text-yellow-800">⚠️ No teachers available. Please add teachers first in Teacher Management tab.</p>
+          <p className="text-yellow-800"> No teachers available. Please add teachers first in Teacher Management tab.</p>
         </div>
       )}
     </div>

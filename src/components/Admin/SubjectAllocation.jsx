@@ -171,7 +171,7 @@ function SubjectAllocation() {
       {message && (
         <div className={`p-3 rounded ${
           messageType === 'success' 
-            ? 'bg-green-100 text-green-700 border border-green-300' 
+            ? 'bg-green-100 text-blue-800 border border-blue-300' 
             : 'bg-red-100 text-red-700 border border-red-300'
         }`}>
           {message}
@@ -230,7 +230,7 @@ function SubjectAllocation() {
           <button 
             type="submit" 
             disabled={loading}
-            className="col-span-3 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-400"
+            className="col-span-3 bg-blue-800 text-white px-4 py-2 rounded-lg hover:bg-blue-900 disabled:bg-gray-400"
           >
             {loading ? 'Allocating...' : 'Allocate Teacher'}
           </button>
@@ -282,13 +282,13 @@ function SubjectAllocation() {
       
       {teachers.length === 0 && (
         <div className="p-3 bg-yellow-50 rounded-lg">
-          <p className="text-yellow-800">⚠️ No teachers available. Please add teachers first in Teacher Management tab.</p>
+          <p className="text-yellow-800">No teachers available. Please add teachers first in Teacher Management tab.</p>
         </div>
       )}
       
       {subjects.length === 0 && (
         <div className="p-3 bg-yellow-50 rounded-lg">
-          <p className="text-yellow-800">⚠️ No subjects available. Please add subjects first.</p>
+          <p className="text-yellow-800">No subjects available. Please add subjects first.</p>
         </div>
       )}
     </div>
