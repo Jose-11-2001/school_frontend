@@ -106,7 +106,7 @@ function AdminUserManagement() {
         
         const data = await response.json();
         if (response.ok) {
-          alert(` Password reset for ${name}\n\n🔑 New Password: ${data.newPassword}\n\nUser must change password on next login.`);
+          alert(` Password reset for ${name}\n\n New Password: ${data.newPassword}\n\nUser must change password on next login.`);
           if (type === 'teacher') {
             loadTeachers();
           } else {

@@ -66,7 +66,7 @@ function SubjectAssignment() {
 
   const handleAssign = async () => {
     if (!selectedTeacher || !selectedSubject) {
-      setMessage('⚠️ Please select both teacher and subject');
+      setMessage(' Please select both teacher and subject');
       setMessageType('error');
       setTimeout(() => setMessage(''), 3000);
       return;
@@ -89,7 +89,7 @@ function SubjectAssignment() {
 
       const data = await response.json();
       if (response.ok) {
-        setMessage(`✅ ${data.message || 'Subject assigned successfully!'}`);
+        setMessage(` ${data.message || 'Subject assigned successfully!'}`);
         setMessageType('success');
         loadAssignments();
         setSelectedTeacher('');
@@ -109,7 +109,7 @@ function SubjectAssignment() {
   };
 
   const handleRemoveAssignment = async (id, teacherName, subjectName) => {
-    if (!confirm(`🗑️ Remove assignment: ${teacherName} → ${subjectName}?`)) return;
+    if (!confirm(` Remove assignment: ${teacherName} → ${subjectName}?`)) return;
 
     try {
       const token = localStorage.getItem('token');

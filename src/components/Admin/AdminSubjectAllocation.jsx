@@ -332,7 +332,7 @@ function AdminSubjectAllocation() {
 
             {selectedStudent && (
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                <p className="font-semibold text-blue-800 mb-2">📋 Student Details:</p>
+                <p className="font-semibold text-blue-800 mb-2">Student Details:</p>
                 <p className="text-sm"><strong>Name:</strong> {selectedStudent.FullName}</p>
                 <p className="text-sm"><strong>Admission:</strong> {selectedStudent.AdmissionNumber}</p>
                 <p className="text-sm"><strong>Class:</strong> {selectedStudent.Class} {selectedStudent.Stream}</p>

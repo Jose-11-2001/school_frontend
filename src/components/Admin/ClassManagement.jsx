@@ -116,7 +116,7 @@ function ClassManagement() {
       console.log('Update response:', data);
       
       if (response.ok) {
-        setMessage('✅ Class updated successfully!');
+        setMessage(' Class updated successfully!');
         setEditingClass(null);
         setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
         loadClasses();
@@ -133,7 +133,7 @@ function ClassManagement() {
   };
 
   const handleDeleteClass = async (id, name) => {
-    if (confirm(`⚠️ Are you sure you want to delete class "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(` Are you sure you want to delete class "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/admin/classes/${id}`, {
@@ -142,7 +142,7 @@ function ClassManagement() {
         });
         
         if (response.ok) {
-          setMessage(`✅ Class "${name}" deleted successfully!`);
+          setMessage(` Class "${name}" deleted successfully!`);
           loadClasses();
           setTimeout(() => setMessage(''), 3000);
         } else {
@@ -193,7 +193,7 @@ function ClassManagement() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">📚 Class Management</h2>
+          <h2 className="text-2xl font-bold text-gray-800"> Class Management</h2>
           <p className="text-sm text-gray-500 mt-1">Manage all classes, streams, and class teachers</p>
         </div>
         <button
@@ -206,7 +206,7 @@ function ClassManagement() {
 
       {message && (
         <div className={`p-3 rounded-lg mb-4 ${
-          message.includes('✅') 
+          message.includes('') 
             ? 'bg-green-50 text-green-700 border border-green-200' 
             : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
@@ -254,7 +254,7 @@ function ClassManagement() {
             />
             <div className="md:col-span-2 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                💾 Save Class
+                 Save Class
               </button>
               <button type="button" onClick={() => setShowAddForm(false)} className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">
                 Cancel
@@ -267,7 +267,7 @@ function ClassManagement() {
       {editingClass && (
         <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg mb-6 border border-yellow-300 shadow-sm">
           <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-            <span>✏️</span> Edit Class: {editingClass.name}
+            <span></span> Edit Class: {editingClass.name}
           </h3>
           <form onSubmit={handleUpdateClass} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
@@ -301,7 +301,7 @@ function ClassManagement() {
             />
             <div className="md:col-span-2 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                🔄 Update Class
+                 Update Class
               </button>
               <button type="button" onClick={cancelEdit} className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">
                 Cancel
@@ -340,11 +340,11 @@ function ClassManagement() {
                     <td className="px-6 py-4">
                       {cls.teacherId ? (
                         <span className="text-green-600 font-medium flex items-center gap-1">
-                          <span>👨‍🏫</span> {getTeacherName(cls.teacherId)}
+                          <span></span> {getTeacherName(cls.teacherId)}
                         </span>
                       ) : (
                         <span className="text-orange-500 flex items-center gap-1">
-                          <span>⚠️</span> Not Assigned
+                          <span></span> Not Assigned
                         </span>
                       )}
                     </td>
@@ -381,7 +381,7 @@ function ClassManagement() {
       {teachers.length === 0 && (
         <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
           <p className="text-yellow-800 flex items-center gap-2">
-            <span>⚠️</span> No teachers available. Please add teachers first in Teacher Management tab.
+            <span></span> No teachers available. Please add teachers first in Teacher Management tab.
           </p>
         </div>
       )}

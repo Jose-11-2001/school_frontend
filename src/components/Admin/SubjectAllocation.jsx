@@ -105,7 +105,7 @@ function SubjectAllocation() {
       
       const data = await response.json();
       if (response.ok) {
-        setMessage(`✅ ${data.message || 'Teacher allocated successfully!'}`);
+        setMessage(` ${data.message || 'Teacher allocated successfully!'}`);
         setMessageType('success');
         setFormData({ ...formData, subjectId: '', teacherId: '' });
         loadAllocations(formData.classId);
@@ -124,7 +124,7 @@ function SubjectAllocation() {
   };
 
   const handleRemoveAllocation = async (id, subjectName) => {
-    if (!confirm(`🗑️ Remove allocation for "${subjectName}"?`)) return;
+    if (!confirm(` Remove allocation for "${subjectName}"?`)) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -182,7 +182,7 @@ function SubjectAllocation() {
           onClick={loadData}
           className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1"
         >
-          🔄 Refresh
+           Refresh
         </button>
       </div>
       

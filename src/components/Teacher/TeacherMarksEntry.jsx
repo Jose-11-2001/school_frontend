@@ -292,7 +292,7 @@ function TeacherMarksEntry() {
 
       const data = await response.json();
       if (response.ok) {
-        setMessage(`✅ Marks saved! Overall: ${finalDisplay}, Grade: ${grade}`);
+        setMessage(` Marks saved! Overall: ${finalDisplay}, Grade: ${grade}`);
         await loadSavedMarks();
       } else {
         setMessage(`❌ ${data.message}`);
@@ -321,7 +321,7 @@ function TeacherMarksEntry() {
 
         const data = await response.json();
         if (response.ok) {
-          setMessage(`✅ ${data.message}`);
+          setMessage(` ${data.message}`);
           loadNotifications();
           loadUnreadCount();
         } else {

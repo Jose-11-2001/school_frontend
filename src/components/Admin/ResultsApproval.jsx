@@ -120,7 +120,7 @@ function ResultsApproval() {
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="px-6 py-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-b border-yellow-200">
           <h3 className="text-xl font-bold text-yellow-800 flex items-center gap-2">
-            <span>⏳</span> Pending Results for Approval
+            <span></span> Pending Results for Approval
           </h3>
           <p className="text-sm text-yellow-600 mt-1">Results waiting for headteacher approval</p>
         </div>
@@ -143,7 +143,7 @@ function ResultsApproval() {
                       onClick={() => viewResultDetails(result.subjectId, result.year, result.term)}
                       className="bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600 text-sm transition-colors flex items-center gap-1"
                     >
-                      👁️ View Details
+                       View Details
                     </button>
                     <button
                       onClick={() => approveResults(result.subjectId, result.year, result.term, result.subjectName)}

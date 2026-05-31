@@ -83,12 +83,12 @@ function AddStudent() {
       const userData = await userResponse.json();
       
       if (userResponse.ok) {
-        setMessage(`✅ Student "${formData.fullName}" added successfully!\n\n Login Email: ${email}\n Temporary Password: ${password}\n\n⚠️ Student must change password on first login.`);
+        setMessage(` Student "${formData.fullName}" added successfully!\n\n Login Email: ${email}\n Temporary Password: ${password}\n\n⚠️ Student must change password on first login.`);
         setMessageType('success');
         setFormData({ admissionNumber: '', fullName: '', class: '', stream: '' });
         window.dispatchEvent(new Event('studentAdded'));
       } else {
-        setMessage(`⚠️ Student added but user account creation failed: ${userData.message}`);
+        setMessage(` Student added but user account creation failed: ${userData.message}`);
         setMessageType('warning');
       }
     } catch (error) {

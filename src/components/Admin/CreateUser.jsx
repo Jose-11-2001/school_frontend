@@ -234,7 +234,7 @@ function CreateUser() {
             <div className="md:col-span-2">
               <label className="block text-gray-700 text-sm font-semibold mb-2">Generated Password</label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-gray-400">🔑</span>
+                <span className="absolute left-3 top-2.5 text-gray-400"></span>
                 <input
                   type="text"
                   value={generatedPassword}
@@ -267,7 +267,7 @@ function CreateUser() {
               }}
               className="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition-all duration-200 flex items-center gap-2"
             >
-              <span>🔄</span> Generate Credentials
+              <span></span> Generate Credentials
             </button>
             
             <button

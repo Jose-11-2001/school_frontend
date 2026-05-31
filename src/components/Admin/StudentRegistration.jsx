@@ -101,7 +101,7 @@ function StudentRegistration() {
             const data = await response.json();
             
             if (response.ok) {
-                setMessage(`✅ ${data.message}`);
+                setMessage(` ${data.message}`);
                 setFormData({
                     admissionNumber: '',
                     fullName: '',
@@ -131,14 +131,14 @@ function StudentRegistration() {
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700">
-                <h2 className="text-2xl font-bold text-white">🎓 Student Registration</h2>
+                <h2 className="text-2xl font-bold text-white"> Student Registration</h2>
                 <p className="text-blue-100 text-sm mt-1">Register new students and automatically create their accounts</p>
             </div>
             
             <div className="p-6">
                 {message && (
                     <div className={`p-3 rounded-lg mb-4 ${
-                        message.includes('✅') 
+                        message.includes('') 
                             ? 'bg-green-50 text-green-700 border border-green-200' 
                             : 'bg-red-50 text-red-700 border border-red-200'
                     }`}>
@@ -156,7 +156,7 @@ function StudentRegistration() {
                         }`}
                         onClick={() => setActiveTab('register')}
                     >
-                        📝 Register New Student
+                         Register New Student
                     </button>
                     <button
                         className={`px-4 py-2 font-semibold transition-all duration-200 ${
@@ -166,7 +166,7 @@ function StudentRegistration() {
                         }`}
                         onClick={() => { setActiveTab('list'); loadRegisteredStudents(); }}
                     >
-                        📋 View All Students
+                        View All Students
                     </button>
                 </div>
 
@@ -254,7 +254,7 @@ function StudentRegistration() {
                                             onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
                                             className="mr-2 w-4 h-4"
                                         />
-                                        <span className="text-lg">🏛️</span>
+                                        <span className="text-lg"></span>
                                         <span className="ml-2">Humanities (History, Geography, Social Studies)</span>
                                     </label>
                                     <label className="flex items-center cursor-pointer">
@@ -265,7 +265,7 @@ function StudentRegistration() {
                                             onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
                                             className="mr-2 w-4 h-4"
                                         />
-                                        <span className="text-lg">🔬</span>
+                                        <span className="text-lg"></span>
                                         <span className="ml-2">Sciences (Physics, Chemistry, Biology)</span>
                                     </label>
                                 </div>
@@ -275,7 +275,7 @@ function StudentRegistration() {
                         {/* Subjects Display */}
                         {formData.class && formData.stream && (
                             <div className="border rounded-lg p-4 bg-gray-50">
-                                <h3 className="font-bold text-lg mb-3 text-gray-800">📚 Subjects Allocation</h3>
+                                <h3 className="font-bold text-lg mb-3 text-gray-800"> Subjects Allocation</h3>
                                 
                                 {/* Core Subjects */}
                                 {availableSubjects.coreSubjects?.length > 0 && (
@@ -294,7 +294,7 @@ function StudentRegistration() {
                                 {/* Subjects based on root selection */}
                                 {formData.root === 'Humanities' && availableSubjects.humanitiesSubjects?.length > 0 && (
                                     <div className="mb-4">
-                                        <h4 className="font-semibold text-blue-700 mb-2">🏛️ Humanities Subjects</h4>
+                                        <h4 className="font-semibold text-blue-700 mb-2">Humanities Subjects</h4>
                                         <div className="flex flex-wrap gap-2">
                                             {availableSubjects.humanitiesSubjects.map((subject, index) => (
                                                 <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
@@ -307,7 +307,7 @@ function StudentRegistration() {
 
                                 {formData.root === 'Sciences' && availableSubjects.scienceSubjects?.length > 0 && (
                                     <div className="mb-4">
-                                        <h4 className="font-semibold text-purple-700 mb-2">🔬 Science Subjects</h4>
+                                        <h4 className="font-semibold text-purple-700 mb-2"> Science Subjects</h4>
                                         <div className="flex flex-wrap gap-2">
                                             {availableSubjects.scienceSubjects.map((subject, index) => (
                                                 <span key={index} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
@@ -407,7 +407,7 @@ function StudentRegistration() {
                                     {registeredStudents.length === 0 && (
                                         <tr>
                                             <td colSpan="6" className="text-center py-8 text-gray-500">
-                                                <div className="text-4xl mb-2">📭</div>
+                                                <div className="text-4xl mb-2"></div>
                                                 No students registered yet
                                             </td>
                                         </tr>

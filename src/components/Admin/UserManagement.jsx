@@ -114,7 +114,7 @@ function UserManagement() {
         
         const data = await response.json();
         if (response.ok) {
-          alert(`Password reset for ${name}\n\n🔑 New Password: ${data.newPassword}\n\nUser must change password on next login.`);
+          alert(`Password reset for ${name}\n\n New Password: ${data.newPassword}\n\nUser must change password on next login.`);
           if (type === 'teacher') {
             loadTeachers();
           } else {
@@ -268,7 +268,7 @@ function UserManagement() {
                 {students.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                      <div className="text-4xl mb-2">👨‍🎓</div>
+                      <div className="text-4xl mb-2"></div>
                       No students found.
                      </td>
                   </tr>

@@ -70,7 +70,7 @@ function MyStudents() {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
-        <h2 className="text-2xl font-bold text-gray-800">👨‍🎓 My Students</h2>
+        <h2 className="text-2xl font-bold text-gray-800"> My Students</h2>
         <p className="text-gray-600 mt-1">Total Students: {students.length}</p>
       </div>
       

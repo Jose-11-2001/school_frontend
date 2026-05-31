@@ -93,7 +93,7 @@ function TeacherManagement() {
       });
       
       if (response.ok) {
-        setMessage(`✅ Teacher added successfully!\n\n📧 Email: ${formData.email}\n🔑 Password: ${formData.password}\n\n⚠️ Teacher must change password on first login.`);
+        setMessage(`Teacher added successfully!\n\n Email: ${formData.email}\nPassword: ${formData.password}\n\n⚠️ Teacher must change password on first login.`);
         setMessageType('success');
         setShowAddForm(false);
         setFormData({ email: '', name: '', password: '', phoneNumber: '', employeeId: '', qualification: '', hireDate: '' });
@@ -115,7 +115,7 @@ function TeacherManagement() {
   };
 
   const handleDeleteTeacher = async (id, name) => {
-    if (confirm(`⚠️ Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(` Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/admin/teachers/${id}`, {
@@ -124,7 +124,7 @@ function TeacherManagement() {
         });
         
         if (response.ok) {
-          setMessage(`✅ Teacher "${name}" deleted successfully!`);
+          setMessage(` Teacher "${name}" deleted successfully!`);
           setMessageType('success');
           loadTeachers();
         } else {
@@ -142,7 +142,7 @@ function TeacherManagement() {
   };
 
   const handleResetPassword = async (id, name) => {
-    if (confirm(`🔐 Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
+    if (confirm(` Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/auth/reset-password/${id}`, {
@@ -155,7 +155,7 @@ function TeacherManagement() {
         
         const data = await response.json();
         if (response.ok) {
-          alert(`✅ Password reset for ${name}\n\n🔑 New Password: ${data.newPassword}\n\n⚠️ Teacher must change password on next login.`);
+          alert(` Password reset for ${name}\n\n New Password: ${data.newPassword}\n\n Teacher must change password on next login.`);
           loadTeachers();
         } else {
           alert(`❌ Error: ${data.message || 'Failed to reset password'}`);
@@ -182,7 +182,7 @@ function TeacherManagement() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">👨‍🏫 Teacher Management</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Teacher Management</h2>
           <p className="text-sm text-gray-500 mt-1">Manage all teacher accounts</p>
         </div>
         <button
@@ -206,7 +206,7 @@ function TeacherManagement() {
       {showAddForm && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6 border border-blue-200 shadow-sm">
           <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-            <span>➕</span> Add New Teacher
+            <span></span> Add New Teacher
           </h3>
           <form onSubmit={handleAddTeacher} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
@@ -219,7 +219,7 @@ function TeacherManagement() {
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">📧 Email will be auto-generated from name (e.g., jmbukwa@gmail.com)</p>
+              <p className="text-xs text-gray-500 mt-1">Email will be auto-generated from name (e.g., jmbukwa@gmail.com)</p>
             </div>
             <div>
               <label className="block text-gray-700 mb-1 text-sm font-semibold">Email *</label>
@@ -240,7 +240,7 @@ function TeacherManagement() {
                 className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 w-full font-mono"
                 readOnly
               />
-              <p className="text-xs text-gray-500 mt-1">🔑 Auto-generated 8-character password</p>
+              <p className="text-xs text-gray-500 mt-1">Auto-generated 8-character password</p>
             </div>
             <div>
               <label className="block text-gray-700 mb-1 text-sm font-semibold">Phone Number</label>
@@ -283,7 +283,7 @@ function TeacherManagement() {
             </div>
             <div className="md:col-span-2 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                💾 Save Teacher
+                 Save Teacher
               </button>
               <button type="button" onClick={() => setShowAddForm(false)} className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">
                 Cancel
@@ -292,7 +292,7 @@ function TeacherManagement() {
           </form>
           <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
             <p className="text-sm text-yellow-800 flex items-center gap-2">
-              <span>ℹ️</span> Teacher will receive auto-generated email and password. They must change password on first login.
+              <span>ℹ</span> Teacher will receive auto-generated email and password. They must change password on first login.
             </p>
           </div>
         </div>
@@ -316,7 +316,7 @@ function TeacherManagement() {
               {teachers.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                    <div className="text-4xl mb-2">👨‍🏫</div>
+                    <div className="text-4xl mb-2"></div>
                     No teachers found. Click "Add New Teacher" to create your first teacher.
                   </td>
                 </tr>
@@ -331,11 +331,11 @@ function TeacherManagement() {
                     <td className="px-6 py-4">
                       {teacher.mustChangePassword ? (
                         <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          ⚠️ Password Required
+                           Password Required
                         </span>
                       ) : (
                         <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          ✅ Active
+                           Active
                         </span>
                       )}
                     </td>
@@ -345,14 +345,14 @@ function TeacherManagement() {
                         className="text-blue-600 hover:text-blue-800 transition-colors text-sm"
                         title="Reset Password"
                       >
-                        🔐 Reset Pwd
+                         Reset Pwd
                       </button>
                       <button
                         onClick={() => handleDeleteTeacher(teacher.id, teacher.name)}
                         className="text-red-600 hover:text-red-800 transition-colors text-sm"
                         title="Delete Teacher"
                       >
-                        🗑️ Delete
+                         Delete
                       </button>
                     </td>
                   </tr>

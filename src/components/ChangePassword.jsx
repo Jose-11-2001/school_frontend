@@ -45,7 +45,7 @@ function ChangePassword() {
       
       const data = await response.json();
       if (response.ok) {
-        setMessage('✅ Password changed successfully! Redirecting to dashboard...');
+        setMessage(' Password changed successfully! Redirecting to dashboard...');
         setMessageType('success');
         
         // Update user data in localStorage
@@ -81,7 +81,7 @@ function ChangePassword() {
       <div className="bg-white p-8 rounded-xl shadow-xl w-96 border border-gray-100">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-2xl">🔐</span>
+            <span className="text-2xl"></span>
           </div>
           <h2 className="text-2xl font-bold text-gray-800">Change Password</h2>
           <p className="text-sm text-gray-500 mt-1">You are required to change your password on first login</p>
@@ -116,7 +116,7 @@ function ChangePassword() {
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-semibold mb-2">New Password</label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-gray-400">🔑</span>
+              <span className="absolute left-3 top-2.5 text-gray-400"></span>
               <input
                 type="password"
                 value={formData.newPassword}

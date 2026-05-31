@@ -74,11 +74,11 @@ function TeacherNotifications() {
 
   const getNotificationIcon = (type) => {
     switch(type) {
-      case 'ExamResults': return '📢';
-      case 'Success': return '✅';
-      case 'Warning': return '⚠️';
-      case 'SubjectAllocation': return '📚';
-      case 'StudentAllocation': return '👨‍🎓';
+      case 'ExamResults': return '';
+      case 'Success': return '';
+      case 'Warning': return '';
+      case 'SubjectAllocation': return '';
+      case 'StudentAllocation': return '';
       default: return '🔔';
     }
   };
@@ -128,7 +128,7 @@ function TeacherNotifications() {
             <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center">
-                  <div className="text-4xl mb-2">🔕</div>
+                  <div className="text-4xl mb-2"></div>
                   <p className="text-gray-500">No notifications</p>
                   <p className="text-xs text-gray-400 mt-1">You're all caught up!</p>
                 </div>
