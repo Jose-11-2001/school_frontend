@@ -247,7 +247,7 @@ function StudentDashboard() {
       case 'ExamResults': return '';
       case 'Success': return '';
       case 'Warning': return '';
-      default: return '🔔';
+      default: return '';
     }
   };
 

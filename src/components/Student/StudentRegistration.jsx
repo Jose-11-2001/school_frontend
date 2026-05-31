@@ -31,7 +31,7 @@ function SubjectRegistration() {
   };
 
   const handleRegister = async (subjectId, subjectName, teacherName, teacherId) => {
-    if (!confirm(`📚 Register for ${subjectName} taught by ${teacherName}?\n\nThe teacher will be notified of your registration.`)) return;
+    if (!confirm(`Register for ${subjectName} taught by ${teacherName}?\n\nThe teacher will be notified of your registration.`)) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -46,7 +46,7 @@ function SubjectRegistration() {
       
       const data = await response.json();
       if (response.ok) {
-        setMessage(`✅ ${data.message} Teacher has been notified.`);
+        setMessage(` ${data.message} Teacher has been notified.`);
         setMessageType('success');
         loadSubjects(); // Refresh list
       } else {
@@ -76,7 +76,7 @@ function SubjectRegistration() {
       {message && (
         <div className={`p-3 rounded-lg ${
           messageType === 'success' 
-            ? 'bg-green-50 text-green-700 border border-green-200' 
+            ? 'bg-green-50 text-blue-900 border border-blue-300' 
             : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
           {message}
@@ -85,32 +85,32 @@ function SubjectRegistration() {
       
       {/* Registered Subjects */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 bg-gradient-to-r from-green-500 to-green-600">
-          <h2 className="text-2xl font-bold text-white">📚 My Registered Subjects</h2>
-          <p className="text-green-100 text-sm mt-1">Subjects you have successfully registered for</p>
+        <div className="px-6 py-4 bg-gradient-to-r from-blue-900 to-blue-600">
+          <h2 className="text-2xl font-bold text-white">My Registered Subjects</h2>
+          <p className="text-blue-100 text-sm mt-1">Subjects you have successfully registered for</p>
         </div>
         <div className="p-6">
           {registeredSubjects.length === 0 ? (
             <div className="text-center py-8">
-              <div className="text-4xl mb-2">📖</div>
+              <div className="text-4xl mb-2"></div>
               <p className="text-gray-500">You haven't registered for any subjects yet.</p>
               <p className="text-sm text-gray-400 mt-1">Browse available subjects below and register.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {registeredSubjects.map(sub => (
-                <div key={sub.subjectId} className="bg-green-50 border border-green-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div key={sub.subjectId} className="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="font-semibold text-green-800 text-lg">{sub.subjectName}</div>
+                      <div className="font-semibold text-blue-800 text-lg">{sub.subjectName}</div>
                       <div className="text-sm text-gray-600 mt-1">
-                        <span className="flex items-center gap-1">👨‍🏫 Teacher: {sub.teacherName}</span>
+                        <span className="flex items-center gap-1"> Teacher: {sub.teacherName}</span>
                       </div>
                       <div className="text-xs text-gray-400 mt-2">
-                        📅 Registered: {new Date(sub.registeredAt).toLocaleDateString()}
+                         Registered: {new Date(sub.registeredAt).toLocaleDateString()}
                       </div>
                     </div>
-                    <div className="text-green-500 text-xl">✓</div>
+                    <div className="text-blue-500 text-xl">✓</div>
                   </div>
                 </div>
               ))}
@@ -122,13 +122,13 @@ function SubjectRegistration() {
       {/* Available Subjects */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600">
-          <h2 className="text-2xl font-bold text-white">📖 Available Subjects</h2>
+          <h2 className="text-2xl font-bold text-white"> Available Subjects</h2>
           <p className="text-blue-100 text-sm mt-1">Subjects you can register for</p>
         </div>
         <div className="p-6">
           {availableSubjects.length === 0 ? (
             <div className="text-center py-8">
-              <div className="text-4xl mb-2">🎉</div>
+              <div className="text-4xl mb-2"></div>
               <p className="text-gray-500">No subjects available for registration.</p>
               <p className="text-sm text-gray-400 mt-1">You have registered for all available subjects.</p>
             </div>
@@ -139,7 +139,7 @@ function SubjectRegistration() {
                   <div>
                     <div className="font-semibold text-blue-800 text-lg">{sub.subjectName}</div>
                     <div className="text-sm text-gray-600 mt-1">
-                      <span className="flex items-center gap-1">👨‍🏫 Taught by: {sub.teacherName}</span>
+                      <span className="flex items-center gap-1"> Taught by: {sub.teacherName}</span>
                     </div>
                     {sub.subjectCode && (
                       <div className="text-xs text-gray-400 mt-1">Code: {sub.subjectCode}</div>
@@ -161,7 +161,7 @@ function SubjectRegistration() {
       {/* Registration Info */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
-          <span className="text-2xl">ℹ️</span>
+          <span className="text-2xl"></span>
         </div>
       </div>
     </div>
