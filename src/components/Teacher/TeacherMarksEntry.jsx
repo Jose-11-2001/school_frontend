@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { generateGradePDF, getLetterGrade, getPoints, getPointsGrade } from './pdfGenerator';
 
 function TeacherMarksEntry() {
   const [students, setStudents] = useState([]);
@@ -19,6 +20,7 @@ function TeacherMarksEntry() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [savedMarks, setSavedMarks] = useState([]);
   const [showSavedMarks, setShowSavedMarks] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   useEffect(() => {
     loadMyStudents();
@@ -36,12 +38,12 @@ function TeacherMarksEntry() {
   const loadMyStudents = async () => {
     try {
       const token = localStorage.getItem('token');
-      let response = await fetch('http://localhost:5123/api/TeacherMarks/my-students', {
+      let response = await fetch('https://school-yathu.onrender.com/api/TeacherMarks/my-students', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (!response.ok) {
-        response = await fetch('http://localhost:5123/api/StudentSubject/teacher-students', {
+        response = await fetch('https://school-yathu.onrender.com/api/StudentSubject/teacher-students', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
       }
@@ -56,7 +58,7 @@ function TeacherMarksEntry() {
   const loadMySubjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5123/api/TeacherSubjects/my-subjects', {
+      const response = await fetch('https://school-yathu.onrender.com/api/TeacherSubjects/my-subjects', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -70,7 +72,7 @@ function TeacherMarksEntry() {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:5123/api/TeacherMarks/student-marks/${selectedStudent?.studentId || selectedStudent?.id}/${selectedSubject?.id}/${year}/${term}`,
+        `https://school-yathu.onrender.com/api/TeacherMarks/student-marks/${selectedStudent?.studentId || selectedStudent?.id}/${selectedSubject?.id}/${year}/${term}`,
         {
           headers: { 'Authorization': `Bearer ${token}` }
         }
@@ -97,7 +99,7 @@ function TeacherMarksEntry() {
   const loadNotifications = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5123/api/TeacherMarks/notifications', {
+      const response = await fetch('https://school-yathu.onrender.com/api/TeacherMarks/notifications', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -110,7 +112,7 @@ function TeacherMarksEntry() {
   const loadUnreadCount = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5123/api/TeacherMarks/notifications/unread-count', {
+      const response = await fetch('https://school-yathu.onrender.com/api/TeacherMarks/notifications/unread-count', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -123,7 +125,7 @@ function TeacherMarksEntry() {
   const handleMarkNotificationAsRead = async (notificationId) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:5123/api/TeacherMarks/notifications/${notificationId}/read`, {
+      await fetch(`https://school-yathu.onrender.com/api/TeacherMarks/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -137,7 +139,7 @@ function TeacherMarksEntry() {
   const handleMarkAllAsRead = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:5123/api/TeacherMarks/notifications/mark-all-read', {
+      await fetch('https://school-yathu.onrender.com/api/TeacherMarks/notifications/mark-all-read', {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -208,6 +210,77 @@ function TeacherMarksEntry() {
     return 'Fail';
   };
 
+  // Generate PDF report for selected student
+  const handleGeneratePDF = async () => {
+    if (!selectedStudent) {
+      setMessage('Please select a student first');
+      return;
+    }
+
+    setGeneratingPDF(true);
+    try {
+      const token = localStorage.getItem('token');
+      const classLevel = getStudentClassLevel();
+      
+      // Fetch all marks for the student
+      const response = await fetch(`https://school-yathu.onrender.com/api/Student/marks/${selectedStudent.id || selectedStudent.studentId}?year=${year}&term=${term}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch marks');
+      }
+      
+      const marksData = await response.json();
+      
+      // Format marks for PDF
+      const formattedMarks = marksData.map(mark => ({
+        subjectName: mark.subjectName,
+        score: mark.totalScore || 0,
+        grade: mark.grade,
+        remark: mark.remark
+      }));
+      
+      // Calculate ranking data
+      const totalMarks = formattedMarks.reduce((sum, m) => sum + m.score, 0);
+      const average = formattedMarks.length > 0 ? totalMarks / formattedMarks.length : 0;
+      
+      let overallGrade = '';
+      if (classLevel === 'form3' || classLevel === 'form4') {
+        const points = getPoints(average);
+        overallGrade = `${points} points`;
+      } else {
+        overallGrade = getLetterGrade(average);
+      }
+      
+      const rankingData = {
+        totalMarks: totalMarks,
+        average: average.toFixed(2),
+        position: 'N/A',
+        grade: overallGrade,
+        remarks: `Average score: ${average.toFixed(2)}%`
+      };
+      
+      const studentData = {
+        name: selectedStudent.studentName || selectedStudent.fullName,
+        admissionNumber: selectedStudent.admissionNumber,
+        class: selectedStudent.class,
+        stream: selectedStudent.stream,
+        term: term,
+        year: year
+      };
+      
+      generateGradePDF(studentData, formattedMarks, rankingData, classLevel);
+      setMessage('✅ PDF generated successfully!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setMessage('❌ Error generating PDF. Please try again.');
+    } finally {
+      setGeneratingPDF(false);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedStudent || !selectedSubject) {
@@ -236,7 +309,7 @@ function TeacherMarksEntry() {
         finalDisplay = `${totalScore}%`;
       }
       
-      const response = await fetch('http://localhost:5123/api/TeacherMarks/enter-marks', {
+      const response = await fetch('https://school-yathu.onrender.com/api/TeacherMarks/enter-marks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -255,7 +328,7 @@ function TeacherMarksEntry() {
 
       const data = await response.json();
       if (response.ok) {
-        setMessage(`Marks saved! Overall: ${finalDisplay}, Grade: ${grade}`);
+        setMessage(`✅ Marks saved! Overall: ${finalDisplay}, Grade: ${grade}`);
         await loadSavedMarks(); // Reload saved marks
       } else {
         setMessage(`❌ ${data.message}`);
@@ -277,14 +350,14 @@ function TeacherMarksEntry() {
     if (confirm(`Publish ${term} results for ${selectedSubject.name}?\n\nStudents will receive a notification that results are out.`)) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5123/api/TeacherMarks/publish-results/${selectedSubject.id}/${year}/${term}`, {
+        const response = await fetch(`https://school-yathu.onrender.com/api/TeacherMarks/publish-results/${selectedSubject.id}/${year}/${term}`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const data = await response.json();
         if (response.ok) {
-          setMessage(` ${data.message}`);
+          setMessage(`✅ ${data.message}`);
           loadNotifications();
           loadUnreadCount();
         } else {
@@ -359,6 +432,16 @@ function TeacherMarksEntry() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Enter Student Marks</h2>
         <div className="flex gap-2">
+          {selectedStudent && (
+            <button
+              onClick={handleGeneratePDF}
+              disabled={generatingPDF}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:bg-gray-400"
+              title="Generate Student Report PDF"
+            >
+              {generatingPDF ? 'Generating...' : ' Generate PDF Report'}
+            </button>
+          )}
           <button
             onClick={() => setShowSavedMarks(!showSavedMarks)}
             className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"
@@ -418,7 +501,7 @@ function TeacherMarksEntry() {
       </div>
       
       {message && (
-        <div className={`p-3 rounded mb-4 ${message.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+        <div className={`p-3 rounded mb-4 ${message.includes('') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
           {message}
         </div>
       )}
@@ -587,7 +670,7 @@ function TeacherMarksEntry() {
           disabled={loading}
           className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-400"
         >
-          {loading ? 'Saving...' : 'Save Marks'}
+          {loading ? 'Saving...' : ' Save Marks'}
         </button>
         
         <button

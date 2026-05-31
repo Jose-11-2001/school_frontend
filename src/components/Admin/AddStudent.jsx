@@ -43,8 +43,7 @@ function AddStudent() {
     try {
       const token = localStorage.getItem('token');
       
-      // First, create Student record
-      const studentResponse = await fetch('http://localhost:5123/api/Student', {
+      const studentResponse = await fetch('https://school-yathu.onrender.com/api/Student', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,8 +66,7 @@ function AddStudent() {
         return;
       }
       
-      // Then, create User account for the student
-      const userResponse = await fetch('http://localhost:5123/api/auth/register', {
+      const userResponse = await fetch('https://school-yathu.onrender.com/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,12 +83,12 @@ function AddStudent() {
       const userData = await userResponse.json();
       
       if (userResponse.ok) {
-        setMessage(`Student "${formData.fullName}" added successfully!\n\n Login Email: ${email}\n Temporary Password: ${password}\n\n⚠️ Student must change password on first login.`);
+        setMessage(`✅ Student "${formData.fullName}" added successfully!\n\n Login Email: ${email}\n Temporary Password: ${password}\n\n⚠️ Student must change password on first login.`);
         setMessageType('success');
         setFormData({ admissionNumber: '', fullName: '', class: '', stream: '' });
         window.dispatchEvent(new Event('studentAdded'));
       } else {
-        setMessage(`Student added but user account creation failed: ${userData.message}`);
+        setMessage(`⚠️ Student added but user account creation failed: ${userData.message}`);
         setMessageType('warning');
       }
     } catch (error) {

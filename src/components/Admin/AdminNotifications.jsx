@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 function AdminNotifications() {
@@ -21,7 +20,7 @@ function AdminNotifications() {
   const loadNotifications = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5123/api/TeacherMarks/notifications', {
+      const response = await fetch('https://school-yathu.onrender.com/api/TeacherMarks/notifications', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -34,7 +33,7 @@ function AdminNotifications() {
   const loadUnreadCount = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5123/api/TeacherMarks/notifications/unread-count', {
+      const response = await fetch('https://school-yathu.onrender.com/api/TeacherMarks/notifications/unread-count', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -47,7 +46,7 @@ function AdminNotifications() {
   const markAsRead = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:5123/api/TeacherMarks/notifications/${id}/read`, {
+      await fetch(`https://school-yathu.onrender.com/api/TeacherMarks/notifications/${id}/read`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -61,7 +60,7 @@ function AdminNotifications() {
   const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:5123/api/TeacherMarks/notifications/mark-all-read', {
+      await fetch('https://school-yathu.onrender.com/api/TeacherMarks/notifications/mark-all-read', {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -78,7 +77,7 @@ function AdminNotifications() {
         onClick={() => setShowDropdown(!showDropdown)}
         className="relative bg-gray-100 p-2 rounded-full hover:bg-gray-200 focus:outline-none"
       >
-        <span className="text-xl">🔔</span>
+        <span className="text-xl"></span>
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
             {unreadCount}
