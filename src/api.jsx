@@ -1,9 +1,7 @@
-import axios from 'axios';
+import axios from 'axios'
+const USE_MOCK_DATA = false; 
 
-// TEMPORARY: Use mock data instead of real API
-const USE_MOCK_DATA = true;  // Set to false when backend is ready
-
-const API_BASE_URL = 'http://localhost:5123/api';
+const API_BASE_URL = 'https://school-yathu.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -21,7 +19,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Mock responses for testing
+// Mock responses for testing (only when USE_MOCK_DATA is true)
 if (USE_MOCK_DATA) {
   // Intercept requests and return mock data
   api.interceptors.response.use(
@@ -65,7 +63,8 @@ if (USE_MOCK_DATA) {
   );
 }
 
-// Your existing API exports remain the same...
+// ============= API Exports =============
+
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
@@ -79,15 +78,22 @@ export const studentAPI = {
     api.get(`/Student/marks/${studentId}?year=${year}&term=${term}`),
   getStudentRank: (studentId, year, term) => 
     api.get(`/Student/rank/${studentId}?year=${year}&term=${term}`),
+  getMySubjects: () => api.get('/Student/my-subjects'),
+  getMyMarks: (subjectId, year, term) => 
+    api.get(`/Student/my-marks/${subjectId}?year=${year}&term=${term}`),
+  getDashboard: () => api.get('/Student/dashboard'),
 };
 
 export const teacherMarksAPI = {
   getMyStudents: () => api.get('/TeacherMarks/my-students'),
+  getStudentMarks: (studentId, subjectId, year, term) => 
+    api.get(`/TeacherMarks/student-marks/${studentId}/${subjectId}/${year}/${term}`),
   enterMarks: (data) => api.post('/TeacherMarks/enter-marks', data),
   publishResults: (subjectId, year, term) => 
     api.post(`/TeacherMarks/publish-results/${subjectId}/${year}/${term}`),
   getNotifications: () => api.get('/TeacherMarks/notifications'),
   markAsRead: (id) => api.put(`/TeacherMarks/notifications/${id}/read`),
+  markAllAsRead: () => api.put('/TeacherMarks/notifications/mark-all-read'),
   getUnreadCount: () => api.get('/TeacherMarks/notifications/unread-count'),
 };
 
@@ -97,6 +103,7 @@ export const adminAPI = {
   deleteTeacher: (id) => api.delete(`/admin/teachers/${id}`),
   getClasses: () => api.get('/admin/classes'),
   addClass: (data) => api.post('/admin/classes', data),
+  updateClass: (id, data) => api.put(`/admin/classes/${id}`, data),
   deleteClass: (id) => api.delete(`/admin/classes/${id}`),
   allocateTeacher: (data) => api.post('/admin/allocate-teacher', data),
   getClassAllocations: (classId) => api.get(`/admin/class-allocations/${classId}`),
@@ -112,6 +119,13 @@ export const adminAPI = {
 
 export const teacherSubjectsAPI = {
   getMySubjects: () => api.get('/TeacherSubjects/my-subjects'),
+  getClassSubjects: (classId) => api.get(`/TeacherSubjects/class-subjects/${classId}`),
+  assignToClass: (data) => api.post('/TeacherSubjects/assign-to-class', data),
+  getAllAssignments: () => api.get('/TeacherSubjects/all-assignments'),
+  getAllClassAssignments: () => api.get('/TeacherSubjects/all-class-assignments'),
+  removeFromClass: (id) => api.delete(`/TeacherSubjects/remove-from-class/${id}`),
+  removeAssignment: (id) => api.delete(`/TeacherSubjects/remove/${id}`),
+  getAvailableSubjects: () => api.get('/TeacherSubjects/available-subjects'),
 };
 
 export const studentSubjectAPI = {
@@ -123,6 +137,7 @@ export const studentSubjectAPI = {
 
 export const subjectAPI = {
   getAll: () => api.get('/subjects'),
+  create: (data) => api.post('/subjects', data),
 };
 
 export const studentNotificationsAPI = {
@@ -130,6 +145,35 @@ export const studentNotificationsAPI = {
   getUnreadCount: () => api.get('/StudentNotifications/unread-count'),
   markAsRead: (id) => api.put(`/StudentNotifications/${id}/read`),
   markAllAsRead: () => api.put('/StudentNotifications/mark-all-read'),
+};
+
+export const adminSubjectAllocationAPI = {
+  getAvailableSubjects: () => api.get('/AdminSubjectAllocation/available-subjects'),
+  getTeachers: () => api.get('/AdminSubjectAllocation/teachers'),
+  getClasses: () => api.get('/AdminSubjectAllocation/classes'),
+  getStudentsByClass: (className, stream) => 
+    api.get(`/AdminSubjectAllocation/students-by-class/${className}/${stream}`),
+  getStudentAllocations: (classId, year) => 
+    api.get(`/AdminSubjectAllocation/student-allocations?classId=${classId}&year=${year}`),
+  getStudentSubjects: (studentId, year) => 
+    api.get(`/AdminSubjectAllocation/student-subjects/${studentId}?year=${year}`),
+  allocateToStudent: (data) => api.post('/AdminSubjectAllocation/allocate-subjects-to-student', data),
+  bulkAllocateToClass: (data) => api.post('/AdminSubjectAllocation/bulk-allocate-to-class', data),
+  removeAllocation: (allocationId) => 
+    api.delete(`/AdminSubjectAllocation/remove-allocation/${allocationId}`),
+  getAvailableSubjectsForStudent: (studentId, year) => 
+    api.get(`/AdminSubjectAllocation/available-subjects-for-student/${studentId}?year=${year}`),
+  getSummary: () => api.get('/AdminSubjectAllocation/summary'),
+};
+
+export const studentRegistrationAPI = {
+  getAvailableSubjects: (className, stream, root) => 
+    api.get(`/StudentRegistration/available-subjects/${className}/${stream}?root=${root || ''}`),
+  getRegisteredStudents: (className, stream, year) => 
+    api.get(`/StudentRegistration/registered-students?className=${className || ''}&stream=${stream || ''}&year=${year || ''}`),
+  registerStudent: (data) => api.post('/StudentRegistration/register', data),
+  getStudentDetails: (studentId) => api.get(`/StudentRegistration/student-details/${studentId}`),
+  updateStudent: (studentId, data) => api.put(`/StudentRegistration/update/${studentId}`, data),
 };
 
 export default api;
