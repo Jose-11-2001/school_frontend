@@ -143,9 +143,9 @@ function StudentDashboard() {
 
   const getNotificationIcon = (type) => {
     switch(type) {
-      case 'ExamResults': return '📢';
-      case 'Success': return '✅';
-      case 'Warning': return '⚠️';
+      case 'ExamResults': return '';
+      case 'Success': return '';
+      case 'Warning': return '';
       default: return '🔔';
     }
   };
