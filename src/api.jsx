@@ -1,7 +1,6 @@
 import axios from 'axios'
-const USE_MOCK_DATA = false; 
-
 const API_BASE_URL = 'https://school-yathu.onrender.com/api';
+const USE_MOCK_DATA = false;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
