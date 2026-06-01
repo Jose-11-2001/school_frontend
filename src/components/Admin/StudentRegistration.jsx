@@ -25,6 +25,21 @@ function StudentRegistration() {
         loadRegisteredStudents();
     }, []);
 
+    // Update streams when class changes
+    useEffect(() => {
+        if (formData.class) {
+            // Find all streams for the selected class
+            const availableStreams = classes
+                .filter(c => c.Name === formData.class)
+                .map(c => c.Stream)
+                .filter(s => s);
+            setStreams([...new Set(availableStreams)]); // Remove duplicates
+            setFormData(prev => ({ ...prev, stream: '' })); // Reset stream when class changes
+        } else {
+            setStreams([]);
+        }
+    }, [formData.class, classes]);
+
     useEffect(() => {
         if (formData.class && formData.stream) {
             loadAvailableSubjects();
@@ -39,10 +54,6 @@ function StudentRegistration() {
             });
             const data = await response.json();
             setClasses(data);
-            // Extract unique class names and streams
-            const uniqueClasses = [...new Set(data.map(c => c.Name))];
-            const uniqueStreams = [...new Set(data.map(c => c.Stream))];
-            setStreams(uniqueStreams.filter(s => s));
         } catch (error) {
             console.error('Error loading classes:', error);
         }
@@ -128,17 +139,20 @@ function StudentRegistration() {
                                   formData.class.includes('Form3') || formData.class.includes('Form4'));
     };
 
+    // Get unique class names for dropdown
+    const uniqueClasses = [...new Set(classes.map(c => c.Name))];
+
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700">
-                <h2 className="text-2xl font-bold text-white"> Student Registration</h2>
+                <h2 className="text-2xl font-bold text-white">🎓 Student Registration</h2>
                 <p className="text-blue-100 text-sm mt-1">Register new students and automatically create their accounts</p>
             </div>
             
             <div className="p-6">
                 {message && (
                     <div className={`p-3 rounded-lg mb-4 ${
-                        message.includes('') 
+                        message.includes('✅') 
                             ? 'bg-green-50 text-green-700 border border-green-200' 
                             : 'bg-red-50 text-red-700 border border-red-200'
                     }`}>
@@ -156,7 +170,7 @@ function StudentRegistration() {
                         }`}
                         onClick={() => setActiveTab('register')}
                     >
-                         Register New Student
+                        Register New Student
                     </button>
                     <button
                         className={`px-4 py-2 font-semibold transition-all duration-200 ${
@@ -166,7 +180,7 @@ function StudentRegistration() {
                         }`}
                         onClick={() => { setActiveTab('list'); loadRegisteredStudents(); }}
                     >
-                        View All Students
+                         View All Students
                     </button>
                 </div>
 
@@ -217,10 +231,9 @@ function StudentRegistration() {
                                     onChange={(e) => setFormData({...formData, class: e.target.value, root: '', selectedSubjectIds: []})}
                                 >
                                     <option value="">Select Class</option>
-                                    <option value="Form 1">Form 1</option>
-                                    <option value="Form 2">Form 2</option>
-                                    <option value="Form 3">Form 3</option>
-                                    <option value="Form 4">Form 4</option>
+                                    {uniqueClasses.map(className => (
+                                        <option key={className} value={className}>{className}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
@@ -232,12 +245,16 @@ function StudentRegistration() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={formData.stream}
                                     onChange={(e) => setFormData({...formData, stream: e.target.value})}
+                                    disabled={!formData.class}
                                 >
                                     <option value="">Select Stream</option>
                                     {streams.map(stream => (
                                         <option key={stream} value={stream}>{stream}</option>
                                     ))}
                                 </select>
+                                {!formData.class && (
+                                    <p className="text-xs text-yellow-600 mt-1"> Please select a class first</p>
+                                )}
                             </div>
                         </div>
 
@@ -294,7 +311,7 @@ function StudentRegistration() {
                                 {/* Subjects based on root selection */}
                                 {formData.root === 'Humanities' && availableSubjects.humanitiesSubjects?.length > 0 && (
                                     <div className="mb-4">
-                                        <h4 className="font-semibold text-blue-700 mb-2">Humanities Subjects</h4>
+                                        <h4 className="font-semibold text-blue-700 mb-2"> Humanities Subjects</h4>
                                         <div className="flex flex-wrap gap-2">
                                             {availableSubjects.humanitiesSubjects.map((subject, index) => (
                                                 <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
@@ -320,7 +337,7 @@ function StudentRegistration() {
 
                                 {!isUpperForm() && availableSubjects.coreSubjects?.length > 0 && (
                                     <div className="mt-2 text-sm text-gray-600 bg-yellow-50 p-2 rounded">
-                                        ℹNote: Form 1 & Form 2 students take all subjects. No specialization needed.
+                                         Note: Form 1 & Form 2 students take all subjects. No specialization needed.
                                     </div>
                                 )}
                             </div>
@@ -340,7 +357,7 @@ function StudentRegistration() {
                                     Registering Student...
                                 </span>
                             ) : (
-                                ' Register Student & Create Account'
+                                'Register Student & Create Account'
                             )}
                         </button>
                     </form>
@@ -359,10 +376,9 @@ function StudentRegistration() {
                                     onChange={(e) => { setFilterClass(e.target.value); loadRegisteredStudents(); }}
                                 >
                                     <option value="">All Classes</option>
-                                    <option value="Form 1">Form 1</option>
-                                    <option value="Form 2">Form 2</option>
-                                    <option value="Form 3">Form 3</option>
-                                    <option value="Form 4">Form 4</option>
+                                    {uniqueClasses.map(className => (
+                                        <option key={className} value={className}>{className}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
@@ -413,7 +429,7 @@ function StudentRegistration() {
                                         </tr>
                                     )}
                                 </tbody>
-                             </table>
+                            </table>
                         </div>
                     </div>
                 )}
