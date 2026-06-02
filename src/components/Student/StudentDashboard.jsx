@@ -256,7 +256,7 @@ function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md">
+      <nav className="bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <div>
             <h1 className="text-xl font-bold">School Marks System - Student Portal</h1>
