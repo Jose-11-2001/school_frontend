@@ -10,7 +10,7 @@ import AdminUserManagement from './AdminUserManagement';
 import Rankings from '../Rankings';
 import AdminNotifications from './AdminNotifications';
 import AdminSubjectAllocation from './AdminSubjectAllocation';
-import StudentRegistration from './StudentRegistration'; // Import the new component
+import StudentRegistration from './StudentRegistration';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
