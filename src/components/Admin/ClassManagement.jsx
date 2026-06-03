@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 function ClassManagement() {
   const [classes, setClasses] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingClass, setEditingClass] = useState(null);
@@ -17,6 +18,7 @@ function ClassManagement() {
   useEffect(() => {
     loadClasses();
     loadTeachers();
+    loadStudents();
   }, []);
 
   const loadClasses = async () => {
@@ -30,8 +32,6 @@ function ClassManagement() {
       setClasses(data);
     } catch (error) {
       console.error('Error loading classes:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -47,6 +47,34 @@ function ClassManagement() {
     } catch (error) {
       console.error('Error loading teachers:', error);
     }
+  };
+
+  const loadStudents = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://school-yathu.onrender.com/api/admin/all-students', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setStudents(data);
+    } catch (error) {
+      console.error('Error loading students:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStudentCountByClass = (className, stream) => {
+    return students.filter(s => s.class === className && s.stream === stream).length;
+  };
+
+  const getCapacityStatus = (studentCount, capacity) => {
+    if (!capacity) return { status: 'info', message: 'No capacity set', color: 'gray' };
+    const percentage = (studentCount / capacity) * 100;
+    if (percentage >= 100) return { status: 'danger', message: 'Full', color: 'red' };
+    if (percentage >= 85) return { status: 'warning', message: 'Almost Full', color: 'orange' };
+    if (percentage >= 70) return { status: 'info', message: 'Good', color: 'blue' };
+    return { status: 'success', message: 'Available', color: 'green' };
   };
 
   const handleAddClass = async (e) => {
@@ -88,14 +116,6 @@ function ClassManagement() {
   const handleUpdateClass = async (e) => {
     e.preventDefault();
     
-    console.log('Updating class with data:', {
-      id: editingClass.id,
-      name: formData.name,
-      stream: formData.stream,
-      teacherId: formData.teacherId,
-      capacity: formData.capacity
-    });
-    
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`https://school-yathu.onrender.com/api/admin/classes/${editingClass.id}`, {
@@ -113,10 +133,9 @@ function ClassManagement() {
       });
       
       const data = await response.json();
-      console.log('Update response:', data);
       
       if (response.ok) {
-        setMessage(' Class updated successfully!');
+        setMessage('✅ Class updated successfully!');
         setEditingClass(null);
         setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
         loadClasses();
@@ -133,7 +152,7 @@ function ClassManagement() {
   };
 
   const handleDeleteClass = async (id, name) => {
-    if (confirm(` Are you sure you want to delete class "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(`⚠️ Are you sure you want to delete class "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/admin/classes/${id}`, {
@@ -142,7 +161,7 @@ function ClassManagement() {
         });
         
         if (response.ok) {
-          setMessage(` Class "${name}" deleted successfully!`);
+          setMessage(`✅ Class "${name}" deleted successfully!`);
           loadClasses();
           setTimeout(() => setMessage(''), 3000);
         } else {
@@ -159,7 +178,6 @@ function ClassManagement() {
   };
 
   const startEdit = (cls) => {
-    console.log('Editing class:', cls);
     setEditingClass(cls);
     setFormData({
       name: cls.name,
@@ -193,20 +211,20 @@ function ClassManagement() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800"> Class Management</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Class Management</h2>
           <p className="text-sm text-gray-500 mt-1">Manage all classes, streams, and class teachers</p>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-gradient-to-r from-blue-900 to-green-600 text-white px-5 py-2 rounded-lg hover:from-blue-800 hover:to-blue-800 transition-all duration-200 shadow-md flex items-center gap-2"
+          className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md flex items-center gap-2"
         >
-          <span className="text-lg"></span> Add New Class
+          <span className="text-lg">+</span> Add New Class
         </button>
       </div>
 
       {message && (
         <div className={`p-3 rounded-lg mb-4 ${
-          message.includes('') 
+          message.includes('✅') 
             ? 'bg-green-50 text-green-700 border border-green-200' 
             : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
@@ -220,41 +238,53 @@ function ClassManagement() {
             <span></span> Add New Class
           </h3>
           <form onSubmit={handleAddClass} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Class Name * (e.g., Form 1, Form 2, Form 3, Form 4)"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Stream (e.g., East, West, North, South)"
-              value={formData.stream}
-              onChange={(e) => setFormData({...formData, stream: e.target.value})}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <select
-              value={formData.teacherId}
-              onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select Class Teacher</option>
-              {teachers.map(teacher => (
-                <option key={teacher.id} value={teacher.id}>{teacher.name} ({teacher.email})</option>
-              ))}
-            </select>
-            <input
-              type="number"
-              placeholder="Capacity (e.g., 40)"
-              value={formData.capacity}
-              onChange={(e) => setFormData({...formData, capacity: e.target.value})}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-1">Class Name *</label>
+              <input
+                type="text"
+                placeholder="e.g., Form 1, Form 2, Form 3, Form 4"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-1">Stream</label>
+              <input
+                type="text"
+                placeholder="e.g., East, West, North, South"
+                value={formData.stream}
+                onChange={(e) => setFormData({...formData, stream: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-1">Class Teacher</label>
+              <select
+                value={formData.teacherId}
+                onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Class Teacher</option>
+                {teachers.map(teacher => (
+                  <option key={teacher.id} value={teacher.id}>{teacher.name} ({teacher.email})</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-1">Capacity</label>
+              <input
+                type="number"
+                placeholder="e.g., 40"
+                value={formData.capacity}
+                onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
             <div className="md:col-span-2 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                 Save Class
+                Save Class
               </button>
               <button type="button" onClick={() => setShowAddForm(false)} className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">
                 Cancel
@@ -270,38 +300,50 @@ function ClassManagement() {
             <span></span> Edit Class: {editingClass.name}
           </h3>
           <form onSubmit={handleUpdateClass} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="text"
-              value={formData.stream}
-              onChange={(e) => setFormData({...formData, stream: e.target.value})}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <select
-              value={formData.teacherId}
-              onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select Class Teacher</option>
-              {teachers.map(teacher => (
-                <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-              ))}
-            </select>
-            <input
-              type="number"
-              value={formData.capacity}
-              onChange={(e) => setFormData({...formData, capacity: e.target.value})}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-1">Class Name *</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-1">Stream</label>
+              <input
+                type="text"
+                value={formData.stream}
+                onChange={(e) => setFormData({...formData, stream: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-1">Class Teacher</label>
+              <select
+                value={formData.teacherId}
+                onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Class Teacher</option>
+                {teachers.map(teacher => (
+                  <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-1">Capacity</label>
+              <input
+                type="number"
+                value={formData.capacity}
+                onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
             <div className="md:col-span-2 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                 Update Class
+                🔄 Update Class
               </button>
               <button type="button" onClick={cancelEdit} className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">
                 Cancel
@@ -321,57 +363,83 @@ function ClassManagement() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class Teacher</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Students</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {classes.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
                     <div className="text-4xl mb-2"></div>
                     No classes found. Click "Add New Class" to create your first class.
                   </td>
                 </tr>
               ) : (
-                classes.map((cls) => (
-                  <tr key={cls.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{cls.name}</td>
-                    <td className="px-6 py-4 text-gray-600">{cls.stream || '-'}</td>
-                    <td className="px-6 py-4">
-                      {cls.teacherId ? (
-                        <span className="text-green-600 font-medium flex items-center gap-1">
-                          <span></span> {getTeacherName(cls.teacherId)}
+                classes.map((cls) => {
+                  const studentCount = getStudentCountByClass(cls.name, cls.stream);
+                  const capacityStatus = getCapacityStatus(studentCount, cls.capacity);
+                  const isOverCapacity = cls.capacity && studentCount > cls.capacity;
+                  
+                  return (
+                    <tr key={cls.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-900">{cls.name}</td>
+                      <td className="px-6 py-4 text-gray-600">{cls.stream || '-'}</td>
+                      <td className="px-6 py-4">
+                        {cls.teacherId ? (
+                          <span className="text-green-600 font-medium flex items-center gap-1">
+                            <span></span> {getTeacherName(cls.teacherId)}
+                          </span>
+                        ) : (
+                          <span className="text-orange-500 flex items-center gap-1">
+                            <span>⚠️</span> Not Assigned
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-bold ${isOverCapacity ? 'text-red-600' : 'text-gray-900'}`}>
+                            {studentCount}
+                          </span>
+                          {cls.capacity && (
+                            <span className="text-sm text-gray-500">/ {cls.capacity}</span>
+                          )}
+                          {isOverCapacity && (
+                            <span className="text-red-500 text-xs" title="Over capacity">⚠️</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{cls.capacity || '-'}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          capacityStatus.color === 'green' ? 'bg-green-100 text-green-800' :
+                          capacityStatus.color === 'blue' ? 'bg-blue-100 text-blue-800' :
+                          capacityStatus.color === 'orange' ? 'bg-orange-100 text-orange-800' :
+                          capacityStatus.color === 'red' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {capacityStatus.message}
                         </span>
-                      ) : (
-                        <span className="text-orange-500 flex items-center gap-1">
-                          <span></span> Not Assigned
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
-                        {cls.studentCount || 0}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{cls.capacity || '-'}</td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => startEdit(cls)}
-                        className="text-blue-600 hover:text-blue-800 mr-3 transition-colors"
-                        title="Edit Class"
-                      >
-                         Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClass(cls.id, `${cls.name} ${cls.stream || ''}`)}
-                        className="text-red-600 hover:text-red-800 transition-colors"
-                        title="Delete Class"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => startEdit(cls)}
+                          className="text-blue-600 hover:text-blue-800 mr-3 transition-colors"
+                          title="Edit Class"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClass(cls.id, `${cls.name} ${cls.stream || ''}`)}
+                          className="text-red-600 hover:text-red-800 transition-colors"
+                          title="Delete Class"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -381,7 +449,7 @@ function ClassManagement() {
       {teachers.length === 0 && (
         <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
           <p className="text-yellow-800 flex items-center gap-2">
-            <span></span> No teachers available. Please add teachers first in Teacher Management tab.
+            <span>⚠️</span> No teachers available. Please add teachers first in Teacher Management tab.
           </p>
         </div>
       )}

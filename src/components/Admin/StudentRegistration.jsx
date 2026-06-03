@@ -11,6 +11,7 @@ function StudentRegistration() {
     });
     
     const [classes, setClasses] = useState([]);
+    const [allStreams, setAllStreams] = useState([]); // Store all streams for filtering
     const [streams, setStreams] = useState([]);
     const [availableSubjects, setAvailableSubjects] = useState({ coreSubjects: [], humanitiesSubjects: [], scienceSubjects: [] });
     const [registeredStudents, setRegisteredStudents] = useState([]);
@@ -19,22 +20,37 @@ function StudentRegistration() {
     const [activeTab, setActiveTab] = useState('register');
     const [filterClass, setFilterClass] = useState('');
     const [filterStream, setFilterStream] = useState('');
+    const [availableFilterStreams, setAvailableFilterStreams] = useState([]); // Streams for filter dropdown
 
     useEffect(() => {
         loadClasses();
         loadRegisteredStudents();
     }, []);
 
-    // Update streams when class changes
+    // Update filter streams when filter class changes
+    useEffect(() => {
+        if (filterClass) {
+            const availableStreams = classes
+                .filter(c => c.Name === filterClass)
+                .map(c => c.Stream)
+                .filter(s => s);
+            setAvailableFilterStreams([...new Set(availableStreams)]);
+            setFilterStream(''); // Reset stream filter when class changes
+        } else {
+            setAvailableFilterStreams([]);
+            setFilterStream('');
+        }
+    }, [filterClass, classes]);
+
+    // Update streams when form class changes
     useEffect(() => {
         if (formData.class) {
-            // Find all streams for the selected class
             const availableStreams = classes
                 .filter(c => c.Name === formData.class)
                 .map(c => c.Stream)
                 .filter(s => s);
-            setStreams([...new Set(availableStreams)]); // Remove duplicates
-            setFormData(prev => ({ ...prev, stream: '' })); // Reset stream when class changes
+            setStreams([...new Set(availableStreams)]);
+            setFormData(prev => ({ ...prev, stream: '' }));
         } else {
             setStreams([]);
         }
@@ -45,6 +61,14 @@ function StudentRegistration() {
             loadAvailableSubjects();
         }
     }, [formData.class, formData.stream, formData.root]);
+
+    // Store all streams for later use
+    useEffect(() => {
+        if (classes.length > 0) {
+            const allStreamsData = [...new Set(classes.map(c => c.Stream).filter(s => s))];
+            setAllStreams(allStreamsData);
+        }
+    }, [classes]);
 
     const loadClasses = async () => {
         try {
@@ -81,8 +105,11 @@ function StudentRegistration() {
         try {
             const token = localStorage.getItem('token');
             let url = 'https://school-yathu.onrender.com/api/StudentRegistration/registered-students';
-            if (filterClass) url += `?className=${filterClass}`;
-            if (filterStream) url += `${filterClass ? '&' : '?'}stream=${filterStream}`;
+            
+            const params = new URLSearchParams();
+            if (filterClass) params.append('className', filterClass);
+            if (filterStream) params.append('stream', filterStream);
+            if (params.toString()) url += `?${params.toString()}`;
             
             const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -112,7 +139,7 @@ function StudentRegistration() {
             const data = await response.json();
             
             if (response.ok) {
-                setMessage(` ${data.message}`);
+                setMessage(`✅ ${data.message}`);
                 setFormData({
                     admissionNumber: '',
                     fullName: '',
@@ -132,6 +159,10 @@ function StudentRegistration() {
             setLoading(false);
             setTimeout(() => setMessage(''), 3000);
         }
+    };
+
+    const handleFilterChange = () => {
+        loadRegisteredStudents();
     };
 
     const isUpperForm = () => {
@@ -180,7 +211,7 @@ function StudentRegistration() {
                         }`}
                         onClick={() => { setActiveTab('list'); loadRegisteredStudents(); }}
                     >
-                         View All Students
+                        View All Students
                     </button>
                 </div>
 
@@ -282,7 +313,7 @@ function StudentRegistration() {
                                             onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
                                             className="mr-2 w-4 h-4"
                                         />
-                                        <span className="text-lg"></span>
+                                        <span className="text-lg">🔬</span>
                                         <span className="ml-2">Sciences (Physics, Chemistry, Biology)</span>
                                     </label>
                                 </div>
@@ -324,7 +355,7 @@ function StudentRegistration() {
 
                                 {formData.root === 'Sciences' && availableSubjects.scienceSubjects?.length > 0 && (
                                     <div className="mb-4">
-                                        <h4 className="font-semibold text-purple-700 mb-2"> Science Subjects</h4>
+                                        <h4 className="font-semibold text-purple-700 mb-2">🔬 Science Subjects</h4>
                                         <div className="flex flex-wrap gap-2">
                                             {availableSubjects.scienceSubjects.map((subject, index) => (
                                                 <span key={index} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
@@ -337,7 +368,7 @@ function StudentRegistration() {
 
                                 {!isUpperForm() && availableSubjects.coreSubjects?.length > 0 && (
                                     <div className="mt-2 text-sm text-gray-600 bg-yellow-50 p-2 rounded">
-                                         Note: Form 1 & Form 2 students take all subjects. No specialization needed.
+                                        ℹ️ Note: Form 1 & Form 2 students take all subjects. No specialization needed.
                                     </div>
                                 )}
                             </div>
@@ -357,7 +388,7 @@ function StudentRegistration() {
                                     Registering Student...
                                 </span>
                             ) : (
-                                'Register Student & Create Account'
+                                ' Register Student & Create Account'
                             )}
                         </button>
                     </form>
@@ -367,32 +398,53 @@ function StudentRegistration() {
                 {activeTab === 'list' && (
                     <div>
                         {/* Filters */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <label className="block text-gray-700 mb-2 font-semibold">Filter by Class</label>
-                                <select
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={filterClass}
-                                    onChange={(e) => { setFilterClass(e.target.value); loadRegisteredStudents(); }}
-                                >
-                                    <option value="">All Classes</option>
-                                    {uniqueClasses.map(className => (
-                                        <option key={className} value={className}>{className}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-gray-700 mb-2 font-semibold">Filter by Stream</label>
-                                <select
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={filterStream}
-                                    onChange={(e) => { setFilterStream(e.target.value); loadRegisteredStudents(); }}
-                                >
-                                    <option value="">All Streams</option>
-                                    {streams.map(stream => (
-                                        <option key={stream} value={stream}>{stream}</option>
-                                    ))}
-                                </select>
+                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                            <h3 className="font-semibold text-gray-700 mb-3">🔍 Filter Students</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-gray-700 text-sm font-semibold mb-2">Filter by Class</label>
+                                    <select
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value={filterClass}
+                                        onChange={(e) => { 
+                                            setFilterClass(e.target.value); 
+                                            setTimeout(() => loadRegisteredStudents(), 100);
+                                        }}
+                                    >
+                                        <option value="">All Classes</option>
+                                        {uniqueClasses.map(className => (
+                                            <option key={className} value={className}>{className}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-gray-700 text-sm font-semibold mb-2">Filter by Stream</label>
+                                    <select
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value={filterStream}
+                                        onChange={(e) => { 
+                                            setFilterStream(e.target.value); 
+                                            setTimeout(() => loadRegisteredStudents(), 100);
+                                        }}
+                                        disabled={!filterClass}
+                                    >
+                                        <option value="">All Streams</option>
+                                        {availableFilterStreams.map(stream => (
+                                            <option key={stream} value={stream}>{stream}</option>
+                                        ))}
+                                    </select>
+                                    {!filterClass && (
+                                        <p className="text-xs text-yellow-600 mt-1"> Select a class first to filter by stream</p>
+                                    )}
+                                </div>
+                                <div className="flex items-end">
+                                    <button
+                                        onClick={handleFilterChange}
+                                        className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                                    >
+                                        🔄 Apply Filters
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -410,23 +462,25 @@ function StudentRegistration() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {registeredStudents.map(student => (
-                                        <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-4 py-2 border text-sm text-gray-600">{student.admissionNumber}</td>
-                                            <td className="px-4 py-2 border text-sm font-medium text-gray-900">{student.fullName}</td>
-                                            <td className="px-4 py-2 border text-sm text-gray-600">{student.class}</td>
-                                            <td className="px-4 py-2 border text-sm text-gray-600">{student.stream}</td>
-                                            <td className="px-4 py-2 border text-sm text-gray-600">{student.subjectsCount} subjects</td>
-                                            <td className="px-4 py-2 border text-sm text-gray-500">{new Date(student.createdAt).toLocaleDateString()}</td>
-                                        </tr>
-                                    ))}
-                                    {registeredStudents.length === 0 && (
+                                    {registeredStudents.length === 0 ? (
                                         <tr>
                                             <td colSpan="6" className="text-center py-8 text-gray-500">
-                                                <div className="text-4xl mb-2"></div>
-                                                No students registered yet
+                                                <div className="text-4xl mb-2">📭</div>
+                                                No students found
+                                                {filterClass && <p className="text-sm mt-1">Try changing your filter criteria</p>}
                                             </td>
                                         </tr>
+                                    ) : (
+                                        registeredStudents.map(student => (
+                                            <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.admissionNumber}</td>
+                                                <td className="px-4 py-2 border text-sm font-medium text-gray-900">{student.fullName}</td>
+                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.class}</td>
+                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.stream}</td>
+                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.subjectsCount} subjects</td>
+                                                <td className="px-4 py-2 border text-sm text-gray-500">{new Date(student.createdAt).toLocaleDateString()}</td>
+                                            </tr>
+                                        ))
                                     )}
                                 </tbody>
                             </table>
