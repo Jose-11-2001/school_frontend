@@ -111,16 +111,7 @@ function AdminDashboard() {
           >
             Register Students
           </button>
-          <button
-            onClick={() => setActiveTab('students')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'students' 
-                ? 'border-b-2 border-blue-800 text-blue-900' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Manage Students
-          </button>
+    
           <button
             onClick={() => setActiveTab('users')}
             className={`px-4 py-2 font-medium transition-colors ${
@@ -128,7 +119,7 @@ function AdminDashboard() {
                 ? 'border-b-2 border-blue-800 text-blue-900' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
-          >
+         >
             Manage Users
           </button>
           <button

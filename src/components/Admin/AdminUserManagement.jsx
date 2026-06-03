@@ -135,7 +135,7 @@ function AdminUserManagement() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">👥 User Management</h2>
+          <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
           <p className="text-sm text-gray-500 mt-1">Manage all teacher and student accounts</p>
         </div>
         <div className="flex gap-2">

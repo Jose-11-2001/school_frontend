@@ -145,7 +145,7 @@ function StudentRegistration() {
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700">
-                <h2 className="text-2xl font-bold text-white">🎓 Student Registration</h2>
+                <h2 className="text-2xl font-bold text-white">Student Registration</h2>
                 <p className="text-blue-100 text-sm mt-1">Register new students and automatically create their accounts</p>
             </div>
             

@@ -198,9 +198,9 @@ function ClassManagement() {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md flex items-center gap-2"
+          className="bg-gradient-to-r from-blue-900 to-green-600 text-white px-5 py-2 rounded-lg hover:from-blue-800 hover:to-blue-800 transition-all duration-200 shadow-md flex items-center gap-2"
         >
-          <span className="text-lg">+</span> Add New Class
+          <span className="text-lg"></span> Add New Class
         </button>
       </div>
 
@@ -217,7 +217,7 @@ function ClassManagement() {
       {showAddForm && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6 border border-blue-200 shadow-sm">
           <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-            <span>➕</span> Add New Class
+            <span></span> Add New Class
           </h3>
           <form onSubmit={handleAddClass} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
