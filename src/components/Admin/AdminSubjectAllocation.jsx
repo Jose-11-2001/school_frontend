@@ -13,34 +13,44 @@ function AdminSubjectAllocation() {
   const [allocations, setAllocations] = useState([]);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState('single');
-  const [uniqueClassOptions, setUniqueClassOptions] = useState([]);
 
   useEffect(() => {
-    loadClasses();
-    loadSubjects();
-    loadAllocations();
+    loadAllData();
   }, []);
+
+  const loadAllData = async () => {
+    setLoadingData(true);
+    await Promise.all([
+      loadClasses(),
+      loadSubjects(),
+      loadAllocations()
+    ]);
+    setLoadingData(false);
+  };
 
   const loadClasses = async () => {
     try {
       const token = localStorage.getItem('token');
+      console.log('Fetching classes...');
       const response = await fetch('https://school-yathu.onrender.com/api/AdminSubjectAllocation/classes', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
-      setClasses(data);
       
-      // Create unique class + stream options for dropdown
-      const options = data.map(c => ({
-        id: c.id,
-        name: c.Name,
-        stream: c.Stream,
-        displayName: `${c.Name} ${c.Stream}`
-      }));
-      setUniqueClassOptions(options);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Classes received:', data);
+      setClasses(data);
+      return data;
     } catch (error) {
       console.error('Error loading classes:', error);
+      setMessage('❌ Failed to load classes. Please check your connection.');
+      setTimeout(() => setMessage(''), 5000);
+      return [];
     }
   };
 
@@ -51,6 +61,7 @@ function AdminSubjectAllocation() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
+      console.log('Subjects received:', data);
       setSubjects(data);
     } catch (error) {
       console.error('Error loading subjects:', error);
@@ -99,11 +110,16 @@ function AdminSubjectAllocation() {
   };
 
   const handleClassChange = (e) => {
-    const selectedOption = uniqueClassOptions.find(opt => opt.id === parseInt(e.target.value));
-    if (selectedOption) {
-      setSelectedClass(selectedOption.name);
-      setSelectedStream(selectedOption.stream);
-      // Load students after setting class and stream
+    const selectedId = parseInt(e.target.value);
+    const selectedClassObj = classes.find(c => c.id === selectedId);
+    
+    if (selectedClassObj) {
+      console.log('Selected class:', selectedClassObj);
+      setSelectedClass(selectedClassObj.Name);
+      setSelectedStream(selectedClassObj.Stream);
+      setSelectedStudent(null);
+      setSelectedSubjects([]);
+      // Load students after state update
       setTimeout(() => loadStudentsByClass(), 100);
     }
   };
@@ -126,7 +142,7 @@ function AdminSubjectAllocation() {
 
   const handleAllocateToStudent = async () => {
     if (!selectedStudent || selectedSubjects.length === 0) {
-      setMessage('Please select a student and at least one subject');
+      setMessage('⚠️ Please select a student and at least one subject');
       return;
     }
 
@@ -166,7 +182,7 @@ function AdminSubjectAllocation() {
 
   const handleBulkAllocate = async () => {
     if (!selectedClass || !selectedStream || selectedSubjects.length === 0) {
-      setMessage('Please select a class and at least one subject');
+      setMessage('⚠️ Please select a class and at least one subject');
       return;
     }
 
@@ -234,6 +250,19 @@ function AdminSubjectAllocation() {
     setTimeout(() => setMessage(''), 3000);
   };
 
+  if (loadingData) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-gray-600">Loading data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
@@ -285,21 +314,23 @@ function AdminSubjectAllocation() {
           </select>
         </div>
         <div>
-          <label className="block text-gray-700 mb-2 font-semibold">Select Class</label>
+          <label className="block text-gray-700 mb-2 font-semibold">🏫 Select Class</label>
           <select
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
             onChange={handleClassChange}
-            value={uniqueClassOptions.find(opt => opt.name === selectedClass && opt.stream === selectedStream)?.id || ''}
+            value=""
           >
             <option value="">-- Select a Class --</option>
-            {uniqueClassOptions.map(option => (
-              <option key={option.id} value={option.id}>
-                {option.displayName}
+            {classes.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.Name} {c.Stream}
               </option>
             ))}
           </select>
-          {uniqueClassOptions.length === 0 && (
-            <p className="text-xs text-yellow-600 mt-1"> No classes available. Please add classes first.</p>
+          {classes.length === 0 && (
+            <p className="text-xs text-red-500 mt-1">
+              ⚠️ No classes available. Please add classes in Class Management tab.
+            </p>
           )}
         </div>
       </div>
@@ -314,7 +345,7 @@ function AdminSubjectAllocation() {
           }`}
           onClick={() => setActiveTab('single')}
         >
-          Single Student Allocation
+          👤 Single Student Allocation
         </button>
         <button
           className={`px-4 py-2 font-semibold transition-all duration-200 ${
@@ -324,7 +355,7 @@ function AdminSubjectAllocation() {
           }`}
           onClick={() => setActiveTab('bulk')}
         >
-          Bulk Class Allocation
+          👥 Bulk Class Allocation
         </button>
       </div>
 
@@ -334,31 +365,39 @@ function AdminSubjectAllocation() {
           {/* Left Panel - Student Selection */}
           <div className="border rounded-lg p-4 bg-white shadow-sm">
             <h3 className="font-semibold text-lg mb-4 text-gray-800">👨‍🎓 Select Student</h3>
-            <select
-              className="w-full px-3 py-2 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-500"
-              onChange={(e) => handleStudentSelect(e.target.value)}
-              disabled={!selectedClass}
-            >
-              <option value="">-- Select a student --</option>
-              {students.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.AdmissionNumber} - {s.FullName}
-                </option>
-              ))}
-            </select>
+            {!selectedClass ? (
+              <div className="bg-yellow-50 p-3 rounded-lg text-yellow-700 text-sm border border-yellow-200">
+                ⚠️ Please select a class first to see students
+              </div>
+            ) : (
+              <>
+                <select
+                  className="w-full px-3 py-2 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 bg-white"
+                  onChange={(e) => handleStudentSelect(e.target.value)}
+                  value={selectedStudent?.id || ''}
+                >
+                  <option value="">-- Select a student --</option>
+                  {students.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.AdmissionNumber} - {s.FullName}
+                    </option>
+                  ))}
+                </select>
+
+                {students.length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No students found in {selectedClass} {selectedStream}
+                  </p>
+                )}
+              </>
+            )}
 
             {selectedStudent && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+              <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
                 <p className="font-semibold text-blue-800 mb-2">📋 Student Details:</p>
                 <p className="text-sm"><strong>Name:</strong> {selectedStudent.FullName}</p>
                 <p className="text-sm"><strong>Admission:</strong> {selectedStudent.AdmissionNumber}</p>
                 <p className="text-sm"><strong>Class:</strong> {selectedStudent.Class} {selectedStudent.Stream}</p>
-              </div>
-            )}
-
-            {!selectedClass && (
-              <div className="bg-yellow-50 p-3 rounded-lg text-yellow-700 text-sm border border-yellow-200">
-                Please select a class first to see students
               </div>
             )}
           </div>
@@ -401,14 +440,14 @@ function AdminSubjectAllocation() {
 
                 <div className="flex justify-between items-center pt-2 border-t">
                   <span className="text-sm text-gray-500">
-                    Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> subject(s)
+                     Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> subject(s)
                   </span>
                   <button
                     onClick={handleAllocateToStudent}
                     disabled={loading || selectedSubjects.length === 0}
                     className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-400 transition-all duration-200 shadow-sm"
                   >
-                    {loading ? ' Allocating...' : ' Allocate Subjects'}
+                    {loading ? ' Allocating...' : 'Allocate Subjects'}
                   </button>
                 </div>
               </>
@@ -427,13 +466,13 @@ function AdminSubjectAllocation() {
           
           {!selectedClass ? (
             <div className="text-center py-8 text-yellow-600 bg-yellow-50 rounded-lg border border-yellow-200">
-              Please select a class from the dropdown above to bulk allocate subjects
+              ⚠️ Please select a class from the dropdown above to bulk allocate subjects
             </div>
           ) : (
             <>
               <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
                 <p className="text-sm">
-                  👥 <strong>{students.length}</strong> student(s) in {selectedClass} {selectedStream}
+                  <strong>{students.length}</strong> student(s) in {selectedClass} {selectedStream}
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
                   All selected subjects will be allocated to ALL students in this class
@@ -489,7 +528,7 @@ function AdminSubjectAllocation() {
         
         {allocations.length === 0 ? (
           <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border">
-            No subject allocations found for {academicYear}. Create allocations above.
+             No subject allocations found for {academicYear}. Create allocations above.
           </div>
         ) : (
           <div className="overflow-x-auto border rounded-lg">
