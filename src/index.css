@@ -30,3 +30,19 @@ select {
   position: relative;
   z-index: 10;
 }
+/* Force dropdown visibility */
+select,
+select option {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+/* Fix for any parent containers that might clip the dropdown */
+.overflow-hidden,
+.overflow-x-auto,
+.overflow-y-auto {
+  overflow: visible !important;
+}
