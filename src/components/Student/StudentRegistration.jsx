@@ -70,6 +70,9 @@ function SubjectRegistration() {
       </div>
     );
   }
+  const handleGoBack = () => {
+    navigate(-1); // Go back to previous page
+  };
 
   return (
     <div className="space-y-6">

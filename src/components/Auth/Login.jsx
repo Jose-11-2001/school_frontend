@@ -46,6 +46,10 @@ function Login({ setUser }) {
     setShowPassword(!showPassword);
   };
 
+  const handleGoBack = () => {
+    navigate(-1); // Go back to previous page
+  };
+
   return (
     <div 
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
@@ -53,13 +57,21 @@ function Login({ setUser }) {
         backgroundImage: `url(${backgroundImage})`,
       }}
     >
-      
-
       {/* Dark overlay for better text readability */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       
       {/* Login Form */}
       <div className="relative z-10 bg-white p-8 rounded-xl shadow-2xl w-96">
+        {/* Back Arrow Button */}
+        <button
+          onClick={handleGoBack}
+          className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 transition-colors"
+          title="Go back"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+        </button>
         
         <div className="text-center mb-8">
           {/* School Logo */}

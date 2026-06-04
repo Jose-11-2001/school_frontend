@@ -111,7 +111,7 @@ function CreateUser() {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
-        <h2 className="text-2xl font-bold text-white">👤 Create New User</h2>
+        <h2 className="text-2xl font-bold text-white">Create New User</h2>
         <p className="text-purple-100 text-sm mt-1">Register teachers and students with auto-generated credentials</p>
       </div>
       
