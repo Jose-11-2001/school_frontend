@@ -31,13 +31,29 @@ function TeacherDashboard() {
     navigate('/login');
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold">Mkondezi Secondary School - Teacher Panel</h1>
-            <p className="text-sm opacity-90">Teacher Access</p>
+          <div className="flex items-center gap-4">
+            {/* Back Arrow Button */}
+            <button
+              onClick={handleGoBack}
+              className="hover:bg-blue-500 p-2 rounded-full transition-colors"
+              title="Go back"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-xl font-bold">Mkondezi Secondary School - Teacher Panel</h1>
+              <p className="text-sm opacity-90">Teacher Access</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <span>Welcome, {user?.name}</span>
