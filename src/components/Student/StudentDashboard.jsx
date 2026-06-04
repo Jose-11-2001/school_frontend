@@ -419,7 +419,7 @@ function StudentDashboard() {
                             );
                           })}
                         </tbody>
-                      </tr>
+                      </table>
                     </div>
                   )}
                 </div>
