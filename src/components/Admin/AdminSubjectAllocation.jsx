@@ -16,6 +16,7 @@ function AdminSubjectAllocation() {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState('single');
+  const [testValue, setTestValue] = useState('');
 
   useEffect(() => {
     loadAllData();
@@ -31,7 +32,6 @@ function AdminSubjectAllocation() {
     setLoadingData(false);
   };
 
-  // Helper function to get property value regardless of case
   const getProperty = (obj, ...keys) => {
     for (const key of keys) {
       if (obj && obj[key] !== undefined) return obj[key];
@@ -54,7 +54,6 @@ function AdminSubjectAllocation() {
       const data = await response.json();
       console.log('Classes received:', data);
       
-      // Transform data to have consistent property names
       const normalizedData = data.map(item => ({
         id: item.id,
         name: getProperty(item, 'name', 'Name', 'className', 'ClassName'),
@@ -82,7 +81,6 @@ function AdminSubjectAllocation() {
       const data = await response.json();
       console.log('Subjects received:', data);
       
-      // Normalize subject data
       const normalizedData = data.map(item => ({
         Id: item.id || item.Id,
         Name: getProperty(item, 'name', 'Name'),
@@ -293,6 +291,9 @@ function AdminSubjectAllocation() {
 
   console.log('Classes for dropdown:', classes);
 
+  // Create a simple text list to verify classes are loaded
+  const classListText = classes.map(c => `${c.name} ${c.stream || ''}`).join(', ');
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
@@ -345,28 +346,45 @@ function AdminSubjectAllocation() {
         </div>
         <div>
           <label className="block text-gray-700 mb-2 font-semibold">🏫 Select Class</label>
-          {classes.length === 0 ? (
+          
+          {/* TEST DROPDOWN - Use a simple test dropdown first */}
+          <div className="mb-4 p-3 bg-yellow-50 rounded border border-yellow-300">
+            <p className="text-sm font-semibold text-yellow-800 mb-2">Debug Info:</p>
+            <p className="text-xs text-gray-700">Classes loaded: {classes.length}</p>
+            <p className="text-xs text-gray-700 truncate">Classes: {classListText || 'None'}</p>
+          </div>
+          
+          {/* MAIN DROPDOWN - With inline styles for guaranteed visibility */}
+          <select
+            onChange={handleClassChange}
+            value={selectedClassId}
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '10px 12px',
+              backgroundColor: '#ffffff',
+              color: '#1f2937',
+              border: '2px solid #3b82f6',
+              borderRadius: '8px',
+              fontSize: '16px',
+              cursor: 'pointer',
+              marginBottom: '8px'
+            }}
+          >
+            <option value="" style={{ color: '#6b7280' }}>-- Select a Class --</option>
+            {classes.map(c => (
+              <option key={c.id} value={c.id} style={{ padding: '8px', color: '#1f2937' }}>
+                {c.name} {c.stream ? c.stream.trim() : ''}
+              </option>
+            ))}
+          </select>
+          
+          {/* Fallback display if no classes */}
+          {classes.length === 0 && (
             <div className="text-red-500 text-sm p-2 border rounded-lg bg-red-50">
               No classes available. Please add classes in Class Management tab.
             </div>
-          ) : (
-            <select
-              className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 shadow-sm cursor-pointer"
-              onChange={handleClassChange}
-              value={selectedClassId}
-            >
-              <option value="" className="text-gray-500">-- Select a Class --</option>
-              {classes.map(c => (
-                <option key={c.id} value={c.id} className="py-2 text-gray-900">
-                  {c.name} {c.stream ? c.stream.trim() : ''}
-                </option>
-              ))}
-            </select>
           )}
-          {/* Debug info to confirm classes are loaded */}
-          <div className="text-xs text-green-600 mt-2 p-2 bg-green-50 rounded">
-            ✓ Found {classes.length} class(es): {classes.map(c => `${c.name}`).join(', ')}
-          </div>
         </div>
       </div>
 
