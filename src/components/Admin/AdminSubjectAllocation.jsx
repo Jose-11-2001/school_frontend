@@ -4,7 +4,7 @@ function AdminSubjectAllocation() {
   const [classes, setClasses] = useState([]);
   const [students, setStudents] = useState([]);
   const [subjects, setSubjects] = useState([]);
-  const [selectedClassId, setSelectedClassId] = useState('');  // Store ID instead of name
+  const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedStream, setSelectedStream] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -265,7 +265,7 @@ function AdminSubjectAllocation() {
     );
   }
 
-  // Debug: Log classes to console
+  // Debug log to check classes data
   console.log('Classes for dropdown:', classes);
 
   return (
@@ -341,7 +341,6 @@ function AdminSubjectAllocation() {
         </div>
       </div>
 
-      {/* Rest of your component remains the same... */}
       {/* Tab Navigation */}
       <div className="flex border-b mb-6">
         <button
