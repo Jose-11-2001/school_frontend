@@ -13,10 +13,6 @@ function StudentDashboard() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
   const [activeTab, setActiveTab] = useState('subjects');
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [studentClass, setStudentClass] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,7 +27,6 @@ function StudentDashboard() {
         navigate('/login');
       }
       setUser(parsedUser);
-      // loadNotifications and loadUnreadCount are now handled by StudentNotifications component
       if (activeTab === 'results') {
         fetchStudentData(parsedUser.id);
       }
@@ -149,7 +144,6 @@ function StudentDashboard() {
         year: selectedYear
       };
       
-      // Format marks for PDF
       const formattedMarks = marks.map(mark => ({
         subjectName: mark.subjectName || mark.subject,
         score: mark.score,
