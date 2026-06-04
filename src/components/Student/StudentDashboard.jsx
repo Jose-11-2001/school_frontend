@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { studentAPI } from '../../services/api';
 import { generateGradePDF } from '../PDFGenerator';
-import SubjectRegistration from '../Student/StudentRegistration';
+import SubjectRegistration from '../Student/SubjectRegistration';
+import StudentNotifications from './StudentNotifications';
 
 function StudentDashboard() {
   const [user, setUser] = useState(null);
@@ -30,67 +31,12 @@ function StudentDashboard() {
         navigate('/login');
       }
       setUser(parsedUser);
-      loadNotifications();
-      loadUnreadCount();
+      // loadNotifications and loadUnreadCount are now handled by StudentNotifications component
       if (activeTab === 'results') {
         fetchStudentData(parsedUser.id);
       }
     }
   }, [navigate, activeTab]);
-
-  const loadNotifications = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/StudentNotifications/my-notifications', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setNotifications(data);
-    } catch (error) {
-      console.error('Error loading notifications:', error);
-    }
-  };
-
-  const loadUnreadCount = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/StudentNotifications/unread-count', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setUnreadCount(data.unreadCount);
-    } catch (error) {
-      console.error('Error loading unread count:', error);
-    }
-  };
-
-  const markAsRead = async (notificationId) => {
-    try {
-      const token = localStorage.getItem('token');
-      await fetch(`https://school-yathu.onrender.com/api/StudentNotifications/${notificationId}/read`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      loadNotifications();
-      loadUnreadCount();
-    } catch (error) {
-      console.error('Error marking as read:', error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      await fetch('https://school-yathu.onrender.com/api/StudentNotifications/mark-all-read', {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      loadNotifications();
-      loadUnreadCount();
-    } catch (error) {
-      console.error('Error marking all as read:', error);
-    }
-  };
 
   // Get student class level from user data
   const getStudentClassLevel = () => {
@@ -246,15 +192,6 @@ function StudentDashboard() {
     navigate(-1);
   };
 
-  const getNotificationIcon = (type) => {
-    switch(type) {
-      case 'ExamResults': return '📢';
-      case 'Success': return '✅';
-      case 'Warning': return '⚠️';
-      default: return '🔔';
-    }
-  };
-
   const classLevel = getStudentClassLevel();
   const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
 
@@ -286,66 +223,9 @@ function StudentDashboard() {
               {!isUpperForm && classLevel && ' • Letter Grades'}
             </div>
             
-            {/* Notification Bell */}
-            <div className="relative">
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="relative focus:outline-none"
-              >
-                <span className="text-2xl">🔔</span>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-              
-              {/* Notification Dropdown */}
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border z-50">
-                  <div className="p-3 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
-                    <h3 className="font-semibold text-gray-800">Notifications</h3>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={markAllAsRead}
-                        className="text-xs text-blue-500 hover:text-blue-700"
-                      >
-                        Mark all as read
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-96 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="p-4 text-gray-500 text-center">No notifications</p>
-                    ) : (
-                      notifications.map(notif => (
-                        <div
-                          key={notif.id}
-                          onClick={() => markAsRead(notif.id)}
-                          className={`p-3 border-b cursor-pointer hover:bg-gray-50 transition ${
-                            !notif.isRead ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                          }`}
-                        >
-                          <div className="flex items-start gap-2">
-                            <span className="text-xl">{getNotificationIcon(notif.type)}</span>
-                            <div className="flex-1">
-                              <div className="font-medium text-sm text-gray-800">{notif.title}</div>
-                              <div className="text-xs text-gray-600 mt-1">{notif.message}</div>
-                              <div className="text-xs text-gray-400 mt-1">
-                                {new Date(notif.createdAt).toLocaleString()}
-                              </div>
-                            </div>
-                            {!notif.isRead && (
-                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Student Notifications Component */}
+            <StudentNotifications />
+            
             <span>Welcome, {user?.name}</span>
             <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
               Logout
@@ -374,7 +254,7 @@ function StudentDashboard() {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-             My Results
+            My Results
           </button>
         </div>
 
@@ -539,7 +419,7 @@ function StudentDashboard() {
                             );
                           })}
                         </tbody>
-                      </table>
+                      </tr>
                     </div>
                   )}
                 </div>
