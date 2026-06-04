@@ -4,6 +4,7 @@ function AdminSubjectAllocation() {
   const [classes, setClasses] = useState([]);
   const [students, setStudents] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState('');  // Store ID instead of name
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedStream, setSelectedStream] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -86,7 +87,6 @@ function AdminSubjectAllocation() {
     
     try {
       const token = localStorage.getItem('token');
-      // Trim the stream to remove any leading/trailing spaces
       const trimmedStream = selectedStream.trim();
       const response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass}/${trimmedStream}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -117,12 +117,11 @@ function AdminSubjectAllocation() {
     
     if (selectedClassObj) {
       console.log('Selected class:', selectedClassObj);
+      setSelectedClassId(selectedId);
       setSelectedClass(selectedClassObj.name);
-      // Trim the stream to remove any leading/trailing spaces
       setSelectedStream(selectedClassObj.stream ? selectedClassObj.stream.trim() : '');
       setSelectedStudent(null);
       setSelectedSubjects([]);
-      // Load students after state update
       setTimeout(() => loadStudentsByClass(), 100);
     }
   };
@@ -266,6 +265,9 @@ function AdminSubjectAllocation() {
     );
   }
 
+  // Debug: Log classes to console
+  console.log('Classes for dropdown:', classes);
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
@@ -318,22 +320,23 @@ function AdminSubjectAllocation() {
         </div>
         <div>
           <label className="block text-gray-700 mb-2 font-semibold">🏫 Select Class</label>
-          <select
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
-            onChange={handleClassChange}
-            value=""
-          >
-            <option value="">-- Select a Class --</option>
-            {classes.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.name} {c.stream ? c.stream.trim() : ''}
-              </option>
-            ))}
-          </select>
-          {classes.length === 0 && (
-            <p className="text-xs text-red-500 mt-1">
-              ⚠️ No classes available. Please add classes in Class Management tab.
-            </p>
+          {classes.length === 0 ? (
+            <div className="text-red-500 text-sm p-2 border rounded-lg bg-red-50">
+              No classes available. Please add classes in Class Management tab.
+            </div>
+          ) : (
+            <select
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+              onChange={handleClassChange}
+              value={selectedClassId}
+            >
+              <option value="">-- Select a Class --</option>
+              {classes.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.name} {c.stream ? c.stream.trim() : ''}
+                </option>
+              ))}
+            </select>
           )}
         </div>
       </div>
@@ -398,7 +401,7 @@ function AdminSubjectAllocation() {
 
             {selectedStudent && (
               <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                <p className="font-semibold text-blue-800 mb-2">Student Details:</p>
+                <p className="font-semibold text-blue-800 mb-2">📋 Student Details:</p>
                 <p className="text-sm"><strong>Name:</strong> {selectedStudent.FullName}</p>
                 <p className="text-sm"><strong>Admission:</strong> {selectedStudent.AdmissionNumber}</p>
                 <p className="text-sm"><strong>Class:</strong> {selectedStudent.Class} {selectedStudent.Stream}</p>
