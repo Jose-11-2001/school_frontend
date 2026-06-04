@@ -127,7 +127,7 @@ function Home() {
       {/* Footer */}
       <footer className="relative z-10 bg-gray-900 text-white py-8 bg-opacity-95">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <span>{new Date().getFullYear()} Joseph Mbukwa. All rights reserved.</span>
+          <span>{new Date().getFullYear()} Mkondezi Secondary School. All rights reserved.</span>
         </div>
       </footer>
     </div>
