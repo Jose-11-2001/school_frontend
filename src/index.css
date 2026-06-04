@@ -1,4 +1,32 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Ensure dropdowns are visible */
+select {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-color: white !important;
+  color: #1f2937 !important;
+  border: 1px solid #d1d5db !important;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 0.5rem !important;
+  width: 100% !important;
+}
+
+select option {
+  background-color: white !important;
+  color: #1f2937 !important;
+  padding: 0.5rem !important;
+}
+
+/* Fix for any parent containers that might hide the dropdown */
+.overflow-hidden {
+  overflow: visible !important;
+}
+
+/* Ensure the select has proper z-index */
+select {
+  position: relative;
+  z-index: 10;
+}
