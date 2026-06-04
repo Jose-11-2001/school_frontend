@@ -259,7 +259,7 @@ function StudentDashboard() {
       <nav className="bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold">School Marks System - Student Portal</h1>
+            <h1 className="text-xl font-bold">Mkondezi Secondary School- Student Portal</h1>
             <p className="text-sm opacity-90">Student Access</p>
           </div>
           <div className="flex items-center gap-4">

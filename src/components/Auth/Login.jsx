@@ -53,11 +53,14 @@ function Login({ setUser }) {
         backgroundImage: `url(${backgroundImage})`,
       }}
     >
+      
+
       {/* Dark overlay for better text readability */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       
       {/* Login Form */}
       <div className="relative z-10 bg-white p-8 rounded-xl shadow-2xl w-96">
+        
         <div className="text-center mb-8">
           {/* School Logo */}
           <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg bg-white">
@@ -71,8 +74,8 @@ function Login({ setUser }) {
               }}
             />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">Mbukwa Joseph</h2>
-          <p className="text-gray-600 mt-2">School Grading System</p>
+          <h2 className="text-2xl font-bold text-gray-800">Mkondezi Secondary School</h2>
+          <p className="text-gray-600 mt-2">Grading System</p>
         </div>
         
         {error && (

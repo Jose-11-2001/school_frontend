@@ -36,7 +36,7 @@ function TeacherDashboard() {
       <nav className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold">Joseph School System - Teacher Panel</h1>
+            <h1 className="text-xl font-bold">Mkondezi Secondary School - Teacher Panel</h1>
             <p className="text-sm opacity-90">Teacher Access</p>
           </div>
           <div className="flex items-center gap-4">
