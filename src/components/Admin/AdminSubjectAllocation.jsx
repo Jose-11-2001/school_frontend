@@ -16,7 +16,6 @@ function AdminSubjectAllocation() {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState('single');
-  const [testValue, setTestValue] = useState('');
 
   useEffect(() => {
     loadAllData();
@@ -137,15 +136,18 @@ function AdminSubjectAllocation() {
 
   const handleClassChange = (e) => {
     const selectedId = parseInt(e.target.value);
+    console.log('Selected ID:', selectedId);
+    
     const selectedClassObj = classes.find(c => c.id === selectedId);
+    console.log('Found class object:', selectedClassObj);
     
     if (selectedClassObj) {
-      console.log('Selected class:', selectedClassObj);
       setSelectedClassId(selectedId);
       setSelectedClass(selectedClassObj.name);
       setSelectedStream(selectedClassObj.stream ? selectedClassObj.stream.trim() : '');
       setSelectedStudent(null);
       setSelectedSubjects([]);
+      // Load students after state update
       setTimeout(() => loadStudentsByClass(), 100);
     }
   };
@@ -290,9 +292,7 @@ function AdminSubjectAllocation() {
   }
 
   console.log('Classes for dropdown:', classes);
-
-  // Create a simple text list to verify classes are loaded
-  const classListText = classes.map(c => `${c.name} ${c.stream || ''}`).join(', ');
+  console.log('Current selectedClassId:', selectedClassId);
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
@@ -346,45 +346,27 @@ function AdminSubjectAllocation() {
         </div>
         <div>
           <label className="block text-gray-700 mb-2 font-semibold">🏫 Select Class</label>
-          
-          {/* TEST DROPDOWN - Use a simple test dropdown first */}
-          <div className="mb-4 p-3 bg-yellow-50 rounded border border-yellow-300">
-            <p className="text-sm font-semibold text-yellow-800 mb-2">Debug Info:</p>
-            <p className="text-xs text-gray-700">Classes loaded: {classes.length}</p>
-            <p className="text-xs text-gray-700 truncate">Classes: {classListText || 'None'}</p>
-          </div>
-          
-          {/* MAIN DROPDOWN - With inline styles for guaranteed visibility */}
           <select
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
             onChange={handleClassChange}
             value={selectedClassId}
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px 12px',
-              backgroundColor: '#ffffff',
-              color: '#1f2937',
-              border: '2px solid #3b82f6',
-              borderRadius: '8px',
-              fontSize: '16px',
-              cursor: 'pointer',
-              marginBottom: '8px'
-            }}
           >
-            <option value="" style={{ color: '#6b7280' }}>-- Select a Class --</option>
+            <option value="">-- Select a Class --</option>
             {classes.map(c => (
-              <option key={c.id} value={c.id} style={{ padding: '8px', color: '#1f2937' }}>
+              <option key={c.id} value={c.id}>
                 {c.name} {c.stream ? c.stream.trim() : ''}
               </option>
             ))}
           </select>
-          
-          {/* Fallback display if no classes */}
           {classes.length === 0 && (
-            <div className="text-red-500 text-sm p-2 border rounded-lg bg-red-50">
+            <div className="text-red-500 text-sm p-2 border rounded-lg bg-red-50 mt-2">
               No classes available. Please add classes in Class Management tab.
             </div>
           )}
+          {/* Debug info - shows current selection */}
+          <div className="text-xs text-gray-500 mt-1">
+            Selected Class ID: {selectedClassId || 'None'} | Classes loaded: {classes.length}
+          </div>
         </div>
       </div>
 
