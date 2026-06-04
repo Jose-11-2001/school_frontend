@@ -86,7 +86,9 @@ function AdminSubjectAllocation() {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass}/${selectedStream}`, {
+      // Trim the stream to remove any leading/trailing spaces
+      const trimmedStream = selectedStream.trim();
+      const response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass}/${trimmedStream}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -109,15 +111,15 @@ function AdminSubjectAllocation() {
     }
   };
 
-  // ✅ FIXED: Use lowercase name and stream
   const handleClassChange = (e) => {
     const selectedId = parseInt(e.target.value);
     const selectedClassObj = classes.find(c => c.id === selectedId);
     
     if (selectedClassObj) {
       console.log('Selected class:', selectedClassObj);
-      setSelectedClass(selectedClassObj.name);      // Changed: Name → name
-      setSelectedStream(selectedClassObj.stream);   // Changed: Stream → stream
+      setSelectedClass(selectedClassObj.name);
+      // Trim the stream to remove any leading/trailing spaces
+      setSelectedStream(selectedClassObj.stream ? selectedClassObj.stream.trim() : '');
       setSelectedStudent(null);
       setSelectedSubjects([]);
       // Load students after state update
@@ -202,7 +204,7 @@ function AdminSubjectAllocation() {
         },
         body: JSON.stringify({
           className: selectedClass,
-          stream: selectedStream,
+          stream: selectedStream.trim(),
           subjectIds: selectedSubjects,
           academicYear: academicYear,
           term: term
@@ -316,7 +318,6 @@ function AdminSubjectAllocation() {
         </div>
         <div>
           <label className="block text-gray-700 mb-2 font-semibold">🏫 Select Class</label>
-          {/* ✅ FIXED: Use lowercase name and stream in dropdown */}
           <select
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
             onChange={handleClassChange}
@@ -325,7 +326,7 @@ function AdminSubjectAllocation() {
             <option value="">-- Select a Class --</option>
             {classes.map(c => (
               <option key={c.id} value={c.id}>
-                {c.name} {c.stream}
+                {c.name} {c.stream ? c.stream.trim() : ''}
               </option>
             ))}
           </select>
@@ -337,6 +338,7 @@ function AdminSubjectAllocation() {
         </div>
       </div>
 
+      {/* Rest of your component remains the same... */}
       {/* Tab Navigation */}
       <div className="flex border-b mb-6">
         <button
@@ -347,7 +349,7 @@ function AdminSubjectAllocation() {
           }`}
           onClick={() => setActiveTab('single')}
         >
-          Single Student Allocation
+          👤 Single Student Allocation
         </button>
         <button
           className={`px-4 py-2 font-semibold transition-all duration-200 ${
@@ -357,7 +359,7 @@ function AdminSubjectAllocation() {
           }`}
           onClick={() => setActiveTab('bulk')}
         >
-          Bulk Class Allocation
+          👥 Bulk Class Allocation
         </button>
       </div>
 
@@ -407,7 +409,7 @@ function AdminSubjectAllocation() {
           {/* Right Panel - Subject Selection */}
           <div className="border rounded-lg p-4 bg-white shadow-sm">
             <h3 className="font-semibold text-lg mb-4 text-gray-800">
-              Select Subjects 
+              📖 Select Subjects 
               {selectedStudent && <span className="text-sm text-gray-500 ml-2">for {selectedStudent.FullName}</span>}
             </h3>
             
@@ -442,14 +444,14 @@ function AdminSubjectAllocation() {
 
                 <div className="flex justify-between items-center pt-2 border-t">
                   <span className="text-sm text-gray-500">
-                     Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> subject(s)
+                    📌 Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> subject(s)
                   </span>
                   <button
                     onClick={handleAllocateToStudent}
                     disabled={loading || selectedSubjects.length === 0}
                     className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-400 transition-all duration-200 shadow-sm"
                   >
-                    {loading ? ' Allocating...' : 'Allocate Subjects'}
+                    {loading ? '⏳ Allocating...' : '✅ Allocate Subjects'}
                   </button>
                 </div>
               </>
@@ -462,7 +464,7 @@ function AdminSubjectAllocation() {
       {activeTab === 'bulk' && (
         <div className="border rounded-lg p-4 bg-white shadow-sm">
           <h3 className="font-semibold text-lg mb-4 text-gray-800">
-            Bulk Allocate to Class: 
+            📚 Bulk Allocate to Class: 
             <span className="text-blue-600 ml-2">{selectedClass || '—'} {selectedStream || '—'}</span>
           </h3>
           
@@ -474,7 +476,7 @@ function AdminSubjectAllocation() {
             <>
               <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
                 <p className="text-sm">
-                  <strong>{students.length}</strong> student(s) in {selectedClass} {selectedStream}
+                  👥 <strong>{students.length}</strong> student(s) in {selectedClass} {selectedStream}
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
                   All selected subjects will be allocated to ALL students in this class
@@ -506,14 +508,14 @@ function AdminSubjectAllocation() {
 
               <div className="flex justify-between items-center pt-2 border-t">
                 <span className="text-sm text-gray-500">
-                   Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> subject(s) for <strong>{students.length}</strong> student(s)
+                  📌 Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> subject(s) for <strong>{students.length}</strong> student(s)
                 </span>
                 <button
                   onClick={handleBulkAllocate}
                   disabled={loading || selectedSubjects.length === 0 || students.length === 0}
                   className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-all duration-200 shadow-sm"
                 >
-                  {loading ? ' Allocating...' : ` Bulk Allocate to ${students.length} Students`}
+                  {loading ? '⏳ Allocating...' : `🚀 Bulk Allocate to ${students.length} Students`}
                 </button>
               </div>
             </>
@@ -524,13 +526,13 @@ function AdminSubjectAllocation() {
       {/* Current Allocations Table */}
       <div className="mt-8">
         <h3 className="font-semibold text-lg mb-4 flex items-center gap-2 text-gray-800">
-          Current Subject Allocations
+          📋 Current Subject Allocations
           <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">({allocations.length} allocations)</span>
         </h3>
         
         {allocations.length === 0 ? (
           <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border">
-             No subject allocations found for {academicYear}. Create allocations above.
+            📭 No subject allocations found for {academicYear}. Create allocations above.
           </div>
         ) : (
           <div className="overflow-x-auto border rounded-lg">
@@ -563,7 +565,7 @@ function AdminSubjectAllocation() {
                         className="text-red-500 hover:text-red-700 text-sm transition-colors"
                         title="Remove allocation"
                       >
-                        Remove
+                        🗑️ Remove
                       </button>
                     </td>
                   </tr>
