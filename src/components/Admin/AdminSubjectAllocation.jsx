@@ -17,6 +17,7 @@ function AdminSubjectAllocation() {
   const [loadingData, setLoadingData] = useState(true);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [activeTab, setActiveTab] = useState('single');
+  const [searchSubject, setSearchSubject] = useState('');
 
   useEffect(() => {
     loadAllData();
@@ -137,22 +138,6 @@ function AdminSubjectAllocation() {
       }
       
       if (!response.ok) {
-        console.log('Trying with Form prefix...');
-        const formVariations = [
-          `Form ${selectedClass.replace('Form ', '').trim()}`,
-          `form ${selectedClass.replace('Form ', '').trim()}`,
-          `FORM ${selectedClass.replace('Form ', '').trim()}`
-        ];
-        
-        for (const formClass of formVariations) {
-          response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${formClass}/${trimmedStream}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (response.ok) break;
-        }
-      }
-      
-      if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
@@ -161,7 +146,7 @@ function AdminSubjectAllocation() {
       setStudents(data);
       
       if (data.length === 0) {
-        setMessage(`⚠️ No students found in ${selectedClass} ${selectedStream}. Please add students first.`);
+        setMessage(`No students found in ${selectedClass} ${selectedStream}. Please add students first.`);
         setTimeout(() => setMessage(''), 5000);
       }
     } catch (error) {
@@ -222,9 +207,17 @@ function AdminSubjectAllocation() {
     );
   };
 
+  const handleSelectAll = () => {
+    if (selectedSubjects.length === subjects.length) {
+      setSelectedSubjects([]);
+    } else {
+      setSelectedSubjects(subjects.map(s => s.Id));
+    }
+  };
+
   const handleAllocateToStudent = async () => {
     if (!selectedStudent || selectedSubjects.length === 0) {
-      setMessage('⚠️ Please select a student and at least one subject');
+      setMessage('Please select a student and at least one subject');
       return;
     }
 
@@ -255,7 +248,7 @@ function AdminSubjectAllocation() {
         setMessage(`❌ ${data.message}`);
       }
     } catch (error) {
-      setMessage('❌ Error allocating subjects');
+      setMessage('Error allocating subjects');
     } finally {
       setLoading(false);
       setTimeout(() => setMessage(''), 3000);
@@ -264,7 +257,7 @@ function AdminSubjectAllocation() {
 
   const handleBulkAllocate = async () => {
     if (!selectedClass || !selectedStream || selectedSubjects.length === 0) {
-      setMessage('⚠️ Please select a class and at least one subject');
+      setMessage(' Please select a class and at least one subject');
       return;
     }
 
@@ -331,6 +324,11 @@ function AdminSubjectAllocation() {
     }
     setTimeout(() => setMessage(''), 3000);
   };
+
+  // Filter subjects based on search
+  const filteredSubjects = subjects.filter(subject =>
+    subject.Name.toLowerCase().includes(searchSubject.toLowerCase())
+  );
 
   if (loadingData) {
     return (
@@ -449,24 +447,18 @@ function AdminSubjectAllocation() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Panel - Student Selection */}
           <div className="border rounded-lg p-4 bg-white shadow-sm">
-            <h3 className="font-semibold text-lg mb-4 text-gray-800">👨‍🎓 Select Student</h3>
+            <h3 className="font-semibold text-lg mb-4 text-gray-800">Select Student</h3>
             {!selectedClass ? (
               <div className="bg-yellow-50 p-3 rounded-lg text-yellow-700 text-sm border border-yellow-200">
                 Please select a class first to see students
               </div>
             ) : (
               <>
-                {/* Debug info - shows student count */}
                 <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
-                   Students found: <strong>{students.length}</strong>
+                  Students found: <strong>{students.length}</strong>
                   {students.length > 0 && (
                     <div className="mt-1 text-green-600">
-                      ✓ {students.length} student(s) available. Select from dropdown below.
-                    </div>
-                  )}
-                  {students.length === 0 && (
-                    <div className="text-amber-600 mt-1">
-                      ℹ️ No students in this class. Go to "Register Students" tab to add students.
+                      ✓ {students.length} student(s) available.
                     </div>
                   )}
                 </div>
@@ -477,48 +469,25 @@ function AdminSubjectAllocation() {
                     Loading students...
                   </div>
                 ) : (
-                  <div>
-                    {/* Student selection dropdown with explicit styling */}
-                    <label className="block text-gray-700 text-sm font-semibold mb-2">Select Student:</label>
-                    <select
-                      className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 cursor-pointer"
-                      onChange={(e) => handleStudentSelect(e.target.value)}
-                      value={selectedStudent?.id || ''}
-                      disabled={students.length === 0}
-                      style={{
-                        backgroundColor: 'white',
-                        color: '#1f2937',
-                        border: '2px solid #3b82f6',
-                        borderRadius: '0.5rem',
-                        padding: '0.75rem 1rem',
-                        fontSize: '1rem',
-                        width: '100%'
-                      }}
-                    >
-                      <option value="" className="text-gray-500">-- Select a student --</option>
-                      {students.map(s => (
-                        <option key={s.id} value={s.id} className="py-2 text-gray-900">
-                          {s.AdmissionNumber || s.admissionNumber} - {s.FullName || s.fullName || s.name}
-                        </option>
-                      ))}
-                    </select>
-                    
-                    {/* Show student count in dropdown style */}
-                    {students.length > 0 && (
-                      <p className="text-xs text-gray-500 mt-2">
-                        Click the dropdown above to see {students.length} student(s)
-                      </p>
-                    )}
-                  </div>
+                  <select
+                    className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 cursor-pointer"
+                    onChange={(e) => handleStudentSelect(e.target.value)}
+                    value={selectedStudent?.id || ''}
+                    disabled={students.length === 0}
+                  >
+                    <option value="">-- Select a student --</option>
+                    {students.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.AdmissionNumber} - {s.FullName}
+                      </option>
+                    ))}
+                  </select>
                 )}
 
                 {students.length === 0 && !loadingStudents && (
                   <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                     <p className="text-sm text-yellow-800">
                       No students found in <strong>{selectedClass} {selectedStream}</strong>
-                    </p>
-                    <p className="text-xs text-yellow-700 mt-1">
-                      Please go to the <strong>"Register Students"</strong> tab to add students to this class.
                     </p>
                   </div>
                 )}
@@ -528,19 +497,29 @@ function AdminSubjectAllocation() {
             {selectedStudent && (
               <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
                 <p className="font-semibold text-blue-800 mb-2">Student Details:</p>
-                <p className="text-sm"><strong>Name:</strong> {selectedStudent.FullName || selectedStudent.fullName || selectedStudent.name}</p>
-                <p className="text-sm"><strong>Admission:</strong> {selectedStudent.AdmissionNumber || selectedStudent.admissionNumber}</p>
-                <p className="text-sm"><strong>Class:</strong> {selectedStudent.Class || selectedStudent.class} {selectedStudent.Stream || selectedStudent.stream}</p>
+                <p className="text-sm"><strong>Name:</strong> {selectedStudent.FullName}</p>
+                <p className="text-sm"><strong>Admission:</strong> {selectedStudent.AdmissionNumber}</p>
+                <p className="text-sm"><strong>Class:</strong> {selectedStudent.Class} {selectedStudent.Stream}</p>
               </div>
             )}
           </div>
 
-          {/* Right Panel - Subject Selection */}
+          {/* Right Panel - Subject Selection - IMPROVED LAYOUT */}
           <div className="border rounded-lg p-4 bg-white shadow-sm">
-            <h3 className="font-semibold text-lg mb-4 text-gray-800">
-              Select Subjects 
-              {selectedStudent && <span className="text-sm text-gray-500 ml-2">for {selectedStudent.FullName || selectedStudent.fullName}</span>}
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-semibold text-lg text-gray-800">
+                 Select Subjects 
+                {selectedStudent && <span className="text-sm text-gray-500 ml-2">for {selectedStudent.FullName}</span>}
+              </h3>
+              {selectedStudent && subjects.length > 0 && (
+                <button
+                  onClick={handleSelectAll}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  {selectedSubjects.length === subjects.length ? 'Deselect All' : 'Select All'}
+                </button>
+              )}
+            </div>
             
             {!selectedStudent ? (
               <div className="text-center py-8 text-gray-500">
@@ -548,39 +527,54 @@ function AdminSubjectAllocation() {
               </div>
             ) : (
               <>
-                <div className="max-h-96 overflow-y-auto space-y-2 mb-4 border rounded-lg p-2">
-                  {subjects.length === 0 ? (
-                    <div className="text-center py-4 text-gray-500">
-                      No subjects available
-                    </div>
-                  ) : (
-                    subjects.map(subject => (
-                      <label key={subject.Id} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer border transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={selectedSubjects.includes(subject.Id)}
-                          onChange={() => handleSubjectToggle(subject.Id)}
-                          className="mr-3 w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-800">{subject.Name}</div>
-                          <div className="text-sm text-gray-500">Code: {subject.Code}</div>
-                        </div>
-                      </label>
-                    ))
-                  )}
+                {/* Search Bar */}
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="🔍 Search subjects..."
+                    value={searchSubject}
+                    onChange={(e) => setSearchSubject(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
 
-                <div className="flex justify-between items-center pt-2 border-t">
+                {/* Subjects Grid - 2 columns for better presentation */}
+                <div className="max-h-96 overflow-y-auto border rounded-lg p-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    {filteredSubjects.length === 0 ? (
+                      <div className="col-span-2 text-center py-4 text-gray-500">
+                        No subjects found
+                      </div>
+                    ) : (
+                      filteredSubjects.map(subject => (
+                        <label key={subject.Id} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer border transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={selectedSubjects.includes(subject.Id)}
+                            onChange={() => handleSubjectToggle(subject.Id)}
+                            className="mr-3 w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-800 text-sm">{subject.Name}</div>
+                            <div className="text-xs text-gray-500">Code: {subject.Code}</div>
+                          </div>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Selected Count and Action Button */}
+                <div className="flex justify-between items-center pt-3 mt-3 border-t">
                   <span className="text-sm text-gray-500">
-                    Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> subject(s)
+                    Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> of {subjects.length} subject(s)
                   </span>
                   <button
                     onClick={handleAllocateToStudent}
                     disabled={loading || selectedSubjects.length === 0}
                     className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-400 transition-all duration-200 shadow-sm"
                   >
-                    {loading ? 'Allocating...' : ' Allocate Subjects'}
+                    {loading ? ' Allocating...' : ' Allocate Subjects'}
                   </button>
                 </div>
               </>
@@ -593,7 +587,7 @@ function AdminSubjectAllocation() {
       {activeTab === 'bulk' && (
         <div className="border rounded-lg p-4 bg-white shadow-sm">
           <h3 className="font-semibold text-lg mb-4 text-gray-800">
-            Bulk Allocate to Class: 
+             Bulk Allocate to Class: 
             <span className="text-blue-600 ml-2">{selectedClass || '—'} {selectedStream || '—'}</span>
           </h3>
           
@@ -605,37 +599,50 @@ function AdminSubjectAllocation() {
             <>
               <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
                 <p className="text-sm">
-                  👥 <strong>{students.length}</strong> student(s) in {selectedClass} {selectedStream}
+                  <strong>{students.length}</strong> student(s) in {selectedClass} {selectedStream}
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
                   All selected subjects will be allocated to ALL students in this class
                 </p>
               </div>
 
-              <div className="max-h-96 overflow-y-auto space-y-2 mb-4 border rounded-lg p-2">
-                {subjects.length === 0 ? (
-                  <div className="text-center py-4 text-gray-500">
-                    No subjects available
-                  </div>
-                ) : (
-                  subjects.map(subject => (
-                    <label key={subject.Id} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer border transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={selectedSubjects.includes(subject.Id)}
-                        onChange={() => handleSubjectToggle(subject.Id)}
-                        className="mr-3 w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-800">{subject.Name}</div>
-                        <div className="text-sm text-gray-500">Code: {subject.Code}</div>
-                      </div>
-                    </label>
-                  ))
-                )}
+              {/* Search Bar for Bulk */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="🔍 Search subjects..."
+                  value={searchSubject}
+                  onChange={(e) => setSearchSubject(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
 
-              <div className="flex justify-between items-center pt-2 border-t">
+              <div className="max-h-96 overflow-y-auto border rounded-lg p-3">
+                <div className="grid grid-cols-2 gap-2">
+                  {filteredSubjects.length === 0 ? (
+                    <div className="col-span-2 text-center py-4 text-gray-500">
+                      No subjects found
+                    </div>
+                  ) : (
+                    filteredSubjects.map(subject => (
+                      <label key={subject.Id} className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer border transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={selectedSubjects.includes(subject.Id)}
+                          onChange={() => handleSubjectToggle(subject.Id)}
+                          className="mr-3 w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-800 text-sm">{subject.Name}</div>
+                          <div className="text-xs text-gray-500">Code: {subject.Code}</div>
+                        </div>
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center pt-3 mt-3 border-t">
                 <span className="text-sm text-gray-500">
                   Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> subject(s) for <strong>{students.length}</strong> student(s)
                 </span>
@@ -644,7 +651,7 @@ function AdminSubjectAllocation() {
                   disabled={loading || selectedSubjects.length === 0 || students.length === 0}
                   className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400 transition-all duration-200 shadow-sm"
                 >
-                  {loading ? 'Allocating...' : `Bulk Allocate to ${students.length} Students`}
+                  {loading ? ' Allocating...' : `Bulk Allocate to ${students.length} Students`}
                 </button>
               </div>
             </>
@@ -661,7 +668,7 @@ function AdminSubjectAllocation() {
         
         {allocations.length === 0 ? (
           <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border">
-            No subject allocations found for {academicYear}. Create allocations above.
+             No subject allocations found for {academicYear}. Create allocations above.
           </div>
         ) : (
           <div className="overflow-x-auto border rounded-lg">
@@ -675,8 +682,8 @@ function AdminSubjectAllocation() {
                   <th className="px-4 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase">Teacher</th>
                   <th className="px-4 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase">Term/Year</th>
                   <th className="px-4 py-3 border-b text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
-                  </tr>
-                  </thead>
+                </tr>
+              </thead>
               <tbody className="divide-y divide-gray-200">
                 {allocations.map(allocation => (
                   <tr key={allocation.Id} className="hover:bg-gray-50 transition-colors">
