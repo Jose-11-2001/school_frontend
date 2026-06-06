@@ -38,7 +38,7 @@ function UserManagement() {
       setStudents(data);
     } catch (error) {
       console.error('Error loading students:', error);
-      setMessage('❌ Error loading students');
+      setMessage(' Error loading students');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -61,12 +61,12 @@ function UserManagement() {
           loadTeachers();
         } else {
           const error = await response.json();
-          setMessage(`❌ Error: ${error.message || 'Failed to delete teacher'}`);
+          setMessage(` Error: ${error.message || 'Failed to delete teacher'}`);
           setMessageType('error');
         }
       } catch (error) {
         console.error('Error:', error);
-        setMessage('❌ Error deleting teacher');
+        setMessage(' Error deleting teacher');
         setMessageType('error');
       }
       setTimeout(() => setMessage(''), 3000);
