@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { studentAPI } from '../../services/api';
 import { generateGradePDF } from '../PDFGenerator';
-import SubjectRegistration from '../Student/SubjectRegistration';
+//import SubjectRegistration from '../Student/SubjectRegistration';
 import StudentNotifications from './StudentNotifications';
 
 function StudentDashboard() {

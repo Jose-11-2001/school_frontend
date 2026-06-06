@@ -11,7 +11,6 @@ import Rankings from '../Rankings';
 import AdminNotifications from './AdminNotifications';
 import AdminSubjectAllocation from './AdminSubjectAllocation';
 import StudentRegistration from './StudentRegistration';
-import AdminNotifications from './AdminNotifications';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
