@@ -21,7 +21,7 @@ function AdminSubjectAllocation() {
 
   useEffect(() => {
     loadAllData();
-  }, []);
+  }, [academicYear, term]);
 
   const loadAllData = async () => {
     setLoadingData(true);
@@ -43,7 +43,6 @@ function AdminSubjectAllocation() {
   const loadClasses = async () => {
     try {
       const token = localStorage.getItem('token');
-      console.log('Fetching classes...');
       const response = await fetch('https://school-yathu.onrender.com/api/AdminSubjectAllocation/classes', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -53,16 +52,14 @@ function AdminSubjectAllocation() {
       }
       
       const data = await response.json();
-      console.log('Classes received:', data);
       
       const normalizedData = data.map(item => ({
         id: item.id,
-        name: getProperty(item, 'name', 'Name', 'className', 'ClassName'),
-        stream: getProperty(item, 'stream', 'Stream'),
-        fullName: getProperty(item, 'fullName', 'fullname', 'FullName', 'displayName')
+        name: item.name,
+        stream: item.stream,
+        fullName: item.fullName
       }));
       
-      console.log('Normalized classes:', normalizedData);
       setClasses(normalizedData);
       return normalizedData;
     } catch (error) {
@@ -80,12 +77,11 @@ function AdminSubjectAllocation() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      console.log('Subjects received:', data);
       
       const normalizedData = data.map(item => ({
-        Id: item.id || item.Id,
-        Name: getProperty(item, 'name', 'Name'),
-        Code: getProperty(item, 'code', 'Code')
+        Id: item.id,
+        Name: item.name,
+        Code: item.code
       }));
       
       setSubjects(normalizedData);
@@ -101,6 +97,7 @@ function AdminSubjectAllocation() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
+      console.log('Allocations loaded:', data);
       setAllocations(data);
     } catch (error) {
       console.error('Error loading allocations:', error);
@@ -109,7 +106,6 @@ function AdminSubjectAllocation() {
 
   const loadStudentsByClass = async () => {
     if (!selectedClass || !selectedStream) {
-      console.log('No class or stream selected');
       return;
     }
     
@@ -117,32 +113,17 @@ function AdminSubjectAllocation() {
     try {
       const token = localStorage.getItem('token');
       const trimmedStream = selectedStream.trim();
-      console.log(`Fetching students for: ${selectedClass} / ${trimmedStream}`);
       
-      let response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass}/${trimmedStream}`, {
+      const response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass}/${trimmedStream}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
-      if (!response.ok) {
-        console.log('Trying lowercase class name...');
-        response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass.toLowerCase()}/${trimmedStream}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-      }
-      
-      if (!response.ok) {
-        console.log('Trying uppercase class name...');
-        response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass.toUpperCase()}/${trimmedStream}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-      }
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log('Students received:', data);
+      console.log('Students loaded:', data);
       setStudents(data);
       
       if (data.length === 0) {
@@ -166,7 +147,7 @@ function AdminSubjectAllocation() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      setSelectedSubjects(data.AllocatedSubjects?.map(s => s.SubjectId) || []);
+      setSelectedSubjects(data.allocatedSubjects?.map(s => s.subjectId) || []);
     } catch (error) {
       console.error('Error loading student subjects:', error);
     }
@@ -174,10 +155,8 @@ function AdminSubjectAllocation() {
 
   const handleClassChange = (e) => {
     const selectedId = parseInt(e.target.value);
-    console.log('Selected ID:', selectedId);
     
     const selectedClassObj = classes.find(c => c.id === selectedId);
-    console.log('Found class object:', selectedClassObj);
     
     if (selectedClassObj) {
       setSelectedClassId(selectedId);
@@ -192,7 +171,6 @@ function AdminSubjectAllocation() {
 
   const handleStudentSelect = (studentId) => {
     const student = students.find(s => s.id === parseInt(studentId));
-    console.log('Selected student:', student);
     setSelectedStudent(student);
     if (student) {
       loadStudentSubjects(parseInt(studentId));
@@ -240,14 +218,15 @@ function AdminSubjectAllocation() {
 
       const data = await response.json();
       if (response.ok) {
-        setMessage(`${data.message}`);
-        loadAllocations();
-        loadStudentSubjects(selectedStudent.id);
+        setMessage(data.message);
+        await loadAllocations();
+        await loadStudentSubjects(selectedStudent.id);
         setSelectedSubjects([]);
       } else {
-        setMessage(`${data.message}`);
+        setMessage(`Error: ${data.message || 'Failed to allocate subjects'}`);
       }
     } catch (error) {
+      console.error('Allocation error:', error);
       setMessage('Error allocating subjects');
     } finally {
       setLoading(false);
@@ -285,13 +264,14 @@ function AdminSubjectAllocation() {
 
       const data = await response.json();
       if (response.ok) {
-        setMessage(`${data.message}`);
-        loadAllocations();
+        setMessage(data.message);
+        await loadAllocations();
         setSelectedSubjects([]);
       } else {
-        setMessage(`${data.message}`);
+        setMessage(`Error: ${data.message || 'Failed bulk allocation'}`);
       }
     } catch (error) {
+      console.error('Bulk allocation error:', error);
       setMessage('Error bulk allocating subjects');
     } finally {
       setLoading(false);
@@ -300,8 +280,16 @@ function AdminSubjectAllocation() {
   };
 
   const handleRemoveAllocation = async (allocationId) => {
-    if (!confirm('Remove this subject allocation? The student will no longer see this subject.')) return;
+    if (!allocationId) {
+      setMessage('Cannot remove: Invalid allocation ID');
+      return;
+    }
+    
+    if (!confirm('Remove this subject allocation? The student will no longer see this subject.')) {
+      return;
+    }
 
+    setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/remove-allocation/${allocationId}`, {
@@ -310,22 +298,27 @@ function AdminSubjectAllocation() {
       });
 
       const data = await response.json();
+      
       if (response.ok) {
-        setMessage(`${data.message}`);
-        loadAllocations();
+        setMessage(data.message || 'Allocation removed successfully');
+        await loadAllocations(); // Refresh the allocations list
+        
+        // If we have a selected student, refresh their subjects
         if (selectedStudent) {
-          loadStudentSubjects(selectedStudent.id);
+          await loadStudentSubjects(selectedStudent.id);
         }
       } else {
-        setMessage(`${data.message}`);
+        setMessage(`Failed to remove: ${data.message || 'Unknown error'}`);
       }
     } catch (error) {
+      console.error('Error removing allocation:', error);
       setMessage('Error removing allocation');
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMessage(''), 3000);
     }
-    setTimeout(() => setMessage(''), 3000);
   };
 
-  // Filter subjects based on search
   const filteredSubjects = subjects.filter(subject =>
     subject.Name.toLowerCase().includes(searchSubject.toLowerCase())
   );
@@ -375,10 +368,7 @@ function AdminSubjectAllocation() {
             type="number"
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
             value={academicYear}
-            onChange={(e) => {
-              setAcademicYear(parseInt(e.target.value));
-              loadAllocations();
-            }}
+            onChange={(e) => setAcademicYear(parseInt(e.target.value))}
           />
         </div>
         <div>
@@ -478,18 +468,10 @@ function AdminSubjectAllocation() {
                     <option value="">-- Select a student --</option>
                     {students.map(s => (
                       <option key={s.id} value={s.id}>
-                        {s.AdmissionNumber || s.admissionNumber || s.studentId || s.id} - {s.FullName || s.fullName || s.name || 'Unknown'}
+                        {s.admissionNumber} - {s.fullName}
                       </option>
                     ))}
                   </select>
-                )}
-
-                {/* Debug info - shows raw student data */}
-                {students.length > 0 && !loadingStudents && (
-                  <div className="text-xs text-gray-400 mt-2 p-1 bg-gray-50 rounded">
-                    Debug: {students.length} student(s) loaded. 
-                    First student: {JSON.stringify(students[0]).substring(0, 100)}...
-                  </div>
                 )}
 
                 {students.length === 0 && !loadingStudents && (
@@ -505,9 +487,9 @@ function AdminSubjectAllocation() {
             {selectedStudent && (
               <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
                 <p className="font-semibold text-blue-800 mb-2">Student Details:</p>
-                <p className="text-sm"><strong>Name:</strong> {selectedStudent.FullName || selectedStudent.fullName || selectedStudent.name}</p>
-                <p className="text-sm"><strong>Admission:</strong> {selectedStudent.AdmissionNumber || selectedStudent.admissionNumber || selectedStudent.studentId}</p>
-                <p className="text-sm"><strong>Class:</strong> {selectedStudent.Class || selectedStudent.class} {selectedStudent.Stream || selectedStudent.stream}</p>
+                <p className="text-sm"><strong>Name:</strong> {selectedStudent.fullName}</p>
+                <p className="text-sm"><strong>Admission:</strong> {selectedStudent.admissionNumber}</p>
+                <p className="text-sm"><strong>Class:</strong> {selectedStudent.class} {selectedStudent.stream}</p>
               </div>
             )}
           </div>
@@ -517,7 +499,7 @@ function AdminSubjectAllocation() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg text-gray-800">
                 Select Subjects 
-                {selectedStudent && <span className="text-sm text-gray-500 ml-2">for {selectedStudent.FullName || selectedStudent.fullName || selectedStudent.name}</span>}
+                {selectedStudent && <span className="text-sm text-gray-500 ml-2">for {selectedStudent.fullName}</span>}
               </h3>
               {selectedStudent && subjects.length > 0 && (
                 <button
@@ -535,7 +517,6 @@ function AdminSubjectAllocation() {
               </div>
             ) : (
               <>
-                {/* Search Bar with magnifying glass */}
                 <div className="mb-4 relative">
                   <input
                     type="text"
@@ -547,7 +528,6 @@ function AdminSubjectAllocation() {
                   <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
                 </div>
 
-                {/* Subjects Grid */}
                 <div className="max-h-96 overflow-y-auto border rounded-lg p-3">
                   <div className="grid grid-cols-2 gap-2">
                     {filteredSubjects.length === 0 ? (
@@ -573,7 +553,6 @@ function AdminSubjectAllocation() {
                   </div>
                 </div>
 
-                {/* Selected Count and Action Button */}
                 <div className="flex justify-between items-center pt-3 mt-3 border-t">
                   <span className="text-sm text-gray-500">
                     Selected: <strong className="text-blue-600">{selectedSubjects.length}</strong> of {subjects.length} subject(s)
@@ -615,7 +594,6 @@ function AdminSubjectAllocation() {
                 </p>
               </div>
 
-              {/* Search Bar for Bulk */}
               <div className="mb-4 relative">
                 <input
                   type="text"
@@ -695,20 +673,21 @@ function AdminSubjectAllocation() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {allocations.map(allocation => (
-                  <tr key={allocation.Id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-2 text-sm text-gray-900">{allocation.StudentName}</td>
-                    <td className="px-4 py-2 text-sm text-gray-600">{allocation.AdmissionNumber}</td>
-                    <td className="px-4 py-2 text-sm text-gray-600">{allocation.StudentClass} {allocation.StudentStream}</td>
+                {allocations.map((allocation) => (
+                  <tr key={allocation.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-2 text-sm text-gray-900">{allocation.studentName}</td>
+                    <td className="px-4 py-2 text-sm text-gray-600">{allocation.admissionNumber}</td>
+                    <td className="px-4 py-2 text-sm text-gray-600">{allocation.studentClass} {allocation.studentStream}</td>
                     <td className="px-4 py-2 text-sm">
-                      <span className="font-medium text-gray-800">{allocation.SubjectName}</span>
+                      <span className="font-medium text-gray-800">{allocation.subjectName}</span>
                     </td>
-                    <td className="px-4 py-2 text-sm text-gray-600">{allocation.TeacherName}</td>
-                    <td className="px-4 py-2 text-sm text-gray-500">{allocation.Term} {allocation.AcademicYear}</td>
+                    <td className="px-4 py-2 text-sm text-gray-600">{allocation.teacherName}</td>
+                    <td className="px-4 py-2 text-sm text-gray-500">{allocation.term} {allocation.academicYear}</td>
                     <td className="px-4 py-2 text-center">
                       <button
-                        onClick={() => handleRemoveAllocation(allocation.Id)}
-                        className="text-red-500 hover:text-red-700 text-sm transition-colors"
+                        onClick={() => handleRemoveAllocation(allocation.id)}
+                        disabled={loading}
+                        className="text-red-500 hover:text-red-700 text-sm transition-colors disabled:opacity-50"
                         title="Remove allocation"
                       >
                         Remove
