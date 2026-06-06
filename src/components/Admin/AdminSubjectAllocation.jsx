@@ -66,7 +66,7 @@ function AdminSubjectAllocation() {
       return normalizedData;
     } catch (error) {
       console.error('Error loading classes:', error);
-      setMessage('Failed to load classes. Please check your connection.');
+      setMessage('❌ Failed to load classes. Please check your connection.');
       setTimeout(() => setMessage(''), 5000);
       return [];
     }
@@ -106,6 +106,7 @@ function AdminSubjectAllocation() {
     }
   };
 
+  // IMPROVED: Case-insensitive student loading
   const loadStudentsByClass = async () => {
     if (!selectedClass || !selectedStream) {
       console.log('No class or stream selected');
@@ -118,9 +119,43 @@ function AdminSubjectAllocation() {
       const trimmedStream = selectedStream.trim();
       console.log(`Fetching students for: ${selectedClass} / ${trimmedStream}`);
       
-      const response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass}/${trimmedStream}`, {
+      // Try to fetch students with the exact class name first
+      let response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass}/${trimmedStream}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      // If that fails, try lowercase class name
+      if (!response.ok) {
+        console.log('Trying lowercase class name...');
+        response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass.toLowerCase()}/${trimmedStream}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      }
+      
+      // If that fails, try uppercase class name
+      if (!response.ok) {
+        console.log('Trying uppercase class name...');
+        response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass.toUpperCase()}/${trimmedStream}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      }
+      
+      // Also try with "Form" prefix variations
+      if (!response.ok) {
+        console.log('Trying with Form prefix...');
+        const formVariations = [
+          `Form ${selectedClass.replace('Form ', '').trim()}`,
+          `form ${selectedClass.replace('Form ', '').trim()}`,
+          `FORM ${selectedClass.replace('Form ', '').trim()}`
+        ];
+        
+        for (const formClass of formVariations) {
+          response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${formClass}/${trimmedStream}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) break;
+        }
+      }
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -131,12 +166,12 @@ function AdminSubjectAllocation() {
       setStudents(data);
       
       if (data.length === 0) {
-        setMessage(`No students found in ${selectedClass} ${selectedStream}. Please add students first.`);
+        setMessage(`⚠️ No students found in ${selectedClass} ${selectedStream}. Please add students first.`);
         setTimeout(() => setMessage(''), 5000);
       }
     } catch (error) {
       console.error('Error loading students:', error);
-      setMessage(`Failed to load students: ${error.message}`);
+      setMessage(`❌ Failed to load students: ${error.message}`);
       setStudents([]);
       setTimeout(() => setMessage(''), 5000);
     } finally {
@@ -233,7 +268,7 @@ function AdminSubjectAllocation() {
 
   const handleBulkAllocate = async () => {
     if (!selectedClass || !selectedStream || selectedSubjects.length === 0) {
-      setMessage('⚠️ Please select a class and at least one subject');
+      setMessage('Please select a class and at least one subject');
       return;
     }
 
@@ -371,7 +406,7 @@ function AdminSubjectAllocation() {
             onChange={handleClassChange}
             value={selectedClassId}
           >
-            <option value="">-- Select a Class --</option>
+            <option value="">Select a Class</option>
             {classes.map(c => (
               <option key={c.id} value={c.id}>
                 {c.name} {c.stream ? c.stream.trim() : ''}
@@ -421,7 +456,7 @@ function AdminSubjectAllocation() {
             <h3 className="font-semibold text-lg mb-4 text-gray-800">👨‍🎓 Select Student</h3>
             {!selectedClass ? (
               <div className="bg-yellow-50 p-3 rounded-lg text-yellow-700 text-sm border border-yellow-200">
-              Please select a class first to see students
+                Please select a class first to see students
               </div>
             ) : (
               <>
@@ -524,7 +559,7 @@ function AdminSubjectAllocation() {
                     disabled={loading || selectedSubjects.length === 0}
                     className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-400 transition-all duration-200 shadow-sm"
                   >
-                    {loading ? 'Allocating...' : 'Allocate Subjects'}
+                    {loading ? 'Allocating...' : '✅ Allocate Subjects'}
                   </button>
                 </div>
               </>
