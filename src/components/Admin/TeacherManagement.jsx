@@ -187,7 +187,7 @@ function TeacherManagement() {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-gradient-to-r from-blue-800 to-blue-900 text-white px-5 py-2 rounded-lg hover:from-blue-800 hover:to-blue-800 transition-all duration-200 shadow-md flex items-center gap-2"
+          className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md flex items-center gap-2"
         >
           <span className="text-lg">+</span> Add New Teacher
         </button>
