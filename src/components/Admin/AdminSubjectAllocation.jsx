@@ -106,7 +106,6 @@ function AdminSubjectAllocation() {
     }
   };
 
-  // IMPROVED: Case-insensitive student loading
   const loadStudentsByClass = async () => {
     if (!selectedClass || !selectedStream) {
       console.log('No class or stream selected');
@@ -119,12 +118,10 @@ function AdminSubjectAllocation() {
       const trimmedStream = selectedStream.trim();
       console.log(`Fetching students for: ${selectedClass} / ${trimmedStream}`);
       
-      // Try to fetch students with the exact class name first
       let response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass}/${trimmedStream}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      // If that fails, try lowercase class name
       if (!response.ok) {
         console.log('Trying lowercase class name...');
         response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass.toLowerCase()}/${trimmedStream}`, {
@@ -132,7 +129,6 @@ function AdminSubjectAllocation() {
         });
       }
       
-      // If that fails, try uppercase class name
       if (!response.ok) {
         console.log('Trying uppercase class name...');
         response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/students-by-class/${selectedClass.toUpperCase()}/${trimmedStream}`, {
@@ -140,7 +136,6 @@ function AdminSubjectAllocation() {
         });
       }
       
-      // Also try with "Form" prefix variations
       if (!response.ok) {
         console.log('Trying with Form prefix...');
         const formVariations = [
@@ -212,6 +207,7 @@ function AdminSubjectAllocation() {
 
   const handleStudentSelect = (studentId) => {
     const student = students.find(s => s.id === parseInt(studentId));
+    console.log('Selected student:', student);
     setSelectedStudent(student);
     if (student) {
       loadStudentSubjects(parseInt(studentId));
@@ -228,7 +224,7 @@ function AdminSubjectAllocation() {
 
   const handleAllocateToStudent = async () => {
     if (!selectedStudent || selectedSubjects.length === 0) {
-      setMessage('Please select a student and at least one subject');
+      setMessage('⚠️ Please select a student and at least one subject');
       return;
     }
 
@@ -268,7 +264,7 @@ function AdminSubjectAllocation() {
 
   const handleBulkAllocate = async () => {
     if (!selectedClass || !selectedStream || selectedSubjects.length === 0) {
-      setMessage('Please select a class and at least one subject');
+      setMessage('⚠️ Please select a class and at least one subject');
       return;
     }
 
@@ -406,7 +402,7 @@ function AdminSubjectAllocation() {
             onChange={handleClassChange}
             value={selectedClassId}
           >
-            <option value="">Select a Class</option>
+            <option value="">-- Select a Class --</option>
             {classes.map(c => (
               <option key={c.id} value={c.id}>
                 {c.name} {c.stream ? c.stream.trim() : ''}
@@ -462,7 +458,12 @@ function AdminSubjectAllocation() {
               <>
                 {/* Debug info - shows student count */}
                 <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
-                  Students found: <strong>{students.length}</strong>
+                   Students found: <strong>{students.length}</strong>
+                  {students.length > 0 && (
+                    <div className="mt-1 text-green-600">
+                      ✓ {students.length} student(s) available. Select from dropdown below.
+                    </div>
+                  )}
                   {students.length === 0 && (
                     <div className="text-amber-600 mt-1">
                       ℹ️ No students in this class. Go to "Register Students" tab to add students.
@@ -476,19 +477,39 @@ function AdminSubjectAllocation() {
                     Loading students...
                   </div>
                 ) : (
-                  <select
-                    className="w-full px-3 py-2 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
-                    onChange={(e) => handleStudentSelect(e.target.value)}
-                    value={selectedStudent?.id || ''}
-                    disabled={students.length === 0}
-                  >
-                    <option value="">-- Select a student --</option>
-                    {students.map(s => (
-                      <option key={s.id} value={s.id}>
-                        {s.AdmissionNumber} - {s.FullName}
-                      </option>
-                    ))}
-                  </select>
+                  <div>
+                    {/* Student selection dropdown with explicit styling */}
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">Select Student:</label>
+                    <select
+                      className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 cursor-pointer"
+                      onChange={(e) => handleStudentSelect(e.target.value)}
+                      value={selectedStudent?.id || ''}
+                      disabled={students.length === 0}
+                      style={{
+                        backgroundColor: 'white',
+                        color: '#1f2937',
+                        border: '2px solid #3b82f6',
+                        borderRadius: '0.5rem',
+                        padding: '0.75rem 1rem',
+                        fontSize: '1rem',
+                        width: '100%'
+                      }}
+                    >
+                      <option value="" className="text-gray-500">-- Select a student --</option>
+                      {students.map(s => (
+                        <option key={s.id} value={s.id} className="py-2 text-gray-900">
+                          {s.AdmissionNumber || s.admissionNumber} - {s.FullName || s.fullName || s.name}
+                        </option>
+                      ))}
+                    </select>
+                    
+                    {/* Show student count in dropdown style */}
+                    {students.length > 0 && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        Click the dropdown above to see {students.length} student(s)
+                      </p>
+                    )}
+                  </div>
                 )}
 
                 {students.length === 0 && !loadingStudents && (
@@ -507,9 +528,9 @@ function AdminSubjectAllocation() {
             {selectedStudent && (
               <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
                 <p className="font-semibold text-blue-800 mb-2">Student Details:</p>
-                <p className="text-sm"><strong>Name:</strong> {selectedStudent.FullName}</p>
-                <p className="text-sm"><strong>Admission:</strong> {selectedStudent.AdmissionNumber}</p>
-                <p className="text-sm"><strong>Class:</strong> {selectedStudent.Class} {selectedStudent.Stream}</p>
+                <p className="text-sm"><strong>Name:</strong> {selectedStudent.FullName || selectedStudent.fullName || selectedStudent.name}</p>
+                <p className="text-sm"><strong>Admission:</strong> {selectedStudent.AdmissionNumber || selectedStudent.admissionNumber}</p>
+                <p className="text-sm"><strong>Class:</strong> {selectedStudent.Class || selectedStudent.class} {selectedStudent.Stream || selectedStudent.stream}</p>
               </div>
             )}
           </div>
@@ -518,7 +539,7 @@ function AdminSubjectAllocation() {
           <div className="border rounded-lg p-4 bg-white shadow-sm">
             <h3 className="font-semibold text-lg mb-4 text-gray-800">
               Select Subjects 
-              {selectedStudent && <span className="text-sm text-gray-500 ml-2">for {selectedStudent.FullName}</span>}
+              {selectedStudent && <span className="text-sm text-gray-500 ml-2">for {selectedStudent.FullName || selectedStudent.fullName}</span>}
             </h3>
             
             {!selectedStudent ? (
@@ -559,7 +580,7 @@ function AdminSubjectAllocation() {
                     disabled={loading || selectedSubjects.length === 0}
                     className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-400 transition-all duration-200 shadow-sm"
                   >
-                    {loading ? 'Allocating...' : '✅ Allocate Subjects'}
+                    {loading ? 'Allocating...' : ' Allocate Subjects'}
                   </button>
                 </div>
               </>
@@ -584,7 +605,7 @@ function AdminSubjectAllocation() {
             <>
               <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
                 <p className="text-sm">
-                  <strong>{students.length}</strong> student(s) in {selectedClass} {selectedStream}
+                  👥 <strong>{students.length}</strong> student(s) in {selectedClass} {selectedStream}
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
                   All selected subjects will be allocated to ALL students in this class
@@ -654,8 +675,8 @@ function AdminSubjectAllocation() {
                   <th className="px-4 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase">Teacher</th>
                   <th className="px-4 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase">Term/Year</th>
                   <th className="px-4 py-3 border-b text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-              </thead>
+                  </tr>
+                  </thead>
               <tbody className="divide-y divide-gray-200">
                 {allocations.map(allocation => (
                   <tr key={allocation.Id} className="hover:bg-gray-50 transition-colors">
