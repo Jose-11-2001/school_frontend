@@ -52,7 +52,7 @@ function TeacherDashboard() {
       {/* Mobile Hamburger Menu */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <button
+        <button
             onClick={toggleMobileSidebar}
             className="p-1 rounded-lg hover:bg-blue-700"
           >
@@ -61,6 +61,7 @@ function TeacherDashboard() {
             </svg>
           </button>
           <h1 className="text-sm font-bold">Teacher Panel</h1>
+          
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -101,7 +102,7 @@ function TeacherDashboard() {
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold">Teacher Panel</h1>
+              <h1 className="text-xl font-bold">Teacher Portal</h1>
               <p className="text-xs text-blue-200">Mkondezi Secondary</p>
             </div>
           </div>
