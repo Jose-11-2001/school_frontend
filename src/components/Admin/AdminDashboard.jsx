@@ -45,7 +45,7 @@ function AdminDashboard() {
   };
 
   const menuItems = [
-    { id: 'teachers', label: 'Teacher Management', icon: '👥' },
+    { id: 'teachers', label: 'Teacher Management', icon: '' },
     { id: 'classes', label: '📚 Class Management', icon: '📚' },
     { id: 'allocation', label: '🎯 Subject Allocation (Teachers)', icon: '🎯' },
     { id: 'student-subjects', label: '📖 Student Subject Allocation', icon: '📖' },
