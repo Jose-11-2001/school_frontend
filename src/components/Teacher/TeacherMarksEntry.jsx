@@ -604,7 +604,7 @@ function TeacherMarksEntry() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-400"
+          className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
         >
           {loading ? 'Saving...' : ' Save Marks'}
         </button>
