@@ -98,18 +98,21 @@ function AdminDashboard() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Fixed position with independent scrolling */}
       <div className={`
-        fixed lg:relative z-50
+        fixed lg:fixed z-50
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         transition-transform duration-300 ease-in-out
-        w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl flex-shrink-0 min-h-screen
+        w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl
+        h-screen overflow-y-auto
+        ${!mobileOpen && 'lg:block'}
       `}>
-        {/* Sidebar Header */}
-        <div className="flex items-center gap-4">
+        {/* Sidebar Header - Sticky */}
+        <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
+          <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button
               onClick={handleGoBack}
-              className="hover:bg-blue-700 p-2 rounded-full transition-colors"
+              className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0"
               title="Go back"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -117,11 +120,13 @@ function AdminDashboard() {
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold">Mkondezi Secondary School - Admin Panel</h1>
+              <h1 className="text-xl font-bold">Mkondezi Admin</h1>
+              <p className="text-xs text-blue-200">Secondary School</p>
             </div>
           </div>
+        </div>
 
-        {/* Sidebar Navigation */}
+        {/* Sidebar Navigation - Scrollable */}
         <nav className="flex-1 overflow-y-auto py-4">
           {menuItems.map((item) => (
             <button
@@ -142,32 +147,40 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-blue-700">
+        {/* Sidebar Footer - Sticky at bottom */}
+        <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
           >
-            <span className="text-xl">🚪</span>
-            <span>Logout</span>
+            <span className="text-xl"></span>
+            <span  className="text-red-300 bold">Logout</span>
           </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Desktop Navbar */}
-        <nav className="hidden lg:flex bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
-        
+      {/* Main Content - Scrollable */}
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
+        {/* Desktop Navbar - Fixed */}
+        <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
+          {/* Left side - empty or can add other items */}
+          <div className="flex items-center gap-4">
+            {/* Add any header items here if needed */}
+          </div>
           
-          <div className="flex items-center gap-9">
+          {/* Right side - Welcome message and notifications */}
+          <div className="flex items-center gap-6">
             <AdminNotifications />
-            <span>Welcome, {user?.name}</span>
+            <div className="h-6 w-px bg-blue-600"></div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Welcome,</span>
+              <span className="text-sm font-bold">{user?.name || 'Headteacher'}</span>
+            </div>
           </div>
         </nav>
 
-        {/* Content Area */}
-        <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-0">
+        {/* Content Area - With padding for fixed navbar */}
+        <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 lg:p-6">
               {activeTab === 'teachers' && <TeacherManagement />}
