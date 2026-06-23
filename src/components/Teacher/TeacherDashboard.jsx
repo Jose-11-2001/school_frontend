@@ -4,6 +4,7 @@ import TeacherMarksEntry from './TeacherMarksEntry';
 import MySubjects from './MySubjects';
 import Rankings from '../Rankings';
 import MyStudents from './MyStudents';
+import TeacherNotifications from './TeacherNotifications';
 
 function TeacherDashboard() {
   const [user, setUser] = useState(null);
@@ -52,7 +53,7 @@ function TeacherDashboard() {
       {/* Mobile Hamburger Menu */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-3">
-        <button
+          <button
             onClick={toggleMobileSidebar}
             className="p-1 rounded-lg hover:bg-blue-700"
           >
@@ -61,9 +62,10 @@ function TeacherDashboard() {
             </svg>
           </button>
           <h1 className="text-sm font-bold">Teacher Panel</h1>
-          
         </div>
         <div className="flex items-center gap-2">
+          {/* Add notification icon to mobile header */}
+          <TeacherNotifications />
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
@@ -135,8 +137,7 @@ function TeacherDashboard() {
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
           >
-            <span className="text-xl"></span>
-            <span className="text-white bold">Logout</span>
+            <span className="text-white font-bold">Logout</span>
           </button>
         </div>
       </div>
@@ -150,6 +151,9 @@ function TeacherDashboard() {
           </div>
           
           <div className="flex items-center gap-6">
+            {/* Add notification icon to desktop header */}
+            <TeacherNotifications />
+            <div className="h-6 w-px bg-blue-600"></div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
               <span className="text-sm font-bold">{user?.name}</span>

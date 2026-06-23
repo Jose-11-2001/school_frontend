@@ -155,7 +155,7 @@ function AdminDashboard() {
             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
           >
             <span className="text-xl"></span>
-            <span  className="text-red-300 bold">Logout</span>
+            <span  className="text-white bold">Logout</span>
           </button>
         </div>
       </div>
