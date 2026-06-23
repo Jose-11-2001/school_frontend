@@ -22,7 +22,8 @@ const AdminNotifications = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/notifications/admin', {
+      // CHANGE THIS URL to use the remote backend
+      const response = await fetch('https://school-yathu.onrender.com/api/notifications/admin', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -55,7 +56,8 @@ const AdminNotifications = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+      // CHANGE THIS URL to use the remote backend
+      const response = await fetch(`https://school-yathu.onrender.com/api/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -85,7 +87,8 @@ const AdminNotifications = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/notifications/read-all', {
+      // CHANGE THIS URL to use the remote backend
+      const response = await fetch('https://school-yathu.onrender.com/api/notifications/read-all', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -151,7 +154,6 @@ const AdminNotifications = () => {
           />
         </svg>
         
-        {/* Loading Spinner */}
         {loading && (
           <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5">
             <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -161,7 +163,6 @@ const AdminNotifications = () => {
           </span>
         )}
         
-        {/* Unread Count Badge */}
         {!loading && unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full border-2 border-white min-w-[20px] min-h-[20px]">
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -172,7 +173,6 @@ const AdminNotifications = () => {
       {/* Dropdown Menu */}
       {showDropdown && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-2xl z-50 max-h-96 overflow-hidden border border-gray-200">
-          {/* Header */}
           <div className="p-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-semibold text-gray-800">Notifications</h3>
@@ -187,7 +187,6 @@ const AdminNotifications = () => {
             </div>
           </div>
 
-          {/* Notifications List */}
           <div className="overflow-y-auto max-h-72">
             {loading ? (
               <div className="p-8 text-center">
@@ -235,7 +234,6 @@ const AdminNotifications = () => {
             )}
           </div>
 
-          {/* Footer */}
           {notifications.length > 0 && !loading && (
             <div className="p-2 border-t bg-gray-50">
               <button 
@@ -249,7 +247,6 @@ const AdminNotifications = () => {
         </div>
       )}
 
-      {/* Click Outside Handler */}
       {showDropdown && (
         <div 
           className="fixed inset-0 z-40"
