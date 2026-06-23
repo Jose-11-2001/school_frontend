@@ -11,7 +11,7 @@ function StudentRegistration() {
     });
     
     const [classes, setClasses] = useState([]);
-    const [allStreams, setAllStreams] = useState([]); // Store all streams for filtering
+    const [allStreams, setAllStreams] = useState([]);
     const [streams, setStreams] = useState([]);
     const [availableSubjects, setAvailableSubjects] = useState({ coreSubjects: [], humanitiesSubjects: [], scienceSubjects: [] });
     const [registeredStudents, setRegisteredStudents] = useState([]);
@@ -20,7 +20,7 @@ function StudentRegistration() {
     const [activeTab, setActiveTab] = useState('register');
     const [filterClass, setFilterClass] = useState('');
     const [filterStream, setFilterStream] = useState('');
-    const [availableFilterStreams, setAvailableFilterStreams] = useState([]); // Streams for filter dropdown
+    const [availableFilterStreams, setAvailableFilterStreams] = useState([]);
 
     useEffect(() => {
         loadClasses();
@@ -35,7 +35,7 @@ function StudentRegistration() {
                 .map(c => c.Stream)
                 .filter(s => s);
             setAvailableFilterStreams([...new Set(availableStreams)]);
-            setFilterStream(''); // Reset stream filter when class changes
+            setFilterStream('');
         } else {
             setAvailableFilterStreams([]);
             setFilterStream('');
@@ -62,7 +62,6 @@ function StudentRegistration() {
         }
     }, [formData.class, formData.stream, formData.root]);
 
-    // Store all streams for later use
     useEffect(() => {
         if (classes.length > 0) {
             const allStreamsData = [...new Set(classes.map(c => c.Stream).filter(s => s))];
@@ -73,13 +72,33 @@ function StudentRegistration() {
     const loadClasses = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://school-yathu.onrender.com/api/AdminSubjectAllocation/classes', {
+            
+            // FIXED: Use the correct endpoint that has your classes
+            const response = await fetch('https://school-yathu.onrender.com/api/admin/classes', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const data = await response.json();
-            setClasses(data);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Classes loaded:', data);
+                
+                // Normalize the data to match the expected format
+                const normalizedData = data.map(item => ({
+                    Name: item.name || item.Name,
+                    Stream: item.stream || item.Stream || '',
+                    id: item.id
+                }));
+                
+                setClasses(normalizedData);
+            } else {
+                console.error('Failed to load classes');
+                setMessage('⚠️ Could not load classes. Please add classes in Class Management first.');
+                setTimeout(() => setMessage(''), 5000);
+            }
         } catch (error) {
             console.error('Error loading classes:', error);
+            setMessage('⚠️ Error loading classes. Please refresh and try again.');
+            setTimeout(() => setMessage(''), 5000);
         }
     };
 
@@ -114,8 +133,13 @@ function StudentRegistration() {
             const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const data = await response.json();
-            setRegisteredStudents(data);
+            
+            if (response.ok) {
+                const data = await response.json();
+                setRegisteredStudents(data);
+            } else {
+                console.error('Failed to load registered students');
+            }
         } catch (error) {
             console.error('Error loading students:', error);
         }
@@ -171,7 +195,7 @@ function StudentRegistration() {
     };
 
     // Get unique class names for dropdown
-    const uniqueClasses = [...new Set(classes.map(c => c.Name))];
+    const uniqueClasses = [...new Set(classes.map(c => c.Name).filter(Boolean))];
 
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -266,6 +290,9 @@ function StudentRegistration() {
                                         <option key={className} value={className}>{className}</option>
                                     ))}
                                 </select>
+                                {uniqueClasses.length === 0 && (
+                                    <p className="text-xs text-red-500 mt-1">⚠️ No classes found. Please add classes in Class Management first.</p>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-gray-700 mb-2 font-semibold">
@@ -276,7 +303,7 @@ function StudentRegistration() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={formData.stream}
                                     onChange={(e) => setFormData({...formData, stream: e.target.value})}
-                                    disabled={!formData.class}
+                                    disabled={!formData.class || streams.length === 0}
                                 >
                                     <option value="">Select Stream</option>
                                     {streams.map(stream => (
@@ -284,7 +311,10 @@ function StudentRegistration() {
                                     ))}
                                 </select>
                                 {!formData.class && (
-                                    <p className="text-xs text-yellow-600 mt-1"> Please select a class first</p>
+                                    <p className="text-xs text-yellow-600 mt-1">📌 Please select a class first</p>
+                                )}
+                                {formData.class && streams.length === 0 && (
+                                    <p className="text-xs text-yellow-600 mt-1">⚠️ No streams available for this class</p>
                                 )}
                             </div>
                         </div>
@@ -302,7 +332,7 @@ function StudentRegistration() {
                                             onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
                                             className="mr-2 w-4 h-4"
                                         />
-                                        <span className="text-lg"></span>
+                                        <span className="text-lg">📚</span>
                                         <span className="ml-2">Humanities (History, Geography, Social Studies)</span>
                                     </label>
                                     <label className="flex items-center cursor-pointer">
@@ -323,7 +353,7 @@ function StudentRegistration() {
                         {/* Subjects Display */}
                         {formData.class && formData.stream && (
                             <div className="border rounded-lg p-4 bg-gray-50">
-                                <h3 className="font-bold text-lg mb-3 text-gray-800"> Subjects Allocation</h3>
+                                <h3 className="font-bold text-lg mb-3 text-gray-800">📚 Subjects Allocation</h3>
                                 
                                 {/* Core Subjects */}
                                 {availableSubjects.coreSubjects?.length > 0 && (
@@ -342,7 +372,7 @@ function StudentRegistration() {
                                 {/* Subjects based on root selection */}
                                 {formData.root === 'Humanities' && availableSubjects.humanitiesSubjects?.length > 0 && (
                                     <div className="mb-4">
-                                        <h4 className="font-semibold text-blue-700 mb-2"> Humanities Subjects</h4>
+                                        <h4 className="font-semibold text-blue-700 mb-2">📖 Humanities Subjects</h4>
                                         <div className="flex flex-wrap gap-2">
                                             {availableSubjects.humanitiesSubjects.map((subject, index) => (
                                                 <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
@@ -388,7 +418,7 @@ function StudentRegistration() {
                                     Registering Student...
                                 </span>
                             ) : (
-                                ' Register Student & Create Account'
+                                '📝 Register Student & Create Account'
                             )}
                         </button>
                     </form>
@@ -434,7 +464,7 @@ function StudentRegistration() {
                                         ))}
                                     </select>
                                     {!filterClass && (
-                                        <p className="text-xs text-yellow-600 mt-1"> Select a class first to filter by stream</p>
+                                        <p className="text-xs text-yellow-600 mt-1">📌 Select a class first to filter by stream</p>
                                     )}
                                 </div>
                                 <div className="flex items-end">
@@ -477,7 +507,7 @@ function StudentRegistration() {
                                                 <td className="px-4 py-2 border text-sm font-medium text-gray-900">{student.fullName}</td>
                                                 <td className="px-4 py-2 border text-sm text-gray-600">{student.class}</td>
                                                 <td className="px-4 py-2 border text-sm text-gray-600">{student.stream}</td>
-                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.subjectsCount} subjects</td>
+                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.subjectsCount || 0} subjects</td>
                                                 <td className="px-4 py-2 border text-sm text-gray-500">{new Date(student.createdAt).toLocaleDateString()}</td>
                                             </tr>
                                         ))
