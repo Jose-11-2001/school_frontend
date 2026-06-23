@@ -15,6 +15,8 @@ import StudentRegistration from './StudentRegistration';
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('teachers');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,12 +44,118 @@ function AdminDashboard() {
     navigate(-1);
   };
 
+  const menuItems = [
+    { id: 'teachers', label: 'Teacher Management', icon: '👥' },
+    { id: 'classes', label: '📚 Class Management', icon: '📚' },
+    { id: 'allocation', label: '🎯 Subject Allocation (Teachers)', icon: '🎯' },
+    { id: 'student-subjects', label: '📖 Student Subject Allocation', icon: '📖' },
+    { id: 'student-registration', label: '🎓 Register Students', icon: '🎓' },
+    { id: 'students', label: '👨‍🎓 Manage Students', icon: '👨‍🎓' },
+    { id: 'users', label: '👤 Manage Users', icon: '👤' },
+    { id: 'approval', label: '✅ Results Approval', icon: '✅' },
+    { id: 'rankings', label: '🏆 View Rankings', icon: '🏆' },
+  ];
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleMobileSidebar = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* Mobile Hamburger Menu */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleMobileSidebar}
+            className="p-1 rounded-lg hover:bg-blue-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+          <h1 className="text-sm font-bold">Mkondezi Admin</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <AdminNotifications />
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={toggleMobileSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed lg:relative z-50
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        transition-transform duration-300 ease-in-out
+        w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl flex-shrink-0 min-h-screen
+      `}>
+        {/* Sidebar Header */}
+        <div className="p-4 border-b border-blue-700">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-xl font-bold">
+              M
+            </div>
+            <div>
+              <h2 className="font-bold text-sm">Mkondezi Admin</h2>
+              <p className="text-xs text-blue-200">{user?.name || 'Administrator'}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveTab(item.id);
+                setMobileOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${
+                activeTab === item.id
+                  ? 'bg-blue-700 border-r-4 border-white text-white'
+                  : 'hover:bg-blue-700 text-blue-100'
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span className="text-sm font-medium">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-blue-700">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
+          >
+            <span className="text-xl">🚪</span>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Desktop Navbar */}
+        <nav className="hidden lg:flex bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
-            {/* Back Arrow Button */}
             <button
               onClick={handleGoBack}
               className="hover:bg-blue-700 p-2 rounded-full transition-colors"
@@ -58,7 +166,7 @@ function AdminDashboard() {
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold">Mkondezi secondary school - Admin Panel</h1>
+              <h1 className="text-xl font-bold">Mkondezi Secondary School - Admin Panel</h1>
               <p className="text-sm opacity-90">Administrator Access</p>
             </div>
           </div>
@@ -72,111 +180,30 @@ function AdminDashboard() {
               Logout
             </button>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex gap-2 mb-6 border-b flex-wrap">
-          <button
-            onClick={() => setActiveTab('teachers')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'teachers' 
-                ? 'border-b-2 border-blue-800 text-blue-900' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Teacher Management
-          </button>
-          <button
-            onClick={() => setActiveTab('classes')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'classes' 
-                ? 'border-b-2 border-blue-800 text-blue-900' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Class Management
-          </button>
-          <button
-            onClick={() => setActiveTab('allocation')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'allocation' 
-                ? 'border-b-2 border-blue-800 text-blue-900' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Subject Allocation (Teachers)
-          </button>
-          <button
-            onClick={() => setActiveTab('student-subjects')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'student-subjects' 
-                ? 'border-b-2 border-blue-800 text-blue-900' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Student Subject Allocation
-          </button>
-          <button
-            onClick={() => setActiveTab('student-registration')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'student-registration' 
-                ? 'border-b-2 border-blue-800 text-blue-900' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Register Students
-          </button>
-    
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'users' 
-                ? 'border-b-2 border-blue-800 text-blue-900' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-         >
-            Manage Users
-          </button>
-          <button
-            onClick={() => setActiveTab('approval')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'approval' 
-                ? 'border-b-2 border-blue-800 text-blue-900' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Results Approval
-          </button>
-          <button
-            onClick={() => setActiveTab('rankings')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'rankings' 
-                ? 'border-b-2 border-blue-800 text-blue-900'  
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            View Rankings
-          </button>
-        </div>
-
-        <div>
-          {activeTab === 'teachers' && <TeacherManagement />}
-          {activeTab === 'classes' && <ClassManagement />}
-          {activeTab === 'allocation' && <SubjectAllocation />}
-          {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
-          {activeTab === 'student-registration' && <StudentRegistration />}
-          {activeTab === 'students' && (
-            <div className="space-y-6">
-              <AddStudent />
-              <div className="mt-8">
-                <StudentList />
-              </div>
+        {/* Content Area */}
+        <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-0">
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-4 lg:p-6">
+              {activeTab === 'teachers' && <TeacherManagement />}
+              {activeTab === 'classes' && <ClassManagement />}
+              {activeTab === 'allocation' && <SubjectAllocation />}
+              {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
+              {activeTab === 'student-registration' && <StudentRegistration />}
+              {activeTab === 'students' && (
+                <div className="space-y-6">
+                  <AddStudent />
+                  <div className="mt-8">
+                    <StudentList />
+                  </div>
+                </div>
+              )}
+              {activeTab === 'users' && <AdminUserManagement />}
+              {activeTab === 'approval' && <ResultsApproval />}
+              {activeTab === 'rankings' && <Rankings />}
             </div>
-          )}
-          {activeTab === 'users' && <AdminUserManagement />}
-          {activeTab === 'approval' && <ResultsApproval />}
-          {activeTab === 'rankings' && <Rankings />}
+          </div>
         </div>
       </div>
     </div>
