@@ -47,13 +47,13 @@ function AdminDashboard() {
   const menuItems = [
     { id: 'teachers', label: 'Teacher Management', icon: '' },
     { id: 'classes', label: 'Class Management', icon: '' },
-    { id: 'allocation', label: 'Subject Allocation (Teachers)', icon: '🎯' },
-    { id: 'student-subjects', label: '📖 Student Subject Allocation', icon: '📖' },
-    { id: 'student-registration', label: '🎓 Register Students', icon: '🎓' },
-    { id: 'students', label: '👨‍🎓 Manage Students', icon: '👨‍🎓' },
-    { id: 'users', label: '👤 Manage Users', icon: '👤' },
-    { id: 'approval', label: '✅ Results Approval', icon: '✅' },
-    { id: 'rankings', label: '🏆 View Rankings', icon: '🏆' },
+    { id: 'allocation', label: 'Subject Allocation (Teachers)', icon: '' },
+    { id: 'student-subjects', label: 'Student Subject Allocation', icon: '' },
+    { id: 'student-registration', label: 'Register Students', icon: '' },
+    { id: 'students', label: 'Manage Students', icon: '' },
+    { id: 'users', label: 'Manage Users', icon: '' },
+    { id: 'approval', label: 'Results Approval', icon: '' },
+    { id: 'rankings', label: 'View Rankings', icon: '' },
   ];
 
   const toggleSidebar = () => {
@@ -106,17 +106,20 @@ function AdminDashboard() {
         w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl flex-shrink-0 min-h-screen
       `}>
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-blue-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-xl font-bold">
-              M
-            </div>
+        <div className="flex items-center gap-4">
+            <button
+              onClick={handleGoBack}
+              className="hover:bg-blue-700 p-2 rounded-full transition-colors"
+              title="Go back"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </button>
             <div>
-              <h2 className="font-bold text-sm">Mkondezi Admin</h2>
-              <p className="text-xs text-blue-200">{user?.name || 'Administrator'}</p>
+              <h1 className="text-xl font-bold">Mkondezi Secondary School - Admin Panel</h1>
             </div>
           </div>
-        </div>
 
         {/* Sidebar Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
@@ -155,30 +158,11 @@ function AdminDashboard() {
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleGoBack}
-              className="hover:bg-blue-700 p-2 rounded-full transition-colors"
-              title="Go back"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-              </svg>
-            </button>
-            <div>
-              <h1 className="text-xl font-bold">Mkondezi Secondary School - Admin Panel</h1>
-              <p className="text-sm opacity-90">Administrator Access</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
+        
+          
+          <div className="flex items-center gap-9">
             <AdminNotifications />
             <span>Welcome, {user?.name}</span>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
-            >
-              Logout
-            </button>
           </div>
         </nav>
 
