@@ -45,13 +45,13 @@ function AdminDashboard() {
 
   const menuItems = [
     { id: 'teachers', label: 'Teacher Management', icon: '' },
+    { id: 'student-registration', label: 'Register Students', icon: '' },
+    { id: 'students', label: 'Manage Students', icon: '' },
+    { id: 'users', label: 'Manage Users', icon: '' },
     { id: 'classes', label: 'Class Management', icon: '' },
     { id: 'allocation', label: 'Subject Allocation (Teachers)', icon: '' },
     { id: 'student-subjects', label: 'Student Subject Allocation', icon: '' },
-    { id: 'student-registration', label: 'Register Students', icon: '' },
     { id: 'subjects', label: 'Manage Subjects', icon: '' }, 
-    { id: 'students', label: 'Manage Students', icon: '' },
-    { id: 'users', label: 'Manage Users', icon: '' },
     { id: 'approval', label: 'Results Approval', icon: '' },
     { id: 'rankings', label: 'View Rankings', icon: '' },
   ];
