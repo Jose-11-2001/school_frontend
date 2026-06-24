@@ -7,8 +7,6 @@ function SubjectsManagement() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
-  const [editingSubject, setEditingSubject] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
   const loadSubjects = async () => {
     try {
@@ -62,8 +60,7 @@ function SubjectsManagement() {
         },
         body: JSON.stringify({ 
           name: name.trim(), 
-          code: code.trim().toUpperCase(),
-          maxMarks: 100
+          code: code.trim().toUpperCase()
         })
       });
       
@@ -89,36 +86,6 @@ function SubjectsManagement() {
     }
   };
 
-  const handleDeleteSubject = async (id) => {
-    if (!confirm(`Are you sure you want to delete subject "${subjects.find(s => s.id === id)?.name}"?\n\nThis action cannot be undone.`)) {
-      return;
-    }
-    
-    try {
-      const token = localStorage.getItem('token');
-      // Note: You need to add DELETE endpoint in backend
-      const response = await fetch(`https://school-yathu.onrender.com/api/Subjects/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        setMessage('✅ Subject deleted successfully!');
-        setMessageType('success');
-        loadSubjects();
-      } else {
-        const error = await response.json();
-        setMessage(`❌ ${error.message || 'Failed to delete subject'}`);
-        setMessageType('error');
-      }
-    } catch (error) {
-      console.error('Error deleting subject:', error);
-      setMessage('❌ Error deleting subject');
-      setMessageType('error');
-    }
-    setTimeout(() => setMessage(''), 3000);
-  };
-
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
@@ -135,8 +102,6 @@ function SubjectsManagement() {
         <div className={`p-3 rounded-lg mb-4 ${
           messageType === 'success' 
             ? 'bg-green-50 text-green-700 border border-green-200' 
-            : messageType === 'warning'
-            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
             : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
           {message}
@@ -190,15 +155,12 @@ function SubjectsManagement() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Marks</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {subjects.length === 0 ? (
               <tr>
-                <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                <td colSpan="3" className="px-6 py-8 text-center text-gray-500">
                   <div className="text-4xl mb-2">📚</div>
                   No subjects found. Add your first subject above.
                 </td>
@@ -208,23 +170,10 @@ function SubjectsManagement() {
                 <tr key={subject.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm text-gray-600">{subject.id}</td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{subject.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm">
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-mono">
                       {subject.code}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{subject.maxMarks || 100}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(subject.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-sm space-x-2">
-                    <button
-                      onClick={() => handleDeleteSubject(subject.id)}
-                      className="text-red-600 hover:text-red-800 transition-colors"
-                      title="Delete Subject"
-                    >
-                      🗑️ Delete
-                    </button>
                   </td>
                 </tr>
               ))
@@ -232,12 +181,6 @@ function SubjectsManagement() {
           </tbody>
         </table>
       </div>
-      
-      {subjects.length > 0 && (
-        <div className="mt-4 text-xs text-gray-400">
-          Showing {subjects.length} subject(s)
-        </div>
-      )}
     </div>
   );
 }
