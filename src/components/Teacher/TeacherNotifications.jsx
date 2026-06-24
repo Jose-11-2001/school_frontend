@@ -22,7 +22,8 @@ const TeacherNotifications = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/notifications/teacher', {
+      // ✅ UPDATED: Using Render URL
+      const response = await fetch('https://school-yathu.onrender.com/api/Notifications/teacher', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -55,7 +56,8 @@ const TeacherNotifications = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+      // ✅ UPDATED: Using Render URL
+      const response = await fetch(`https://school-yathu.onrender.com/api/Notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -85,7 +87,8 @@ const TeacherNotifications = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/notifications/read-all', {
+      // ✅ UPDATED: Using Render URL
+      const response = await fetch('https://school-yathu.onrender.com/api/Notifications/read-all', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
