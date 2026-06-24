@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function StudentRegistration() {
+function StudentRegistration({ onStudentAdded }) {
     const [formData, setFormData] = useState({
         admissionNumber: '',
         fullName: '',
@@ -11,18 +11,17 @@ function StudentRegistration() {
     });
     
     const [classes, setClasses] = useState([]);
-    const [allStreams, setAllStreams] = useState([]);
     const [streams, setStreams] = useState([]);
-    const [availableSubjects, setAvailableSubjects] = useState({ coreSubjects: [], humanitiesSubjects: [], scienceSubjects: [] });
-    const [registeredStudents, setRegisteredStudents] = useState([]);
+    const [availableSubjects, setAvailableSubjects] = useState({ 
+        coreSubjects: [], 
+        humanitiesSubjects: [], 
+        scienceSubjects: [] 
+    });
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('');
-    const [activeTab, setActiveTab] = useState('register');
-    const [filterClass, setFilterClass] = useState('');
-    const [filterStream, setFilterStream] = useState('');
-    const [availableFilterStreams, setAvailableFilterStreams] = useState([]);
+    const [registeredStudents, setRegisteredStudents] = useState([]);
 
     useEffect(() => {
         loadAllData();
@@ -30,25 +29,10 @@ function StudentRegistration() {
 
     const loadAllData = async () => {
         setLoadingData(true);
-        await loadRegisteredStudents();
         await loadClasses();
+        await loadRegisteredStudents();
         setLoadingData(false);
     };
-
-    // Update filter streams when filter class changes
-    useEffect(() => {
-        if (filterClass) {
-            const availableStreams = classes
-                .filter(c => c.Name === filterClass)
-                .map(c => c.Stream)
-                .filter(s => s);
-            setAvailableFilterStreams([...new Set(availableStreams)]);
-            setFilterStream('');
-        } else {
-            setAvailableFilterStreams([]);
-            setFilterStream('');
-        }
-    }, [filterClass, classes]);
 
     // Update streams when form class changes
     useEffect(() => {
@@ -70,13 +54,6 @@ function StudentRegistration() {
         }
     }, [formData.class, formData.stream, formData.root]);
 
-    useEffect(() => {
-        if (classes.length > 0) {
-            const allStreamsData = [...new Set(classes.map(c => c.Stream).filter(s => s))];
-            setAllStreams(allStreamsData);
-        }
-    }, [classes]);
-
     const loadClasses = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -86,7 +63,6 @@ function StudentRegistration() {
                 return;
             }
 
-            // Try multiple endpoints
             let data = [];
             let response;
             
@@ -118,7 +94,6 @@ function StudentRegistration() {
                     .filter(Boolean);
                 const uniqueClasses = [...new Set(studentClasses)];
                 
-                // Get streams for each class from students
                 const classMap = {};
                 registeredStudents.forEach(s => {
                     if (s.class && s.stream) {
@@ -140,7 +115,6 @@ function StudentRegistration() {
                 console.log('Classes extracted from students:', data);
             }
             
-            // Normalize the data
             const normalizedData = data.map(item => ({
                 Name: item.name || item.Name || item.className || '',
                 Stream: item.stream || item.Stream || '',
@@ -158,7 +132,6 @@ function StudentRegistration() {
         } catch (error) {
             console.error('Error loading classes:', error);
             
-            // Last resort: Try to extract from registered students
             if (registeredStudents.length > 0) {
                 const studentClasses = registeredStudents
                     .map(s => s.class)
@@ -192,6 +165,24 @@ function StudentRegistration() {
         }
     };
 
+    const loadRegisteredStudents = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('https://school-yathu.onrender.com/api/StudentRegistration/registered-students', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setRegisteredStudents(data);
+            } else {
+                console.error('Failed to load registered students');
+            }
+        } catch (error) {
+            console.error('Error loading students:', error);
+        }
+    };
+
     const loadAvailableSubjects = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -210,29 +201,18 @@ function StudentRegistration() {
         }
     };
 
-    const loadRegisteredStudents = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            let url = 'https://school-yathu.onrender.com/api/StudentRegistration/registered-students';
-            
-            const params = new URLSearchParams();
-            if (filterClass) params.append('className', filterClass);
-            if (filterStream) params.append('stream', filterStream);
-            if (params.toString()) url += `?${params.toString()}`;
-            
-            const response = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                setRegisteredStudents(data);
-            } else {
-                console.error('Failed to load registered students');
-            }
-        } catch (error) {
-            console.error('Error loading students:', error);
+    const generateRandomPassword = () => {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
+        let password = "";
+        for (let i = 0; i < 10; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
         }
+        return password;
+    };
+
+    const generateEmail = (name) => {
+        const cleanName = name.toLowerCase().replace(/\s/g, '');
+        return `${cleanName}@gmail.com`;
     };
 
     const handleSubmit = async (e) => {
@@ -240,21 +220,74 @@ function StudentRegistration() {
         setLoading(true);
         setMessage('');
         
+        if (!formData.admissionNumber || !formData.fullName) {
+            setMessage('⚠️ Admission Number and Full Name are required');
+            setMessageType('error');
+            setLoading(false);
+            return;
+        }
+        
+        const password = generateRandomPassword();
+        const email = generateEmail(formData.fullName);
+        
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://school-yathu.onrender.com/api/StudentRegistration/register', {
+            
+            if (!token) {
+                setMessage('⚠️ Please login first');
+                setMessageType('error');
+                setLoading(false);
+                return;
+            }
+
+            // Step 1: Create the student
+            const studentResponse = await fetch('https://school-yathu.onrender.com/api/Student', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    admissionNumber: formData.admissionNumber,
+                    fullName: formData.fullName,
+                    class: formData.class || '',
+                    stream: formData.stream || ''
+                })
             });
-
-            const data = await response.json();
             
-            if (response.ok) {
-                setMessage(`${data.message}`);
+            const studentData = await studentResponse.json();
+            
+            if (!studentResponse.ok) {
+                setMessage(`❌ ${studentData.message || 'Error adding student'}`);
+                setMessageType('error');
+                setLoading(false);
+                return;
+            }
+            
+            // Step 2: Create user account for the student
+            const userResponse = await fetch('https://school-yathu.onrender.com/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    email: email,
+                    name: formData.fullName,
+                    password: password,
+                    role: 'Student'
+                })
+            });
+            
+            const userData = await userResponse.json();
+            
+            if (userResponse.ok) {
+                setMessage(
+                    `✅ Student "${formData.fullName}" added successfully!\n\n` +
+                    `📧 Login Email: ${email}\n` +
+                    `🔑 Temporary Password: ${password}\n\n` +
+                    `⚠️ Student must change password on first login.`
+                );
                 setMessageType('success');
                 setFormData({
                     admissionNumber: '',
@@ -264,25 +297,37 @@ function StudentRegistration() {
                     root: '',
                     selectedSubjectIds: []
                 });
-                await loadRegisteredStudents();
+                // Notify parent component
+                if (onStudentAdded) {
+                    onStudentAdded();
+                }
+                // Refresh classes after adding student
                 await loadClasses();
-                setActiveTab('list');
             } else {
-                setMessage(`❌ ${data.message}`);
-                setMessageType('error');
+                setMessage(`⚠️ Student added but user account creation failed: ${userData.message}`);
+                setMessageType('warning');
             }
         } catch (error) {
             console.error('Error:', error);
-            setMessage('❌ Error registering student');
+            setMessage(`❌ ${error.message || 'Network error'}`);
             setMessageType('error');
         } finally {
             setLoading(false);
-            setTimeout(() => setMessage(''), 3000);
+            setTimeout(() => setMessage(''), 5000);
         }
     };
 
-    const handleFilterChange = () => {
-        loadRegisteredStudents();
+    const handleClear = () => {
+        setFormData({
+            admissionNumber: '',
+            fullName: '',
+            class: '',
+            stream: '',
+            root: '',
+            selectedSubjectIds: []
+        });
+        setMessage('');
+        setMessageType('');
     };
 
     const isUpperForm = () => {
@@ -290,7 +335,6 @@ function StudentRegistration() {
                                   formData.class.includes('Form3') || formData.class.includes('Form4'));
     };
 
-    // Get unique class names for dropdown
     const uniqueClasses = [...new Set(classes.map(c => c.Name).filter(Boolean))];
 
     if (loadingData) {
@@ -313,242 +357,208 @@ function StudentRegistration() {
             
             <div className="p-6">
                 {message && (
-                    <div className={`p-3 rounded-lg mb-4 ${
+                    <div className={`p-4 rounded-lg mb-4 whitespace-pre-line border ${
                         messageType === 'success' 
-                            ? 'bg-green-50 text-green-700 border border-green-200' 
+                            ? 'bg-green-50 text-green-700 border-green-200' 
                             : messageType === 'warning'
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'bg-red-50 text-red-700 border border-red-200'
+                            ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                            : 'bg-red-50 text-red-700 border-red-200'
                     }`}>
                         {message}
                     </div>
                 )}
 
-                {/* Tab Navigation */}
-                <div className="flex border-b mb-6">
-                    <button
-                        className={`px-4 py-2 font-semibold transition-all duration-200 ${
-                            activeTab === 'register' 
-                                ? 'border-b-2 border-blue-600 text-blue-600' 
-                                : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                        onClick={() => {
-                            setActiveTab('register');
-                            setMessage('');
-                        }}
-                    >
-                        Register New Student
-                    </button>
-                    <button
-                        className={`px-4 py-2 font-semibold transition-all duration-200 ${
-                            activeTab === 'list' 
-                                ? 'border-b-2 border-blue-600 text-blue-600' 
-                                : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                        onClick={() => { 
-                            setActiveTab('list'); 
-                            loadRegisteredStudents(); 
-                            setMessage('');
-                        }}
-                    >
-                        View All Students ({registeredStudents.length})
-                    </button>
-                </div>
-
-                {/* Registration Form */}
-                {activeTab === 'register' && (
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Basic Information */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-gray-700 mb-2 font-semibold">
-                                    Admission Number <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    value={formData.admissionNumber}
-                                    onChange={(e) => setFormData({...formData, admissionNumber: e.target.value})}
-                                    placeholder="e.g., 2024001"
-                                />
-                                <p className="text-xs text-gray-400 mt-1">Unique identifier for the student</p>
-                            </div>
-                            <div>
-                                <label className="block text-gray-700 mb-2 font-semibold">
-                                    Full Name <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    value={formData.fullName}
-                                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                                    placeholder="e.g., John Doe"
-                                />
-                            </div>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Basic Information */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-gray-700 mb-2 font-semibold">
+                                Admission Number <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={formData.admissionNumber}
+                                onChange={(e) => setFormData({...formData, admissionNumber: e.target.value})}
+                                placeholder="e.g., 2024001"
+                            />
+                            <p className="text-xs text-gray-400 mt-1">Unique identifier for the student</p>
                         </div>
+                        <div>
+                            <label className="block text-gray-700 mb-2 font-semibold">
+                                Full Name <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={formData.fullName}
+                                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                                placeholder="e.g., John Doe"
+                            />
+                        </div>
+                    </div>
 
-                        {/* Class and Stream Selection */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-gray-700 mb-2 font-semibold">
-                                    Class <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={formData.class}
-                                    onChange={(e) => setFormData({...formData, class: e.target.value, root: '', selectedSubjectIds: []})}
-                                >
-                                    <option value="">Select Class</option>
-                                    {uniqueClasses.map(className => (
-                                        <option key={className} value={className}>{className}</option>
-                                    ))}
-                                </select>
-                                {uniqueClasses.length === 0 ? (
-                                    <div className="mt-2 p-2 bg-yellow-50 rounded border border-yellow-200">
-                                        <p className="text-xs text-yellow-700">
-                                            ⚠️ No classes found. 
-                                            <button 
-                                                onClick={() => window.location.href = '/admin-dashboard?tab=classes'}
-                                                className="ml-1 text-blue-600 hover:underline font-medium"
-                                            >
-                                                Add classes in Class Management
-                                            </button>
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        {uniqueClasses.length} class(es) available
+                    {/* Class and Stream Selection */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-gray-700 mb-2 font-semibold">
+                                Class <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                required
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={formData.class}
+                                onChange={(e) => setFormData({...formData, class: e.target.value, root: '', selectedSubjectIds: []})}
+                            >
+                                <option value="">Select Class</option>
+                                {uniqueClasses.map(className => (
+                                    <option key={className} value={className}>{className}</option>
+                                ))}
+                            </select>
+                            {uniqueClasses.length === 0 ? (
+                                <div className="mt-2 p-2 bg-yellow-50 rounded border border-yellow-200">
+                                    <p className="text-xs text-yellow-700">
+                                        ⚠️ No classes found. 
+                                        <button 
+                                            onClick={() => window.location.href = '/admin-dashboard?tab=classes'}
+                                            className="ml-1 text-blue-600 hover:underline font-medium"
+                                        >
+                                            Add classes in Class Management
+                                        </button>
                                     </p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-gray-700 mb-2 font-semibold">
-                                    Stream <span className="text-red-500">*</span>
+                                </div>
+                            ) : (
+                                <p className="text-xs text-gray-400 mt-1">
+                                    {uniqueClasses.length} class(es) available
+                                </p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 mb-2 font-semibold">
+                                Stream <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                required
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={formData.stream}
+                                onChange={(e) => setFormData({...formData, stream: e.target.value})}
+                                disabled={!formData.class || streams.length === 0}
+                            >
+                                <option value="">Select Stream</option>
+                                {streams.map(stream => (
+                                    <option key={stream} value={stream}>{stream}</option>
+                                ))}
+                            </select>
+                            {!formData.class && (
+                                <p className="text-xs text-yellow-600 mt-1">📌 Please select a class first</p>
+                            )}
+                            {formData.class && streams.length === 0 && (
+                                <p className="text-xs text-yellow-600 mt-1">⚠️ No streams available for this class</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Root Selection (Only for Form 3 & 4) */}
+                    {isUpperForm() && (
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <label className="block text-gray-700 mb-3 font-semibold">Root/Specialization <span className="text-red-500">*</span></label>
+                            <div className="flex gap-6">
+                                <label className="flex items-center cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        value="Humanities"
+                                        checked={formData.root === 'Humanities'}
+                                        onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
+                                        className="mr-2 w-4 h-4"
+                                    />
+                                    <span className="text-lg">📚</span>
+                                    <span className="ml-2">Humanities (History, Geography, Social Studies)</span>
                                 </label>
-                                <select
-                                    required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={formData.stream}
-                                    onChange={(e) => setFormData({...formData, stream: e.target.value})}
-                                    disabled={!formData.class || streams.length === 0}
-                                >
-                                    <option value="">Select Stream</option>
-                                    {streams.map(stream => (
-                                        <option key={stream} value={stream}>{stream}</option>
-                                    ))}
-                                </select>
-                                {!formData.class && (
-                                    <p className="text-xs text-yellow-600 mt-1">Please select a class first</p>
-                                )}
-                                {formData.class && streams.length === 0 && (
-                                    <p className="text-xs text-yellow-600 mt-1">⚠️ No streams available for this class</p>
-                                )}
+                                <label className="flex items-center cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        value="Sciences"
+                                        checked={formData.root === 'Sciences'}
+                                        onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
+                                        className="mr-2 w-4 h-4"
+                                    />
+                                    <span className="text-lg">🔬</span>
+                                    <span className="ml-2">Sciences (Physics, Chemistry, Biology)</span>
+                                </label>
                             </div>
                         </div>
+                    )}
 
-                        {/* Root Selection (Only for Form 3 & 4) */}
-                        {isUpperForm() && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <label className="block text-gray-700 mb-3 font-semibold">Root/Specialization <span className="text-red-500">*</span></label>
-                                <div className="flex gap-6">
-                                    <label className="flex items-center cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            value="Humanities"
-                                            checked={formData.root === 'Humanities'}
-                                            onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
-                                            className="mr-2 w-4 h-4"
-                                        />
-                                        <span className="text-lg"></span>
-                                        <span className="ml-2">Humanities (History, Geography, Social Studies)</span>
-                                    </label>
-                                    <label className="flex items-center cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            value="Sciences"
-                                            checked={formData.root === 'Sciences'}
-                                            onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
-                                            className="mr-2 w-4 h-4"
-                                        />
-                                        <span className="text-lg">🔬</span>
-                                        <span className="ml-2">Sciences (Physics, Chemistry, Biology)</span>
-                                    </label>
+                    {/* Subjects Display */}
+                    {formData.class && formData.stream && (
+                        <div className="border rounded-lg p-4 bg-gray-50">
+                            <h3 className="font-bold text-lg mb-3 text-gray-800">📚 Subjects Allocation</h3>
+                            
+                            {availableSubjects.coreSubjects?.length === 0 && 
+                             availableSubjects.humanitiesSubjects?.length === 0 && 
+                             availableSubjects.scienceSubjects?.length === 0 ? (
+                                <div className="text-center py-4 text-gray-500">
+                                    <p>No subjects available for this class.</p>
+                                    <p className="text-sm text-gray-400 mt-1">Please add subjects in Manage Subjects.</p>
                                 </div>
-                            </div>
-                        )}
-
-                        {/* Subjects Display */}
-                        {formData.class && formData.stream && (
-                            <div className="border rounded-lg p-4 bg-gray-50">
-                                <h3 className="font-bold text-lg mb-3 text-gray-800">Subjects Allocation</h3>
-                                
-                                {availableSubjects.coreSubjects?.length === 0 && 
-                                 availableSubjects.humanitiesSubjects?.length === 0 && 
-                                 availableSubjects.scienceSubjects?.length === 0 ? (
-                                    <div className="text-center py-4 text-gray-500">
-                                        <p>No subjects available for this class.</p>
-                                        <p className="text-sm text-gray-400 mt-1">Please add subjects in Manage Subjects.</p>
-                                    </div>
-                                ) : (
-                                    <>
-                                        {/* Core Subjects */}
-                                        {availableSubjects.coreSubjects?.length > 0 && (
-                                            <div className="mb-4">
-                                                <h4 className="font-semibold text-green-700 mb-2">✓ Core Subjects (Compulsory)</h4>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {availableSubjects.coreSubjects.map((subject, index) => (
-                                                        <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                                                            {subject}
-                                                        </span>
-                                                    ))}
-                                                </div>
+                            ) : (
+                                <>
+                                    {availableSubjects.coreSubjects?.length > 0 && (
+                                        <div className="mb-4">
+                                            <h4 className="font-semibold text-green-700 mb-2">✓ Core Subjects (Compulsory)</h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {availableSubjects.coreSubjects.map((subject, index) => (
+                                                    <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                                                        {subject}
+                                                    </span>
+                                                ))}
                                             </div>
-                                        )}
+                                        </div>
+                                    )}
 
-                                        {/* Subjects based on root selection */}
-                                        {formData.root === 'Humanities' && availableSubjects.humanitiesSubjects?.length > 0 && (
-                                            <div className="mb-4">
-                                                <h4 className="font-semibold text-blue-700 mb-2">Humanities Subjects</h4>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {availableSubjects.humanitiesSubjects.map((subject, index) => (
-                                                        <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                                                            {subject}
-                                                        </span>
-                                                    ))}
-                                                </div>
+                                    {formData.root === 'Humanities' && availableSubjects.humanitiesSubjects?.length > 0 && (
+                                        <div className="mb-4">
+                                            <h4 className="font-semibold text-blue-700 mb-2">📖 Humanities Subjects</h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {availableSubjects.humanitiesSubjects.map((subject, index) => (
+                                                    <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                                        {subject}
+                                                    </span>
+                                                ))}
                                             </div>
-                                        )}
+                                        </div>
+                                    )}
 
-                                        {formData.root === 'Sciences' && availableSubjects.scienceSubjects?.length > 0 && (
-                                            <div className="mb-4">
-                                                <h4 className="font-semibold text-purple-700 mb-2">Science Subjects</h4>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {availableSubjects.scienceSubjects.map((subject, index) => (
-                                                        <span key={index} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                                                            {subject}
-                                                        </span>
-                                                    ))}
-                                                </div>
+                                    {formData.root === 'Sciences' && availableSubjects.scienceSubjects?.length > 0 && (
+                                        <div className="mb-4">
+                                            <h4 className="font-semibold text-purple-700 mb-2">🔬 Science Subjects</h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {availableSubjects.scienceSubjects.map((subject, index) => (
+                                                    <span key={index} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                                                        {subject}
+                                                    </span>
+                                                ))}
                                             </div>
-                                        )}
+                                        </div>
+                                    )}
 
-                                        {!isUpperForm() && availableSubjects.coreSubjects?.length > 0 && (
-                                            <div className="mt-2 text-sm text-gray-600 bg-yellow-50 p-2 rounded">
-                                                ℹ️ Note: Form 1 & Form 2 students take all subjects. No specialization needed.
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        )}
+                                    {!isUpperForm() && availableSubjects.coreSubjects?.length > 0 && (
+                                        <div className="mt-2 text-sm text-gray-600 bg-yellow-50 p-2 rounded">
+                                            ℹ️ Note: Form 1 & Form 2 students take all subjects. No specialization needed.
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
 
+                    <div className="flex gap-3">
                         <button
                             type="submit"
                             disabled={loading || uniqueClasses.length === 0}
-                            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-400 font-semibold transition-all duration-200 shadow-md"
+                            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-400 font-semibold transition-all duration-200 shadow-md"
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
@@ -559,111 +569,34 @@ function StudentRegistration() {
                                     Registering Student...
                                 </span>
                             ) : (
-                                'Register Student & Create Account'
+                                '📝 Register Student & Create Account'
                             )}
                         </button>
-                        
-                        {uniqueClasses.length === 0 && (
-                            <div className="text-center text-sm text-red-500">
-                                ⚠️ Cannot register student. Please add classes first.
-                            </div>
-                        )}
-                    </form>
-                )}
-
-                {/* Student List */}
-                {activeTab === 'list' && (
-                    <div>
-                        {/* Filters */}
-                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                            <h3 className="font-semibold text-gray-700 mb-3">🔍 Filter Students</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-gray-700 text-sm font-semibold mb-2">Filter by Class</label>
-                                    <select
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={filterClass}
-                                        onChange={(e) => { 
-                                            setFilterClass(e.target.value); 
-                                            setTimeout(() => loadRegisteredStudents(), 100);
-                                        }}
-                                    >
-                                        <option value="">All Classes</option>
-                                        {uniqueClasses.map(className => (
-                                            <option key={className} value={className}>{className}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-gray-700 text-sm font-semibold mb-2">Filter by Stream</label>
-                                    <select
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={filterStream}
-                                        onChange={(e) => { 
-                                            setFilterStream(e.target.value); 
-                                            setTimeout(() => loadRegisteredStudents(), 100);
-                                        }}
-                                        disabled={!filterClass}
-                                    >
-                                        <option value="">All Streams</option>
-                                        {availableFilterStreams.map(stream => (
-                                            <option key={stream} value={stream}>{stream}</option>
-                                        ))}
-                                    </select>
-                                    {!filterClass && (
-                                        <p className="text-xs text-yellow-600 mt-1">📌 Select a class first to filter by stream</p>
-                                    )}
-                                </div>
-                                <div className="flex items-end">
-                                    <button
-                                        onClick={handleFilterChange}
-                                        className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                                    >
-                                        🔄 Apply Filters
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Students Table */}
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full bg-white border rounded-lg">
-                                <thead className="bg-gray-100">
-                                    <tr>
-                                        <th className="px-4 py-3 border text-left text-xs font-medium text-gray-500 uppercase">Admission No</th>
-                                        <th className="px-4 py-3 border text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
-                                        <th className="px-4 py-3 border text-left text-xs font-medium text-gray-500 uppercase">Class</th>
-                                        <th className="px-4 py-3 border text-left text-xs font-medium text-gray-500 uppercase">Stream</th>
-                                        <th className="px-4 py-3 border text-left text-xs font-medium text-gray-500 uppercase">Subjects</th>
-                                        <th className="px-4 py-3 border text-left text-xs font-medium text-gray-500 uppercase">Registered On</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {registeredStudents.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="6" className="text-center py-8 text-gray-500">
-                                                <div className="text-4xl mb-2">📭</div>
-                                                No students found
-                                                {filterClass && <p className="text-sm mt-1">Try changing your filter criteria</p>}
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        registeredStudents.map(student => (
-                                            <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.admissionNumber}</td>
-                                                <td className="px-4 py-2 border text-sm font-medium text-gray-900">{student.fullName}</td>
-                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.class}</td>
-                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.stream}</td>
-                                                <td className="px-4 py-2 border text-sm text-gray-600">{student.subjectsCount || 0} subjects</td>
-                                                <td className="px-4 py-2 border text-sm text-gray-500">{new Date(student.createdAt).toLocaleDateString()}</td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={handleClear}
+                            className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                        >
+                            Clear
+                        </button>
                     </div>
-                )}
+                    
+                    {uniqueClasses.length === 0 && (
+                        <div className="text-center text-sm text-red-500 mt-2">
+                            ⚠️ Cannot register student. Please add classes first.
+                        </div>
+                    )}
+
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h4 className="font-semibold text-blue-800 mb-2">ℹ️ Info</h4>
+                        <ul className="text-sm text-blue-700 space-y-1">
+                            <li>• Student will receive auto-generated email and password</li>
+                            <li>• Password: 10 characters with special characters</li>
+                            <li>• Student must change password on first login</li>
+                            <li>• Student will appear in the "Student List" after creation</li>
+                        </ul>
+                    </div>
+                </form>
             </div>
         </div>
     );
