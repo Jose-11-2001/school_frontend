@@ -5,7 +5,7 @@ import ClassManagement from './ClassManagement';
 import ResultsApproval from './ResultsApproval';
 import StudentList from './StudentList';
 import AdminUserManagement from './AdminUserManagement';
-import Rankings from './Rankings';
+import Rankings from '../Rankings';
 import AdminNotifications from './AdminNotifications';
 import AdminSubjectAllocation from './AdminSubjectAllocation';
 import StudentRegistration from './StudentRegistration';

@@ -5,7 +5,7 @@ import Login from './components/Auth/Login';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import TeacherDashboard from './components/Teacher/TeacherDashboard';
 import StudentDashboard from './components/Student/StudentDashboard';
-import ChangePassword from './components/ChangePassword';
+import ChangePassword from './components/Auth/ChangePassword';
 
 function App() {
   const [user, setUser] = useState(null);
