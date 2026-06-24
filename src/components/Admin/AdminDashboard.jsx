@@ -6,7 +6,7 @@ import ResultsApproval from './ResultsApproval';
 import StudentList from './StudentList';
 import AddStudent from './AddStudent';
 import AdminUserManagement from './AdminUserManagement';
-import Rankings from '../Rankings';
+import Rankings from './Rankings';
 import AdminNotifications from './AdminNotifications';
 import AdminSubjectAllocation from './AdminSubjectAllocation';
 import StudentRegistration from './StudentRegistration';
