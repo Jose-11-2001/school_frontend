@@ -149,9 +149,9 @@ function Rankings() {
   };
 
   const getRankBadge = (position) => {
-    if (position === 1) return '🥇';
-    if (position === 2) return '🥈';
-    if (position === 3) return '🥉';
+    if (position === 1) return '';//🥇';
+    if (position === 2) return '';//🥈';
+    if (position === 3) return '';//🥉';
     return `#${position}`;
   };
 
@@ -379,7 +379,7 @@ function Rankings() {
       {/* No Results State */}
       {rankings && rankings.rankings && rankings.rankings.length === 0 && !error && (
         <div className="bg-white rounded-lg shadow p-12 text-center border border-gray-100">
-          <div className="text-6xl mb-4">📊</div>
+          <div className="text-6xl mb-4"></div>
           <h3 className="text-xl font-semibold text-gray-700 mb-2">No Rankings Available</h3>
           <p className="text-gray-500 max-w-md mx-auto">
             No rankings found for {className} {stream || ''} in {term} {year}.

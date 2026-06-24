@@ -50,11 +50,11 @@ function SubjectRegistration() {
         setMessageType('success');
         loadSubjects(); // Refresh list
       } else {
-        setMessage(`❌ ${data.message}`);
+        setMessage(`${data.message}`);
         setMessageType('error');
       }
     } catch (error) {
-      setMessage('❌ Error registering for subject');
+      setMessage('Error registering for subject');
       setMessageType('error');
     }
     setTimeout(() => setMessage(''), 3000);
