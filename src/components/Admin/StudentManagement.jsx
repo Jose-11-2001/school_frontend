@@ -25,7 +25,7 @@ function StudentManagement() {
                     }`}
                     onClick={() => setActiveTab('register')}
                 >
-                    📝 Register Student
+                    Register Student
                 </button>
                 <button
                     className={`px-6 py-3 font-semibold transition-all duration-200 ${
@@ -35,7 +35,7 @@ function StudentManagement() {
                     }`}
                     onClick={() => setActiveTab('list')}
                 >
-                    📋 Student List
+                    Student List
                 </button>
             </div>
 

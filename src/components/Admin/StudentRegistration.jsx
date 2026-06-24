@@ -124,7 +124,7 @@ function StudentRegistration({ onStudentAdded }) {
             setClasses(normalizedData);
             
             if (normalizedData.length === 0) {
-                setMessage('⚠️ No classes found. Please add classes in Class Management first.');
+                setMessage('No classes found. Please add classes in Class Management first.');
                 setMessageType('warning');
                 setTimeout(() => setMessage(''), 5000);
             }
@@ -158,7 +158,7 @@ function StudentRegistration({ onStudentAdded }) {
                 
                 setClasses(data);
             } else {
-                setMessage('⚠️ Error loading classes. Please add classes in Class Management.');
+                setMessage('Error loading classes. Please add classes in Class Management.');
                 setMessageType('error');
                 setTimeout(() => setMessage(''), 5000);
             }
@@ -221,7 +221,7 @@ function StudentRegistration({ onStudentAdded }) {
         setMessage('');
         
         if (!formData.admissionNumber || !formData.fullName) {
-            setMessage('⚠️ Admission Number and Full Name are required');
+            setMessage('Admission Number and Full Name are required');
             setMessageType('error');
             setLoading(false);
             return;
@@ -234,7 +234,7 @@ function StudentRegistration({ onStudentAdded }) {
             const token = localStorage.getItem('token');
             
             if (!token) {
-                setMessage('⚠️ Please login first');
+                setMessage('Please login first');
                 setMessageType('error');
                 setLoading(false);
                 return;
@@ -258,7 +258,7 @@ function StudentRegistration({ onStudentAdded }) {
             const studentData = await studentResponse.json();
             
             if (!studentResponse.ok) {
-                setMessage(`❌ ${studentData.message || 'Error adding student'}`);
+                setMessage(`${studentData.message || 'Error adding student'}`);
                 setMessageType('error');
                 setLoading(false);
                 return;
@@ -283,10 +283,10 @@ function StudentRegistration({ onStudentAdded }) {
             
             if (userResponse.ok) {
                 setMessage(
-                    `✅ Student "${formData.fullName}" added successfully!\n\n` +
-                    `📧 Login Email: ${email}\n` +
-                    `🔑 Temporary Password: ${password}\n\n` +
-                    `⚠️ Student must change password on first login.`
+                    `Student "${formData.fullName}" added successfully!\n\n` +
+                    `Login Email: ${email}\n` +
+                    `Temporary Password: ${password}\n\n` +
+                    `Student must change password on first login.`
                 );
                 setMessageType('success');
                 setFormData({
@@ -304,12 +304,12 @@ function StudentRegistration({ onStudentAdded }) {
                 // Refresh classes after adding student
                 await loadClasses();
             } else {
-                setMessage(`⚠️ Student added but user account creation failed: ${userData.message}`);
+                setMessage(`Student added but user account creation failed: ${userData.message}`);
                 setMessageType('warning');
             }
         } catch (error) {
             console.error('Error:', error);
-            setMessage(`❌ ${error.message || 'Network error'}`);
+            setMessage(`${error.message || 'Network error'}`);
             setMessageType('error');
         } finally {
             setLoading(false);
@@ -452,10 +452,10 @@ function StudentRegistration({ onStudentAdded }) {
                                 ))}
                             </select>
                             {!formData.class && (
-                                <p className="text-xs text-yellow-600 mt-1">📌 Please select a class first</p>
+                                <p className="text-xs text-yellow-600 mt-1">Please select a class first</p>
                             )}
                             {formData.class && streams.length === 0 && (
-                                <p className="text-xs text-yellow-600 mt-1">⚠️ No streams available for this class</p>
+                                <p className="text-xs text-yellow-600 mt-1">No streams available for this class</p>
                             )}
                         </div>
                     </div>
@@ -494,7 +494,7 @@ function StudentRegistration({ onStudentAdded }) {
                     {/* Subjects Display */}
                     {formData.class && formData.stream && (
                         <div className="border rounded-lg p-4 bg-gray-50">
-                            <h3 className="font-bold text-lg mb-3 text-gray-800">📚 Subjects Allocation</h3>
+                            <h3 className="font-bold text-lg mb-3 text-gray-800">Subjects Allocation</h3>
                             
                             {availableSubjects.coreSubjects?.length === 0 && 
                              availableSubjects.humanitiesSubjects?.length === 0 && 
@@ -507,7 +507,7 @@ function StudentRegistration({ onStudentAdded }) {
                                 <>
                                     {availableSubjects.coreSubjects?.length > 0 && (
                                         <div className="mb-4">
-                                            <h4 className="font-semibold text-green-700 mb-2">✓ Core Subjects (Compulsory)</h4>
+                                            <h4 className="font-semibold text-green-700 mb-2">Core Subjects (Compulsory)</h4>
                                             <div className="flex flex-wrap gap-2">
                                                 {availableSubjects.coreSubjects.map((subject, index) => (
                                                     <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
@@ -520,7 +520,7 @@ function StudentRegistration({ onStudentAdded }) {
 
                                     {formData.root === 'Humanities' && availableSubjects.humanitiesSubjects?.length > 0 && (
                                         <div className="mb-4">
-                                            <h4 className="font-semibold text-blue-700 mb-2">📖 Humanities Subjects</h4>
+                                            <h4 className="font-semibold text-blue-700 mb-2">Humanities Subjects</h4>
                                             <div className="flex flex-wrap gap-2">
                                                 {availableSubjects.humanitiesSubjects.map((subject, index) => (
                                                     <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
@@ -533,7 +533,7 @@ function StudentRegistration({ onStudentAdded }) {
 
                                     {formData.root === 'Sciences' && availableSubjects.scienceSubjects?.length > 0 && (
                                         <div className="mb-4">
-                                            <h4 className="font-semibold text-purple-700 mb-2">🔬 Science Subjects</h4>
+                                            <h4 className="font-semibold text-purple-700 mb-2">Science Subjects</h4>
                                             <div className="flex flex-wrap gap-2">
                                                 {availableSubjects.scienceSubjects.map((subject, index) => (
                                                     <span key={index} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
@@ -569,7 +569,7 @@ function StudentRegistration({ onStudentAdded }) {
                                     Registering Student...
                                 </span>
                             ) : (
-                                '📝 Register Student & Create Account'
+                                'Register Student & Create Account'
                             )}
                         </button>
                         <button

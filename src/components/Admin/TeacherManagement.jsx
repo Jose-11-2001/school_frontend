@@ -31,7 +31,7 @@ function TeacherManagement() {
       setTeachers(data);
     } catch (error) {
       console.error('Error loading teachers:', error);
-      setMessage('❌ Error loading teachers');
+      setMessage('Error loading teachers');
       setMessageType('error');
       setTimeout(() => setMessage(''), 3000);
     } finally {
@@ -101,12 +101,12 @@ function TeacherManagement() {
         loadTeachers();
       } else {
         const error = await response.json();
-        setMessage(`❌ Error: ${error.message || 'Failed to add teacher'}`);
+        setMessage(`Error: ${error.message || 'Failed to add teacher'}`);
         setMessageType('error');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('❌ Error adding teacher');
+      setMessage('Error adding teacher');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -129,12 +129,12 @@ function TeacherManagement() {
           loadTeachers();
         } else {
           const error = await response.json();
-          setMessage(`❌ Error: ${error.message || 'Failed to delete teacher'}`);
+          setMessage(`Error: ${error.message || 'Failed to delete teacher'}`);
           setMessageType('error');
         }
       } catch (error) {
         console.error('Error:', error);
-        setMessage('❌ Error deleting teacher');
+        setMessage('Error deleting teacher');
         setMessageType('error');
       }
       setTimeout(() => setMessage(''), 3000);
@@ -158,11 +158,11 @@ function TeacherManagement() {
           alert(` Password reset for ${name}\n\n New Password: ${data.newPassword}\n\n Teacher must change password on next login.`);
           loadTeachers();
         } else {
-          alert(`❌ Error: ${data.message || 'Failed to reset password'}`);
+          alert(`Error: ${data.message || 'Failed to reset password'}`);
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error resetting password');
+        alert('Error resetting password');
       }
     }
   };

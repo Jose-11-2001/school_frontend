@@ -172,7 +172,7 @@ function StudentList({ refreshTrigger }) {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label className="block text-gray-700 text-sm font-semibold mb-2">
-                                🔍 Search
+                                Search
                             </label>
                             <input
                                 type="text"
@@ -184,7 +184,7 @@ function StudentList({ refreshTrigger }) {
                         </div>
                         <div>
                             <label className="block text-gray-700 text-sm font-semibold mb-2">
-                                📚 Filter by Class
+                                Filter by Class
                             </label>
                             <select
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -199,7 +199,7 @@ function StudentList({ refreshTrigger }) {
                         </div>
                         <div>
                             <label className="block text-gray-700 text-sm font-semibold mb-2">
-                                📊 Filter by Stream
+                                Filter by Stream
                             </label>
                             <select
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -213,7 +213,7 @@ function StudentList({ refreshTrigger }) {
                                 ))}
                             </select>
                             {!filterClass && (
-                                <p className="text-xs text-yellow-600 mt-1">📌 Select a class first</p>
+                                <p className="text-xs text-yellow-600 mt-1">Select a class first</p>
                             )}
                         </div>
                         <div className="flex items-end gap-2">
@@ -221,7 +221,7 @@ function StudentList({ refreshTrigger }) {
                                 onClick={clearFilters}
                                 className="w-full bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
                             >
-                                🧹 Clear Filters
+                                Clear Filters
                             </button>
                         </div>
                     </div>
@@ -231,7 +231,7 @@ function StudentList({ refreshTrigger }) {
                 <div className="overflow-x-auto">
                     {filteredStudents.length === 0 ? (
                         <div className="text-center py-12">
-                            <div className="text-6xl mb-4">📭</div>
+                            <div className="text-6xl mb-4"></div>
                             <p className="text-gray-500 text-lg">No students found</p>
                             {searchTerm || filterClass || filterStream ? (
                                 <p className="text-sm text-gray-400 mt-2">Try adjusting your search or filters</p>

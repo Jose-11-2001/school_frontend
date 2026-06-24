@@ -96,19 +96,19 @@ function ClassManagement() {
       });
       
       if (response.ok) {
-        setMessage('✅ Class added successfully!');
+        setMessage('Class added successfully!');
         setShowAddForm(false);
         setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
         loadClasses();
         setTimeout(() => setMessage(''), 3000);
       } else {
         const error = await response.json();
-        setMessage(`❌ Error: ${error.message || 'Failed to add class'}`);
+        setMessage(`Error: ${error.message || 'Failed to add class'}`);
         setTimeout(() => setMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('❌ Error adding class');
+      setMessage('Error adding class');
       setTimeout(() => setMessage(''), 3000);
     }
   };
@@ -135,24 +135,24 @@ function ClassManagement() {
       const data = await response.json();
       
       if (response.ok) {
-        setMessage('✅ Class updated successfully!');
+        setMessage('Class updated successfully!');
         setEditingClass(null);
         setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
         loadClasses();
         setTimeout(() => setMessage(''), 3000);
       } else {
-        setMessage(`❌ Error: ${data.message || 'Failed to update class'}`);
+        setMessage(`Error: ${data.message || 'Failed to update class'}`);
         setTimeout(() => setMessage(''), 3000);
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage(`❌ Error updating class: ${error.message}`);
+      setMessage(`Error updating class: ${error.message}`);
       setTimeout(() => setMessage(''), 3000);
     }
   };
 
   const handleDeleteClass = async (id, name) => {
-    if (confirm(`⚠️ Are you sure you want to delete class "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete class "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/admin/classes/${id}`, {
@@ -161,17 +161,17 @@ function ClassManagement() {
         });
         
         if (response.ok) {
-          setMessage(`✅ Class "${name}" deleted successfully!`);
+          setMessage(`Class "${name}" deleted successfully!`);
           loadClasses();
           setTimeout(() => setMessage(''), 3000);
         } else {
           const error = await response.json();
-          setMessage(`❌ Error: ${error.message || 'Failed to delete class'}`);
+          setMessage(`Error: ${error.message || 'Failed to delete class'}`);
           setTimeout(() => setMessage(''), 3000);
         }
       } catch (error) {
         console.error('Error:', error);
-        setMessage('❌ Error deleting class');
+        setMessage('Error deleting class');
         setTimeout(() => setMessage(''), 3000);
       }
     }
@@ -224,7 +224,7 @@ function ClassManagement() {
 
       {message && (
         <div className={`p-3 rounded-lg mb-4 ${
-          message.includes('✅') 
+          message.includes('') 
             ? 'bg-green-50 text-green-700 border border-green-200' 
             : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
@@ -392,7 +392,7 @@ function ClassManagement() {
                           </span>
                         ) : (
                           <span className="text-orange-500 flex items-center gap-1">
-                            <span>⚠️</span> Not Assigned
+                            <span></span> Not Assigned
                           </span>
                         )}
                       </td>
@@ -449,7 +449,7 @@ function ClassManagement() {
       {teachers.length === 0 && (
         <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
           <p className="text-yellow-800 flex items-center gap-2">
-            <span>⚠️</span> No teachers available. Please add teachers first in Teacher Management tab.
+            <span></span> No teachers available. Please add teachers first in Teacher Management tab.
           </p>
         </div>
       )}

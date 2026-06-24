@@ -66,19 +66,19 @@ function SubjectsManagement() {
       
       if (response.ok) {
         const data = await response.json();
-        setMessage(`✅ Subject "${data.name}" added successfully!`);
+        setMessage(`Subject "${data.name}" added successfully!`);
         setMessageType('success');
         setName('');
         setCode('');
         loadSubjects();
       } else {
         const error = await response.json();
-        setMessage(`❌ ${error.message || 'Failed to add subject'}`);
+        setMessage(`${error.message || 'Failed to add subject'}`);
         setMessageType('error');
       }
     } catch (error) {
       console.error('Error adding subject:', error);
-      setMessage('❌ Error adding subject. Please try again.');
+      setMessage('Error adding subject. Please try again.');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -90,7 +90,7 @@ function SubjectsManagement() {
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">📚 Manage Subjects</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Manage Subjects</h2>
           <p className="text-sm text-gray-500 mt-1">Add and manage all subjects in the system</p>
         </div>
         <div className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-full">
@@ -161,7 +161,7 @@ function SubjectsManagement() {
             {subjects.length === 0 ? (
               <tr>
                 <td colSpan="3" className="px-6 py-8 text-center text-gray-500">
-                  <div className="text-4xl mb-2">📚</div>
+                  <div className="text-4xl mb-2"></div>
                   No subjects found. Add your first subject above.
                 </td>
               </tr>

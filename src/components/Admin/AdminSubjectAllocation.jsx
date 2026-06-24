@@ -25,7 +25,7 @@ function SubjectAllocation() {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        setMessage('⚠️ Please login first');
+        setMessage('Please login first');
         setMessageType('error');
         setLoading(false);
         return;
@@ -75,7 +75,7 @@ function SubjectAllocation() {
       
     } catch (error) {
       console.error('Error loading data:', error);
-      setMessage('❌ Error loading data. Please try again.');
+      setMessage('Error loading data. Please try again.');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -158,7 +158,7 @@ function SubjectAllocation() {
   const handleAllocate = async (e) => {
     e.preventDefault();
     if (!formData.classId || !formData.subjectId || !formData.teacherId) {
-      setMessage('⚠️ Please select Class, Subject, and Teacher');
+      setMessage('Please select Class, Subject, and Teacher');
       setMessageType('error');
       setTimeout(() => setMessage(''), 3000);
       return;
@@ -183,17 +183,17 @@ function SubjectAllocation() {
       
       const data = await response.json();
       if (response.ok) {
-        setMessage(`✅ ${data.message || 'Teacher allocated successfully!'}`);
+        setMessage(`${data.message || 'Teacher allocated successfully!'}`);
         setMessageType('success');
         setFormData({ ...formData, subjectId: '', teacherId: '' });
         loadAllocations(formData.classId);
       } else {
-        setMessage(`❌ ${data.message || 'Allocation failed'}`);
+        setMessage(`${data.message || 'Allocation failed'}`);
         setMessageType('error');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('❌ Error allocating teacher. Please try again.');
+      setMessage('Error allocating teacher. Please try again.');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -214,17 +214,17 @@ function SubjectAllocation() {
       });
       
       if (response.ok) {
-        setMessage(`✅ Allocation removed successfully`);
+        setMessage(`Allocation removed successfully`);
         setMessageType('success');
         loadAllocations(formData.classId);
       } else {
         const data = await response.json();
-        setMessage(`❌ ${data.message || 'Failed to remove'}`);
+        setMessage(` ${data.message || 'Failed to remove'}`);
         setMessageType('error');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('❌ Error removing allocation');
+      setMessage('Error removing allocation');
       setMessageType('error');
     }
     setTimeout(() => setMessage(''), 3000);
@@ -283,7 +283,7 @@ function SubjectAllocation() {
       
       {!hasData && !loading && (
         <div className="p-6 bg-yellow-50 rounded-lg border border-yellow-200 text-center">
-          <div className="text-4xl mb-3">📚</div>
+          <div className="text-4xl mb-3"></div>
           <h3 className="text-lg font-semibold text-yellow-800">No Data Available</h3>
           <p className="text-yellow-700 mt-2">
             Please add the following before allocating teachers:
@@ -320,7 +320,7 @@ function SubjectAllocation() {
                     ))}
                   </select>
                   {classes.length === 0 && (
-                    <p className="text-xs text-yellow-600 mt-1">⚠️ No classes available</p>
+                    <p className="text-xs text-yellow-600 mt-1">No classes available</p>
                   )}
                 </div>
                 
@@ -339,7 +339,7 @@ function SubjectAllocation() {
                     ))}
                   </select>
                   {subjects.length === 0 && (
-                    <p className="text-xs text-yellow-600 mt-1">⚠️ No subjects available</p>
+                    <p className="text-xs text-yellow-600 mt-1">No subjects available</p>
                   )}
                 </div>
                 
@@ -358,7 +358,7 @@ function SubjectAllocation() {
                     ))}
                   </select>
                   {teachers.length === 0 && (
-                    <p className="text-xs text-yellow-600 mt-1">⚠️ No teachers available</p>
+                    <p className="text-xs text-yellow-600 mt-1">No teachers available</p>
                   )}
                 </div>
                 
@@ -394,7 +394,7 @@ function SubjectAllocation() {
               
               {allocations.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
-                  <div className="text-4xl mb-2">📋</div>
+                  <div className="text-4xl mb-2"></div>
                   <p>No allocations yet. Use the form above to allocate teachers to subjects.</p>
                 </div>
               ) : (
@@ -413,7 +413,7 @@ function SubjectAllocation() {
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">{alloc.subjectName || getSubjectName(alloc.subjectId)}</td>
                           <td className="px-6 py-4 text-sm text-gray-600">
                             <span className="flex items-center gap-1">
-                              👨‍🏫 {alloc.teacherName || getTeacherName(alloc.teacherId)}
+                              {alloc.teacherName || getTeacherName(alloc.teacherId)}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm">
@@ -421,7 +421,7 @@ function SubjectAllocation() {
                               onClick={() => handleRemoveAllocation(alloc.id, alloc.subjectName || getSubjectName(alloc.subjectId))}
                               className="text-red-600 hover:text-red-800 transition-colors flex items-center gap-1"
                             >
-                              🗑️ Remove
+                              Remove
                             </button>
                           </td>
                         </tr>

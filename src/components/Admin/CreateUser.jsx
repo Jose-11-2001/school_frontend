@@ -95,12 +95,12 @@ function CreateUser() {
         setGeneratedEmail('');
         setGeneratedPassword('');
       } else {
-        setMessage(`❌ ${data.message}`);
+        setMessage(`${data.message}`);
         setMessageType('error');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('❌ Error creating user');
+      setMessage('Error creating user');
       setMessageType('error');
     } finally {
       setLoading(false);

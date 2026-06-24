@@ -64,7 +64,7 @@ function AdminUserManagement() {
   // ==================== TEACHER CRUD OPERATIONS ====================
 
   const handleDeleteTeacher = async (id, name) => {
-    if (confirm(`⚠️ Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/admin/teachers/${id}`, {
@@ -73,17 +73,17 @@ function AdminUserManagement() {
         });
         
         if (response.ok) {
-          setMessage(`✅ Teacher "${name}" deleted successfully!`);
+          setMessage(`Teacher "${name}" deleted successfully!`);
           setMessageType('success');
           loadTeachers();
         } else {
           const error = await response.json();
-          setMessage(`❌ Error: ${error.message || 'Failed to delete teacher'}`);
+          setMessage(`Error: ${error.message || 'Failed to delete teacher'}`);
           setMessageType('error');
         }
       } catch (error) {
         console.error('Error:', error);
-        setMessage('❌ Error deleting teacher');
+        setMessage('Error deleting teacher');
         setMessageType('error');
       }
       setTimeout(() => setMessage(''), 3000);
@@ -118,19 +118,19 @@ function AdminUserManagement() {
       });
       
       if (response.ok) {
-        setMessage(`✅ Teacher "${editFormData.name}" updated successfully!`);
+        setMessage(`Teacher "${editFormData.name}" updated successfully!`);
         setMessageType('success');
         setShowEditModal(false);
         setEditingTeacher(null);
         loadTeachers();
       } else {
         const error = await response.json();
-        setMessage(`❌ Error: ${error.message || 'Failed to update teacher'}`);
+        setMessage(`Error: ${error.message || 'Failed to update teacher'}`);
         setMessageType('error');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('❌ Error updating teacher');
+      setMessage('Error updating teacher');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -141,7 +141,7 @@ function AdminUserManagement() {
   // ==================== STUDENT CRUD OPERATIONS ====================
 
   const handleDeleteStudent = async (id, name) => {
-    if (confirm(`⚠️ Are you sure you want to delete student "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete student "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/admin/students/${id}`, {
@@ -150,17 +150,17 @@ function AdminUserManagement() {
         });
         
         if (response.ok) {
-          setMessage(`✅ Student "${name}" deleted successfully!`);
+          setMessage(`Student "${name}" deleted successfully!`);
           setMessageType('success');
           loadStudents();
         } else {
           const error = await response.json();
-          setMessage(`❌ Error: ${error.message || 'Failed to delete student'}`);
+          setMessage(`Error: ${error.message || 'Failed to delete student'}`);
           setMessageType('error');
         }
       } catch (error) {
         console.error('Error:', error);
-        setMessage('❌ Error deleting student');
+        setMessage(' Error deleting student');
         setMessageType('error');
       }
       setTimeout(() => setMessage(''), 3000);
@@ -198,19 +198,19 @@ function AdminUserManagement() {
       });
       
       if (response.ok) {
-        setMessage(`✅ Student "${editFormData.name}" updated successfully!`);
+        setMessage(`Student "${editFormData.name}" updated successfully!`);
         setMessageType('success');
         setShowEditModal(false);
         setEditingStudent(null);
         loadStudents();
       } else {
         const error = await response.json();
-        setMessage(`❌ Error: ${error.message || 'Failed to update student'}`);
+        setMessage(` Error: ${error.message || 'Failed to update student'}`);
         setMessageType('error');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('❌ Error updating student');
+      setMessage(' Error updating student');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -218,10 +218,10 @@ function AdminUserManagement() {
     }
   };
 
-  // ==================== PASSWORD RESET ====================
+  // PASSWORD RESET 
 
   const handleResetPassword = async (id, name, type) => {
-    if (confirm(`🔑 Reset password for ${type} "${name}"?\n\nThey will need to change it on next login.`)) {
+    if (confirm(`Reset password for ${type} "${name}"?\n\nThey will need to change it on next login.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/auth/reset-password/${id}`, {
@@ -234,23 +234,23 @@ function AdminUserManagement() {
         
         const data = await response.json();
         if (response.ok) {
-          alert(`✅ Password reset for ${name}\n\n📧 New Password: ${data.newPassword}\n\n⚠️ User must change password on next login.`);
+          alert(`Password reset for ${name}\n\n New Password: ${data.newPassword}\n\n User must change password on next login.`);
           if (type === 'teacher') {
             loadTeachers();
           } else {
             loadStudents();
           }
         } else {
-          alert(`❌ Error: ${data.message || 'Failed to reset password'}`);
+          alert(`Error: ${data.message || 'Failed to reset password'}`);
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error resetting password');
+        alert('Error resetting password');
       }
     }
   };
 
-  // ==================== MODAL CLOSE ====================
+  // MODAL CLOSE
 
   const closeModal = () => {
     setShowEditModal(false);
@@ -280,7 +280,7 @@ function AdminUserManagement() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">👤 User Management</h2>
+          <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
           <p className="text-sm text-gray-500 mt-1">Manage all teacher and student accounts</p>
         </div>
         <div className="flex gap-2">
@@ -292,7 +292,7 @@ function AdminUserManagement() {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            👨‍🏫 Teachers ({teachers.length})
+            Teachers ({teachers.length})
           </button>
           <button
             onClick={() => setActiveTab('students')}
@@ -302,7 +302,7 @@ function AdminUserManagement() {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            👨‍🎓 Students ({students.length})
+            Students ({students.length})
           </button>
         </div>
       </div>
@@ -322,7 +322,7 @@ function AdminUserManagement() {
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex justify-between items-center">
             <div>
-              <h3 className="text-xl font-semibold text-gray-800">👨‍🏫 Teacher Accounts</h3>
+              <h3 className="text-xl font-semibold text-gray-800">Teacher Accounts</h3>
               <p className="text-gray-600 text-sm mt-1">Manage all teacher accounts - Edit, Delete, Reset Password</p>
             </div>
             <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
@@ -348,7 +348,7 @@ function AdminUserManagement() {
                 {teachers.length === 0 ? (
                   <tr>
                     <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
-                      <div className="text-4xl mb-2">👨‍🏫</div>
+                      <div className="text-4xl mb-2"></div>
                       No teachers found. Add your first teacher in Teacher Management tab.
                     </td>
                   </tr>
@@ -364,11 +364,11 @@ function AdminUserManagement() {
                       <td className="px-6 py-4">
                         {teacher.mustChangePassword ? (
                           <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            🔑 Password Required
+                            Password Required
                           </span>
                         ) : (
                           <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            ✅ Active
+                             Active
                           </span>
                         )}
                       </td>
@@ -378,21 +378,21 @@ function AdminUserManagement() {
                           className="text-blue-600 hover:text-blue-800 transition-colors"
                           title="Edit Teacher"
                         >
-                          ✏️ Edit
+                          Edit
                         </button>
                         <button
                           onClick={() => handleResetPassword(teacher.id, teacher.name, 'teacher')}
                           className="text-yellow-600 hover:text-yellow-800 transition-colors"
                           title="Reset Password"
                         >
-                          🔑 Reset Pwd
+                          Reset Pwd
                         </button>
                         <button
                           onClick={() => handleDeleteTeacher(teacher.id, teacher.name)}
                           className="text-red-600 hover:text-red-800 transition-colors"
                           title="Delete Teacher"
                         >
-                          🗑️ Delete
+                          Delete
                         </button>
                       </td>
                     </tr>
@@ -409,7 +409,7 @@ function AdminUserManagement() {
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex justify-between items-center">
             <div>
-              <h3 className="text-xl font-semibold text-gray-800">👨‍🎓 Student Accounts</h3>
+              <h3 className="text-xl font-semibold text-gray-800">Student Accounts</h3>
               <p className="text-gray-600 text-sm mt-1">Manage all student accounts - Edit, Delete, Reset Password</p>
             </div>
             <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full">
@@ -434,7 +434,7 @@ function AdminUserManagement() {
                 {students.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                      <div className="text-4xl mb-2">👨‍🎓</div>
+                      <div className="text-4xl mb-2"></div>
                       No students found. Add your first student in Manage Students tab.
                     </td>
                   </tr>
@@ -448,7 +448,7 @@ function AdminUserManagement() {
                       <td className="px-6 py-4 text-sm text-gray-600">{student.stream || '-'}</td>
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          ✅ Active
+                          Active
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm space-x-2">
@@ -457,21 +457,21 @@ function AdminUserManagement() {
                           className="text-blue-600 hover:text-blue-800 transition-colors"
                           title="Edit Student"
                         >
-                          ✏️ Edit
+                          Edit
                         </button>
                         <button
                           onClick={() => handleResetPassword(student.id, student.fullName, 'student')}
                           className="text-yellow-600 hover:text-yellow-800 transition-colors"
                           title="Reset Password"
                         >
-                          🔑 Reset Pwd
+                          Reset Pwd
                         </button>
                         <button
                           onClick={() => handleDeleteStudent(student.id, student.fullName)}
                           className="text-red-600 hover:text-red-800 transition-colors"
                           title="Delete Student"
                         >
-                          🗑️ Delete
+                          Delete
                         </button>
                       </td>
                     </tr>
@@ -490,7 +490,7 @@ function AdminUserManagement() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-800">
-                  {editingTeacher ? '✏️ Edit Teacher' : '✏️ Edit Student'}
+                  {editingTeacher ? 'Edit Teacher' : 'Edit Student'}
                 </h3>
                 <button
                   onClick={closeModal}
@@ -604,7 +604,7 @@ function AdminUserManagement() {
                     disabled={loading}
                     className="flex-1 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                   >
-                    {loading ? 'Updating...' : '💾 Update'}
+                    {loading ? 'Updating...' : 'Update'}
                   </button>
                   <button
                     type="button"

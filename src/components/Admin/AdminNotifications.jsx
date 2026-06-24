@@ -22,7 +22,7 @@ const AdminNotifications = () => {
         return;
       }
 
-      // ✅ UPDATED: Using Render URL
+      // UPDATED: Using Render URL
       const response = await fetch('https://school-yathu.onrender.com/api/Notifications/admin', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -56,7 +56,7 @@ const AdminNotifications = () => {
         return;
       }
 
-      // ✅ UPDATED: Using Render URL
+      //  UPDATED: Using Render URL
       const response = await fetch(`https://school-yathu.onrender.com/api/Notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
@@ -87,7 +87,7 @@ const AdminNotifications = () => {
         return;
       }
 
-      // ✅ UPDATED: Using Render URL
+      //  UPDATED: Using Render URL
       const response = await fetch('https://school-yathu.onrender.com/api/Notifications/read-all', {
         method: 'PUT',
         headers: {

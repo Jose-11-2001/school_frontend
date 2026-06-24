@@ -32,7 +32,7 @@ function AddStudent() {
     setMessage('');
     
     if (!formData.admissionNumber || !formData.fullName) {
-      setMessage('⚠️ Admission Number and Full Name are required');
+      setMessage('Admission Number and Full Name are required');
       setMessageType('error');
       setLoading(false);
       return;
@@ -45,7 +45,7 @@ function AddStudent() {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        setMessage('⚠️ Please login first');
+        setMessage('Please login first');
         setMessageType('error');
         setLoading(false);
         return;
@@ -69,7 +69,7 @@ function AddStudent() {
       const studentData = await studentResponse.json();
       
       if (!studentResponse.ok) {
-        setMessage(`❌ ${studentData.message || 'Error adding student'}`);
+        setMessage(`${studentData.message || 'Error adding student'}`);
         setMessageType('error');
         setLoading(false);
         return;
@@ -94,21 +94,21 @@ function AddStudent() {
       
       if (userResponse.ok) {
         setMessage(
-          `✅ Student "${formData.fullName}" added successfully!\n\n` +
-          `📧 Login Email: ${email}\n` +
-          `🔑 Temporary Password: ${password}\n\n` +
-          `⚠️ Student must change password on first login.`
+          `Student "${formData.fullName}" added successfully!\n\n` +
+          `Login Email: ${email}\n` +
+          `Temporary Password: ${password}\n\n` +
+          `Student must change password on first login.`
         );
         setMessageType('success');
         setFormData({ admissionNumber: '', fullName: '', class: '', stream: '' });
         window.dispatchEvent(new Event('studentAdded'));
       } else {
-        setMessage(`⚠️ Student added but user account creation failed: ${userData.message}`);
+        setMessage(`Student added but user account creation failed: ${userData.message}`);
         setMessageType('warning');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage(`❌ ${error.message || 'Network error'}`);
+      setMessage(`${error.message || 'Network error'}`);
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -124,7 +124,7 @@ function AddStudent() {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">📝 Add New Student</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Add New Student</h2>
         <div className="text-sm text-gray-500">
           <span className="text-red-500">*</span> Required fields
         </div>

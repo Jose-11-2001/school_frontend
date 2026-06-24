@@ -77,10 +77,10 @@ function ResultsApproval() {
         setResultDetails(null);
         setSelectedResult(null);
       } else {
-        setMessage(`❌ ${data.message}`);
+        setMessage(`${data.message}`);
       }
     } catch (error) {
-      setMessage('❌ Error approving results');
+      setMessage('Error approving results');
     }
     setTimeout(() => setMessage(''), 5000);
   };
