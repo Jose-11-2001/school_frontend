@@ -4,18 +4,20 @@ import TeacherManagement from './TeacherManagement';
 import ClassManagement from './ClassManagement';
 import ResultsApproval from './ResultsApproval';
 import StudentList from './StudentList';
-import AddStudent from './AddStudent';
 import AdminUserManagement from './AdminUserManagement';
 import Rankings from './Rankings';
 import AdminNotifications from './AdminNotifications';
 import AdminSubjectAllocation from './AdminSubjectAllocation';
 import StudentRegistration from './StudentRegistration';
+import SubjectAllocation from './SubjectAllocation';
+import SubjectsManagement from './SubjectsManagement';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('teachers');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [refreshStudents, setRefreshStudents] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,15 +45,20 @@ function AdminDashboard() {
     navigate(-1);
   };
 
+  const handleStudentRegistered = () => {
+    // Toggle refresh to update student list
+    setRefreshStudents(prev => !prev);
+  };
+
   const menuItems = [
     { id: 'teachers', label: 'Teacher Management', icon: '' },
     { id: 'student-registration', label: 'Register Students', icon: '' },
-    { id: 'students', label: 'Manage Students', icon: '' },
+    { id: 'students', label: 'Student List', icon: '' },
     { id: 'users', label: 'Manage Users', icon: '' },
     { id: 'classes', label: 'Class Management', icon: '' },
     { id: 'allocation', label: 'Subject Allocation (Teachers)', icon: '' },
     { id: 'student-subjects', label: 'Student Subject Allocation', icon: '' },
-    { id: 'subjects', label: 'Manage Subjects', icon: '' }, 
+    { id: 'subjects', label: 'Manage Subjects', icon: '' },
     { id: 'approval', label: 'Results Approval', icon: '' },
     { id: 'rankings', label: 'View Rankings', icon: '' },
   ];
@@ -77,7 +84,7 @@ function AdminDashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <h1 className="text-sm font-bold">Admin  portal</h1>
+          <h1 className="text-sm font-bold">Admin Portal</h1>
           <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
@@ -155,7 +162,7 @@ function AdminDashboard() {
             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
           >
             <span className="text-xl"></span>
-            <span  className="text-white bold">Logout</span>
+            <span className="text-white font-bold">Logout</span>
           </button>
         </div>
       </div>
@@ -188,14 +195,17 @@ function AdminDashboard() {
               {activeTab === 'classes' && <ClassManagement />}
               {activeTab === 'allocation' && <SubjectAllocation />}
               {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
-              {activeTab === 'student-registration' && <StudentRegistration />}
+              {activeTab === 'student-registration' && (
+                <StudentRegistration onStudentAdded={handleStudentRegistered} />
+              )}
               {activeTab === 'subjects' && <SubjectsManagement />}
               {activeTab === 'students' && (
                 <div className="space-y-6">
-                  <AddStudent />
-                  <div className="mt-8">
-                    <StudentList />
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 className="text-lg font-semibold text-blue-800">Student Management</h3>
+                    <p className="text-sm text-blue-600">View and manage all registered students</p>
                   </div>
+                  <StudentList refreshTrigger={refreshStudents} />
                 </div>
               )}
               {activeTab === 'users' && <AdminUserManagement />}
