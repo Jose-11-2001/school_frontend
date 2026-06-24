@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import TeacherManagement from './TeacherManagement';
 import ClassManagement from './ClassManagement';
 import ResultsApproval from './ResultsApproval';
-import StudentList from '../StudentList';
+import StudentList from './StudentList';
 import AddStudent from './AddStudent';
 import AdminUserManagement from './AdminUserManagement';
 import Rankings from '../Rankings';
