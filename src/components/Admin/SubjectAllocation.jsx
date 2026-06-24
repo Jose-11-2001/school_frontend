@@ -13,6 +13,7 @@ function SubjectAllocation() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const [loading, setLoading] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -31,47 +32,73 @@ function SubjectAllocation() {
         return;
       }
 
-      // ✅ Load classes using AdminSubjectAllocation endpoint
+      console.log('Loading data from API...');
+
+      // ✅ Load classes
       const classesRes = await fetch('https://school-yathu.onrender.com/api/AdminSubjectAllocation/classes', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (classesRes.ok) {
         const classesData = await classesRes.json();
+        console.log('Classes loaded:', classesData);
         setClasses(classesData);
       } else {
         console.error('Failed to load classes:', classesRes.status);
+        // Try alternative
+        const altRes = await fetch('https://school-yathu.onrender.com/api/admin/classes', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (altRes.ok) {
+          const data = await altRes.json();
+          console.log('Classes loaded from alt:', data);
+          setClasses(data);
+        }
       }
       
-      // ✅ Load teachers using AdminSubjectAllocation endpoint
+      // ✅ Load teachers
       const teachersRes = await fetch('https://school-yathu.onrender.com/api/AdminSubjectAllocation/teachers', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (teachersRes.ok) {
         const teachersData = await teachersRes.json();
+        console.log('Teachers loaded:', teachersData);
         setTeachers(teachersData);
       } else {
         console.error('Failed to load teachers:', teachersRes.status);
+        const altRes = await fetch('https://school-yathu.onrender.com/api/admin/teachers', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (altRes.ok) {
+          const data = await altRes.json();
+          console.log('Teachers loaded from alt:', data);
+          setTeachers(data);
+        }
       }
       
-      // ✅ Load subjects using AdminSubjectAllocation endpoint
+      // ✅ Load subjects
       const subjectsRes = await fetch('https://school-yathu.onrender.com/api/AdminSubjectAllocation/available-subjects', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (subjectsRes.ok) {
         const subjectsData = await subjectsRes.json();
+        console.log('Subjects loaded:', subjectsData);
         setSubjects(subjectsData);
       } else {
         console.error('Failed to load subjects:', subjectsRes.status);
+        const altRes = await fetch('https://school-yathu.onrender.com/api/subjects', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (altRes.ok) {
+          const data = await altRes.json();
+          console.log('Subjects loaded from alt:', data);
+          setSubjects(data);
+        }
       }
       
-      // Check if any data was loaded
-      if (classes.length === 0 && teachers.length === 0 && subjects.length === 0) {
-        // Try alternative endpoints if the first ones failed
-        await loadDataAlternative();
-      }
+      setDataLoaded(true);
       
     } catch (error) {
       console.error('Error loading data:', error);
@@ -79,44 +106,6 @@ function SubjectAllocation() {
       setMessageType('error');
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Alternative endpoints if the first ones fail
-  const loadDataAlternative = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      // Try admin endpoints as fallback
-      const [classesRes, teachersRes, subjectsRes] = await Promise.all([
-        fetch('https://school-yathu.onrender.com/api/admin/classes', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('https://school-yathu.onrender.com/api/admin/teachers', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('https://school-yathu.onrender.com/api/subjects', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-      ]);
-      
-      if (classesRes.ok) {
-        const data = await classesRes.json();
-        if (data.length > 0) setClasses(data);
-      }
-      
-      if (teachersRes.ok) {
-        const data = await teachersRes.json();
-        if (data.length > 0) setTeachers(data);
-      }
-      
-      if (subjectsRes.ok) {
-        const data = await subjectsRes.json();
-        if (data.length > 0) setSubjects(data);
-      }
-      
-    } catch (error) {
-      console.error('Error loading alternative data:', error);
     }
   };
 
@@ -129,12 +118,15 @@ function SubjectAllocation() {
     
     try {
       const token = localStorage.getItem('token');
+      console.log('Loading allocations for class:', classId);
+      
       const response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/student-allocations?classId=${classId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Allocations loaded:', data);
         setAllocations(data);
       } else {
         console.error('Failed to load allocations:', response.status);
@@ -148,6 +140,7 @@ function SubjectAllocation() {
 
   const handleClassChange = (e) => {
     const classId = e.target.value;
+    console.log('Class selected:', classId);
     setFormData({ ...formData, classId });
     if (classId) {
       loadAllocations(classId);
@@ -167,6 +160,8 @@ function SubjectAllocation() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      
+      console.log('Allocating teacher:', formData);
       
       const response = await fetch('https://school-yathu.onrender.com/api/AdminSubjectAllocation/allocate-teacher-to-subject', {
         method: 'POST',
@@ -208,6 +203,8 @@ function SubjectAllocation() {
     try {
       const token = localStorage.getItem('token');
       
+      console.log('Removing allocation:', id);
+      
       const response = await fetch(`https://school-yathu.onrender.com/api/AdminSubjectAllocation/remove-allocation/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -240,7 +237,8 @@ function SubjectAllocation() {
     return teacher ? teacher.name : 'Unknown';
   };
 
-  if (loading && classes.length === 0 && teachers.length === 0 && subjects.length === 0) {
+  // Show loading state
+  if (loading && !dataLoaded) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="text-center">
@@ -293,6 +291,12 @@ function SubjectAllocation() {
             {teachers.length === 0 && <li>• Add teachers in <strong>Teacher Management</strong></li>}
             {subjects.length === 0 && <li>• Add subjects in <strong>Subjects</strong> section</li>}
           </ul>
+          <button
+            onClick={loadData}
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+          >
+            Retry
+          </button>
         </div>
       )}
       

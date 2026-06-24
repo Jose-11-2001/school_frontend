@@ -49,6 +49,7 @@ function AdminDashboard() {
     { id: 'allocation', label: 'Subject Allocation (Teachers)', icon: '' },
     { id: 'student-subjects', label: 'Student Subject Allocation', icon: '' },
     { id: 'student-registration', label: 'Register Students', icon: '' },
+    { id: 'subjects', label: 'Manage Subjects', icon: '' }, 
     { id: 'students', label: 'Manage Students', icon: '' },
     { id: 'users', label: 'Manage Users', icon: '' },
     { id: 'approval', label: 'Results Approval', icon: '' },
@@ -188,6 +189,7 @@ function AdminDashboard() {
               {activeTab === 'allocation' && <SubjectAllocation />}
               {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
               {activeTab === 'student-registration' && <StudentRegistration />}
+              {activeTab === 'subjects' && <SubjectsManagement />}
               {activeTab === 'students' && (
                 <div className="space-y-6">
                   <AddStudent />
