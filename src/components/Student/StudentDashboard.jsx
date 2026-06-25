@@ -642,9 +642,7 @@ function StudentDashboard() {
 
         {/* Sidebar Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
-          <div className="px-4 py-2 text-xs text-blue-300 uppercase tracking-wider">
-            Student Menu
-          </div>
+          
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -668,7 +666,6 @@ function StudentDashboard() {
         <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
           <div className="px-4 py-2 text-sm text-blue-200">
             <p className="font-semibold">{user?.name}</p>
-            <p className="text-xs opacity-75">{studentData?.class || 'Student'}</p>
           </div>
           <button
             onClick={handleLogout}
