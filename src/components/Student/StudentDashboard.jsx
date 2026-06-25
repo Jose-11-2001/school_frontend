@@ -318,7 +318,7 @@ function StudentDashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">📚 My Subjects</h2>
+              <h2 className="text-2xl font-bold text-gray-800"> My Subjects</h2>
               <p className="text-gray-600 mt-1">Total Subjects: {subjects.length}</p>
             </div>
             <button
@@ -479,7 +479,7 @@ function StudentDashboard() {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">My Marks</h2>
           {marks.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">📭</div>
+              <div className="text-6xl mb-4"></div>
               <p className="text-gray-500 text-lg">No marks available yet.</p>
               <p className="text-sm text-gray-400 mt-2">Check back later when teachers publish results.</p>
             </div>
