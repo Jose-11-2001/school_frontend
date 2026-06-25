@@ -12,6 +12,7 @@ import StudentRegistration from './StudentRegistration';
 import SubjectAllocation from './SubjectAllocation';
 import SubjectsManagement from './SubjectsManagement';
 
+
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('teachers');

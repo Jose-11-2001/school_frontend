@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function SubjectRegistration() {
+  const navigate = useNavigate();
   const [availableSubjects, setAvailableSubjects] = useState([]);
   const [registeredSubjects, setRegisteredSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
