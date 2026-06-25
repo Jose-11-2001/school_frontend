@@ -275,8 +275,8 @@ function StudentDashboard() {
   const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
 
   const menuItems = [
-    { id: 'my-subjects', label: 'My Subjects', icon: '📚' },
-    { id: 'results', label: 'My Results', icon: '📊' },
+    { id: 'my-subjects', label: 'My Subjects', icon: '' },
+    { id: 'results', label: 'My Results', icon: '' },
   ];
 
   // Render My Subjects section (similar to teacher's MySubjects)
@@ -332,7 +332,7 @@ function StudentDashboard() {
           
           {subjects.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <div className="text-6xl mb-4">📭</div>
+              <div className="text-6xl mb-4"></div>
               <p className="text-gray-500 text-lg">No subjects allocated yet.</p>
               <p className="text-sm text-gray-400 mt-2">Please contact the administrator to assign subjects to you.</p>
             </div>
@@ -674,7 +674,7 @@ function StudentDashboard() {
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors mt-2"
           >
-            <span className="text-xl">🚪</span>
+            <span className="text-xl"></span>
             <span className="font-bold">Logout</span>
           </button>
         </div>
