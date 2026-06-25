@@ -168,7 +168,7 @@ function Rankings() {
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">🏆 Class Rankings</h2>
+          <h2 className="text-2xl font-bold text-gray-800"> Class Rankings</h2>
           <p className="text-sm text-gray-500 mt-1">View student performance rankings by class and term</p>
         </div>
         <button
