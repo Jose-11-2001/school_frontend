@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from "../../services/api";
 import schoolLogo from '../../assets/images/logoo.jpg';
 import backgroundImage from '../../assets/images/home.jpg';
 
@@ -18,25 +17,66 @@ function Login({ setUser }) {
     setError('');
     
     try {
-      const response = await authAPI.login({ email, password });
-      const userData = response.data;
+      const response = await fetch('https://school-yathu.onrender.com/api/Auth/login', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
       
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+      // Parse the response body
+      const data = await response.json();
       
-      if (userData.mustChangePassword === true) {
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      // ✅ Extract data from response
+      const { token, id, name, email: userEmail, role, mustChangePassword } = data;
+      
+      // ✅ Validate token exists
+      if (!token) {
+        throw new Error('No token received from server');
+      }
+      
+      // ✅ Store token and user data
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({ 
+        id, 
+        name, 
+        email: userEmail, 
+        role, 
+        mustChangePassword 
+      }));
+      
+      // ✅ Update parent component state
+      if (setUser) {
+        setUser({ id, name, email: userEmail, role, mustChangePassword });
+      }
+      
+      // ✅ Navigate based on role and password change requirement
+      if (mustChangePassword === true) {
         navigate('/change-password');
-      } else if (userData.role === 'Admin') {
-        navigate('/admin-dashboard');
-      } else if (userData.role === 'Teacher') {
-        navigate('/teacher-dashboard');
-      } else {
-        navigate('/student-dashboard');
+        return;
+      }
+      
+      // Navigate based on role
+      switch(role) {
+        case 'Admin':
+          navigate('/admin-dashboard');
+          break;
+        case 'Teacher':
+          navigate('/teacher-dashboard');
+          break;
+        default:
+          navigate('/student-dashboard');
       }
       
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      console.error('Login error:', err);
+      setError(err.message || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -47,7 +87,7 @@ function Login({ setUser }) {
   };
 
   const handleGoBack = () => {
-    navigate(-1); // Go back to previous page
+    navigate(-1);
   };
 
   return (
@@ -142,11 +182,26 @@ function Login({ setUser }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition-colors disabled:bg-gray-400"
+            className="w-full bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Logging in...
+              </span>
+            ) : (
+              'Login'
+            )}
           </button>
         </form>
+        
+        {/* Optional: Add a footer or additional links */}
+        <div className="mt-4 text-center text-xs text-gray-400">
+          <p>© {new Date().getFullYear()} Mkondezi Secondary School</p>
+        </div>
       </div>
     </div>
   );
