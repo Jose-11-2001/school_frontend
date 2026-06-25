@@ -61,7 +61,8 @@ function TeacherDashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <h1 className="text-sm font-bold">Teacher Panel</h1>
+          <h1 className="text-sm font-bold">Teacher Portal</h1>
+          <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Add notification icon to mobile header */}

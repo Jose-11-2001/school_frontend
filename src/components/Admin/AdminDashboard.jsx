@@ -129,7 +129,7 @@ function AdminDashboard() {
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold">Mkondezi Admin</h1>
+              <h1 className="text-xl font-bold">Admin Portal</h1>
               <p className="text-xs text-blue-200">Secondary School</p>
             </div>
           </div>
