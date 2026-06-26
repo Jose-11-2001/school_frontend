@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../services/api';
 import schoolLogo from '../../assets/images/logoo.jpg';
 import backgroundImage from '../../assets/images/home.jpg';
 
@@ -17,31 +18,18 @@ function Login({ setUser }) {
     setError('');
     
     try {
-      const response = await fetch('https://school-yathu.onrender.com/api/Auth/login', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
+      const response = await authAPI.login({ email, password });
+      const data = response.data;
       
-      // Parse the response body
-      const data = await response.json();
+      console.log('Login response:', data); // Debug log
       
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-      
-      // ✅ Extract data from response
       const { token, id, name, email: userEmail, role, mustChangePassword } = data;
       
-      // ✅ Validate token exists
       if (!token) {
         throw new Error('No token received from server');
       }
       
-      // ✅ Store token and user data
+      // Store token and user data
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify({ 
         id, 
@@ -51,18 +39,22 @@ function Login({ setUser }) {
         mustChangePassword 
       }));
       
-      // ✅ Update parent component state
+      console.log('User stored:', { role, mustChangePassword }); // Debug log
+      
+      // Update parent component state
       if (setUser) {
         setUser({ id, name, email: userEmail, role, mustChangePassword });
       }
       
-      // ✅ Navigate based on role and password change requirement
+      // Check if password change is required
       if (mustChangePassword === true) {
+        console.log('Redirecting to change password');
         navigate('/change-password');
         return;
       }
       
       // Navigate based on role
+      console.log('Navigating to dashboard for role:', role);
       switch(role) {
         case 'Admin':
           navigate('/admin-dashboard');
@@ -70,13 +62,19 @@ function Login({ setUser }) {
         case 'Teacher':
           navigate('/teacher-dashboard');
           break;
-        default:
+        case 'Student':
           navigate('/student-dashboard');
+          break;
+        default:
+          console.error('Unknown role:', role);
+          setError('Unknown user role. Please contact support.');
+          navigate('/login');
       }
       
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.message || 'Invalid email or password. Please try again.');
+      const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -97,12 +95,9 @@ function Login({ setUser }) {
         backgroundImage: `url(${backgroundImage})`,
       }}
     >
-      {/* Dark overlay for better text readability */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       
-      {/* Login Form */}
       <div className="relative z-10 bg-white p-8 rounded-xl shadow-2xl w-96">
-        {/* Back Arrow Button */}
         <button
           onClick={handleGoBack}
           className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 transition-colors"
@@ -114,7 +109,6 @@ function Login({ setUser }) {
         </button>
         
         <div className="text-center mb-8">
-          {/* School Logo */}
           <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg bg-white">
             <img 
               src={schoolLogo}
@@ -198,7 +192,6 @@ function Login({ setUser }) {
           </button>
         </form>
         
-        {/* Optional: Add a footer or additional links */}
         <div className="mt-4 text-center text-xs text-gray-400">
           <p>© {new Date().getFullYear()} Mkondezi Secondary School</p>
         </div>
