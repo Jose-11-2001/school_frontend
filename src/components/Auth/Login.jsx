@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../../services/api';
+// ✅ FIXED: Correct path - ../services/api (not ../../services/api)
+import { authAPI } from '../services/api';
 import schoolLogo from '../../assets/images/logoo.jpg';
 import backgroundImage from '../../assets/images/home.jpg';
 
@@ -18,11 +19,10 @@ function Login({ setUser }) {
     setError('');
 
     try {
-      // ✅ Using authAPI from services/api.js
       const response = await authAPI.login({ email, password });
       const data = response.data;
 
-      console.log('🔍 Login Response:', data);
+      console.log('Login Response:', data);
 
       const { token, id, name, email: userEmail, role, mustChangePassword } = data;
 
@@ -30,10 +30,9 @@ function Login({ setUser }) {
         throw new Error('No token received from server');
       }
 
-      console.log('🔍 Role received:', role);
-      console.log('🔍 Must change password:', mustChangePassword);
+      console.log('Role received:', role);
+      console.log('Must change password:', mustChangePassword);
 
-      // Store token and user data
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify({
         id,
@@ -43,24 +42,20 @@ function Login({ setUser }) {
         mustChangePassword
       }));
 
-      console.log('🔍 Stored user:', localStorage.getItem('user'));
+      console.log('Stored user:', localStorage.getItem('user'));
 
-      // Update parent component state
       if (setUser) {
         setUser({ id, name, email: userEmail, role, mustChangePassword });
       }
 
-      // Check if password change is required
       if (mustChangePassword === true) {
-        console.log('🔍 Redirecting to change-password');
+        console.log('Redirecting to change-password');
         navigate('/change-password');
         return;
       }
 
-      // Navigate based on role
-      console.log(`🔍 Navigating to dashboard for role: "${role}"`);
+      console.log(`Navigating to dashboard for role: "${role}"`);
 
-      // ✅ Match exact case from Swagger
       if (role === 'Admin') {
         navigate('/admin-dashboard');
       } else if (role === 'Teacher') {
@@ -68,13 +63,13 @@ function Login({ setUser }) {
       } else if (role === 'Student') {
         navigate('/student-dashboard');
       } else {
-        console.error('❌ Unknown role:', role);
+        console.error('Unknown role:', role);
         setError(`Unknown user role: "${role}". Please contact support.`);
         setLoading(false);
       }
 
     } catch (err) {
-      console.error('❌ Login error:', err);
+      console.error('Login error:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password. Please try again.';
       setError(errorMessage);
     } finally {
