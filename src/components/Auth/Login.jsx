@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../../services/api';
 import schoolLogo from '../../assets/images/logoo.jpg';
 import backgroundImage from '../../assets/images/home.jpg';
 
@@ -18,15 +17,31 @@ function Login({ setUser }) {
     setError('');
     
     try {
-      const response = await authAPI.login({ email, password });
-      const data = response.data;
+      const response = await fetch('https://school-yathu.onrender.com/api/Auth/login', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
       
+      // Parse the response body
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      // ✅ Extract data from response
       const { token, id, name, email: userEmail, role, mustChangePassword } = data;
       
+      // ✅ Validate token exists
       if (!token) {
         throw new Error('No token received from server');
       }
       
+      // ✅ Store token and user data
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify({ 
         id, 
@@ -36,15 +51,18 @@ function Login({ setUser }) {
         mustChangePassword 
       }));
       
+      // ✅ Update parent component state
       if (setUser) {
         setUser({ id, name, email: userEmail, role, mustChangePassword });
       }
       
+      // ✅ Navigate based on role and password change requirement
       if (mustChangePassword === true) {
         navigate('/change-password');
         return;
       }
       
+      // Navigate based on role
       switch(role) {
         case 'Admin':
           navigate('/admin-dashboard');
@@ -58,7 +76,7 @@ function Login({ setUser }) {
       
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Invalid email or password. Please try again.');
+      setError(err.message || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -79,9 +97,12 @@ function Login({ setUser }) {
         backgroundImage: `url(${backgroundImage})`,
       }}
     >
+      {/* Dark overlay for better text readability */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
       
+      {/* Login Form */}
       <div className="relative z-10 bg-white p-8 rounded-xl shadow-2xl w-96">
+        {/* Back Arrow Button */}
         <button
           onClick={handleGoBack}
           className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 transition-colors"
@@ -93,6 +114,7 @@ function Login({ setUser }) {
         </button>
         
         <div className="text-center mb-8">
+          {/* School Logo */}
           <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg bg-white">
             <img 
               src={schoolLogo}
@@ -176,6 +198,7 @@ function Login({ setUser }) {
           </button>
         </form>
         
+        {/* Optional: Add a footer or additional links */}
         <div className="mt-4 text-center text-xs text-gray-400">
           <p>© {new Date().getFullYear()} Mkondezi Secondary School</p>
         </div>
