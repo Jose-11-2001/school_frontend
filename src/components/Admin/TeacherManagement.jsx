@@ -21,7 +21,7 @@ function TeacherManagement() {
     loadTeachers();
   }, []);
 
-  // ✅ FIXED: Load teachers using /api/Admin/teachers (capital A)
+  // ✅ Load teachers using /api/Admin/teachers
   const loadTeachers = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -32,7 +32,7 @@ function TeacherManagement() {
       setTeachers(data);
     } catch (error) {
       console.error('Error loading teachers:', error);
-      setMessage('Error loading teachers');
+      setMessage('❌ Error loading teachers');
       setMessageType('error');
       setTimeout(() => setMessage(''), 3000);
     } finally {
@@ -70,12 +70,22 @@ function TeacherManagement() {
     }
   };
 
-  // ✅ FIXED: Add teacher using /api/Admin/teachers (capital A)
+  // ✅ FIXED: Add teacher with correct date format
   const handleAddTeacher = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      
+      // ✅ Format the date to ISO format (YYYY-MM-DD)
+      let formattedHireDate = null;
+      if (formData.hireDate) {
+        const date = new Date(formData.hireDate);
+        if (!isNaN(date.getTime())) {
+          formattedHireDate = date.toISOString().split('T')[0];
+        }
+      }
+
       const response = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
         method: 'POST',
         headers: {
@@ -89,9 +99,11 @@ function TeacherManagement() {
           phoneNumber: formData.phoneNumber,
           employeeId: formData.employeeId,
           qualification: formData.qualification,
-          hireDate: formData.hireDate
+          hireDate: formattedHireDate
         })
       });
+      
+      const data = await response.json();
       
       if (response.ok) {
         setMessage(`Teacher added successfully!\n\n Email: ${formData.email}\nPassword: ${formData.password}\n\n⚠️ Teacher must change password on first login.`);
@@ -99,10 +111,9 @@ function TeacherManagement() {
         setShowAddForm(false);
         setFormData({ email: '', name: '', password: '', phoneNumber: '', employeeId: '', qualification: '', hireDate: '' });
         setGeneratedPassword('');
-        loadTeachers();
+        await loadTeachers();
       } else {
-        const error = await response.json();
-        setMessage(`Error: ${error.message || 'Failed to add teacher'}`);
+        setMessage(`Error: ${data.message || 'Failed to add teacher'}`);
         setMessageType('error');
       }
     } catch (error) {
@@ -115,7 +126,7 @@ function TeacherManagement() {
     }
   };
 
-  // ✅ FIXED: Delete teacher using /api/Admin/teachers (capital A)
+  // ✅ Delete teacher using /api/Admin/teachers
   const handleDeleteTeacher = async (id, name) => {
     if (confirm(`Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
       try {
@@ -128,7 +139,7 @@ function TeacherManagement() {
         if (response.ok) {
           setMessage(`Teacher "${name}" deleted successfully!`);
           setMessageType('success');
-          loadTeachers();
+          await loadTeachers();
         } else {
           const error = await response.json();
           setMessage(`Error: ${error.message || 'Failed to delete teacher'}`);
@@ -143,9 +154,9 @@ function TeacherManagement() {
     }
   };
 
-  // ✅ FIXED: Reset password using /api/Auth/reset-password (capital A)
+  // ✅ Reset password using /api/Auth/reset-password
   const handleResetPassword = async (id, name) => {
-    if (confirm(`Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
+    if (confirm(`🔑 Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/Auth/reset-password/${id}`, {
@@ -159,7 +170,7 @@ function TeacherManagement() {
         const data = await response.json();
         if (response.ok) {
           alert(`Password reset for ${name}\n\n New Password: ${data.newPassword}\n\nTeacher must change password on next login.`);
-          loadTeachers();
+          await loadTeachers();
         } else {
           alert(`Error: ${data.message || 'Failed to reset password'}`);
         }
@@ -283,6 +294,7 @@ function TeacherManagement() {
                 onChange={(e) => setFormData({...formData, hireDate: e.target.value})}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
+              <p className="text-xs text-gray-400 mt-1">Format: YYYY-MM-DD</p>
             </div>
             <div className="md:col-span-2 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
