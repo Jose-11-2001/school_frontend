@@ -21,7 +21,7 @@ function TeacherManagement() {
     loadTeachers();
   }, []);
 
-  // ✅ Load teachers using /api/Admin/teachers
+  // Load teachers using /api/Admin/teachers
   const loadTeachers = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -32,7 +32,7 @@ function TeacherManagement() {
       setTeachers(data);
     } catch (error) {
       console.error('Error loading teachers:', error);
-      setMessage('❌ Error loading teachers');
+      setMessage('Error loading teachers');
       setMessageType('error');
       setTimeout(() => setMessage(''), 3000);
     } finally {
@@ -70,14 +70,14 @@ function TeacherManagement() {
     }
   };
 
-  // ✅ FIXED: Add teacher with correct date format
+  // Add teacher with correct date format
   const handleAddTeacher = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       
-      // ✅ Format the date to ISO format (YYYY-MM-DD)
+      // Format the date to ISO format (YYYY-MM-DD)
       let formattedHireDate = null;
       if (formData.hireDate) {
         const date = new Date(formData.hireDate);
@@ -106,7 +106,7 @@ function TeacherManagement() {
       const data = await response.json();
       
       if (response.ok) {
-        setMessage(`Teacher added successfully!\n\n Email: ${formData.email}\nPassword: ${formData.password}\n\n⚠️ Teacher must change password on first login.`);
+        setMessage(`Teacher added successfully!\n\n Email: ${formData.email}\nPassword: ${formData.password}\n\nTeacher must change password on first login.`);
         setMessageType('success');
         setShowAddForm(false);
         setFormData({ email: '', name: '', password: '', phoneNumber: '', employeeId: '', qualification: '', hireDate: '' });
@@ -126,7 +126,7 @@ function TeacherManagement() {
     }
   };
 
-  // ✅ Delete teacher using /api/Admin/teachers
+  // Delete teacher using /api/Admin/teachers
   const handleDeleteTeacher = async (id, name) => {
     if (confirm(`Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
       try {
@@ -154,9 +154,9 @@ function TeacherManagement() {
     }
   };
 
-  // ✅ Reset password using /api/Auth/reset-password
+  // Reset password using /api/Auth/reset-password
   const handleResetPassword = async (id, name) => {
-    if (confirm(`🔑 Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
+    if (confirm(`Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://school-yathu.onrender.com/api/Auth/reset-password/${id}`, {
@@ -219,15 +219,15 @@ function TeacherManagement() {
 
       {showAddForm && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6 border border-blue-200 shadow-sm">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-            <span></span> Add New Teacher
-          </h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">Add New Teacher</h3>
           <form onSubmit={handleAddTeacher} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-gray-700 mb-1 text-sm font-semibold">Full Name *</label>
+              <label className="block text-gray-700 mb-1 text-sm font-semibold">
+                Full Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                placeholder="Full Name (e.g., John Mbukwa)"
+                placeholder="e.g., John Mbukwa"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
@@ -235,8 +235,11 @@ function TeacherManagement() {
               />
               <p className="text-xs text-gray-500 mt-1">Email will be auto-generated from name (e.g., jmbukwa@gmail.com)</p>
             </div>
+            
             <div>
-              <label className="block text-gray-700 mb-1 text-sm font-semibold">Email *</label>
+              <label className="block text-gray-700 mb-1 text-sm font-semibold">
+                Email <span className="text-red-500">*</span>
+              </label>
               <input
                 type="email"
                 value={formData.email}
@@ -246,8 +249,11 @@ function TeacherManagement() {
                 readOnly
               />
             </div>
+            
             <div>
-              <label className="block text-gray-700 mb-1 text-sm font-semibold">Password *</label>
+              <label className="block text-gray-700 mb-1 text-sm font-semibold">
+                Password <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={formData.password}
@@ -256,36 +262,40 @@ function TeacherManagement() {
               />
               <p className="text-xs text-gray-500 mt-1">Auto-generated 8-character password</p>
             </div>
+            
             <div>
               <label className="block text-gray-700 mb-1 text-sm font-semibold">Phone Number</label>
               <input
                 type="tel"
-                placeholder="Phone Number"
+                placeholder="e.g., 0888765111"
                 value={formData.phoneNumber}
                 onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
             </div>
+            
             <div>
               <label className="block text-gray-700 mb-1 text-sm font-semibold">Employee ID</label>
               <input
                 type="text"
-                placeholder="Employee ID (e.g., TCH001)"
+                placeholder="e.g., TCH001"
                 value={formData.employeeId}
                 onChange={(e) => setFormData({...formData, employeeId: e.target.value})}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
             </div>
+            
             <div>
               <label className="block text-gray-700 mb-1 text-sm font-semibold">Qualification</label>
               <input
                 type="text"
-                placeholder="Qualification (e.g., Degree in Education)"
+                placeholder="e.g., Degree in Education"
                 value={formData.qualification}
                 onChange={(e) => setFormData({...formData, qualification: e.target.value})}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
             </div>
+            
             <div>
               <label className="block text-gray-700 mb-1 text-sm font-semibold">Hire Date</label>
               <input
@@ -294,8 +304,9 @@ function TeacherManagement() {
                 onChange={(e) => setFormData({...formData, hireDate: e.target.value})}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
-              <p className="text-xs text-gray-400 mt-1">Format: YYYY-MM-DD</p>
+              <p className="text-xs text-gray-400 mt-1">Format: YYYY-MM-DD (e.g., 2024-01-15)</p>
             </div>
+            
             <div className="md:col-span-2 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
                 Save Teacher
@@ -307,7 +318,7 @@ function TeacherManagement() {
           </form>
           <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
             <p className="text-sm text-yellow-800 flex items-center gap-2">
-              <span>ℹ️</span> Teacher will receive auto-generated email and password. They must change password on first login.
+              <span>i</span> Teacher will receive auto-generated email and password. They must change password on first login.
             </p>
           </div>
         </div>
@@ -331,7 +342,6 @@ function TeacherManagement() {
               {teachers.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                    <div className="text-4xl mb-2"></div>
                     No teachers found. Click "Add New Teacher" to create your first teacher.
                   </td>
                 </tr>
