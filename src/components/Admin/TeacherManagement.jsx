@@ -296,10 +296,12 @@ function TeacherManagement() {
               />
             </div>
             
+            {/* ✅ UPDATED: Changed from type="date" to type="text" */}
             <div>
               <label className="block text-gray-700 mb-1 text-sm font-semibold">Hire Date</label>
               <input
-                type="date"
+                type="text"
+                placeholder="YYYY-MM-DD (e.g., 2024-01-15)"
                 value={formData.hireDate}
                 onChange={(e) => setFormData({...formData, hireDate: e.target.value})}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
