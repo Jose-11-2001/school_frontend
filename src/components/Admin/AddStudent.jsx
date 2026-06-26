@@ -51,7 +51,7 @@ function AddStudent() {
         return;
       }
 
-      // Step 1: Create the student
+      // ✅ FIXED: Step 1 - Create the student using /api/Student
       const studentResponse = await fetch('https://school-yathu.onrender.com/api/Student', {
         method: 'POST',
         headers: {
@@ -69,14 +69,14 @@ function AddStudent() {
       const studentData = await studentResponse.json();
       
       if (!studentResponse.ok) {
-        setMessage(`${studentData.message || 'Error adding student'}`);
+        setMessage(`❌ ${studentData.message || 'Error adding student'}`);
         setMessageType('error');
         setLoading(false);
         return;
       }
       
-      // Step 2: Create user account for the student
-      const userResponse = await fetch('https://school-yathu.onrender.com/api/auth/register', {
+      // ✅ FIXED: Step 2 - Create user account using /api/Auth/register (capital A)
+      const userResponse = await fetch('https://school-yathu.onrender.com/api/Auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,21 +94,21 @@ function AddStudent() {
       
       if (userResponse.ok) {
         setMessage(
-          `Student "${formData.fullName}" added successfully!\n\n` +
+          `✅ Student "${formData.fullName}" added successfully!\n\n` +
           `Login Email: ${email}\n` +
           `Temporary Password: ${password}\n\n` +
-          `Student must change password on first login.`
+          `⚠️ Student must change password on first login.`
         );
         setMessageType('success');
         setFormData({ admissionNumber: '', fullName: '', class: '', stream: '' });
         window.dispatchEvent(new Event('studentAdded'));
       } else {
-        setMessage(`Student added but user account creation failed: ${userData.message}`);
+        setMessage(`⚠️ Student added but user account creation failed: ${userData.message}`);
         setMessageType('warning');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage(`${error.message || 'Network error'}`);
+      setMessage(`❌ ${error.message || 'Network error'}`);
       setMessageType('error');
     } finally {
       setLoading(false);

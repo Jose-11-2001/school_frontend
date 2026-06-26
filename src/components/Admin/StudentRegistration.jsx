@@ -34,7 +34,6 @@ function StudentRegistration({ onStudentAdded }) {
         setLoadingData(false);
     };
 
-    // Update streams when form class changes
     useEffect(() => {
         if (formData.class) {
             const availableStreams = classes
@@ -54,6 +53,7 @@ function StudentRegistration({ onStudentAdded }) {
         }
     }, [formData.class, formData.stream, formData.root]);
 
+    // ✅ FIXED: Load classes using /api/Admin/classes (capital A)
     const loadClasses = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -66,14 +66,14 @@ function StudentRegistration({ onStudentAdded }) {
             let data = [];
             let response;
             
-            // Try primary endpoint
-            response = await fetch('https://school-yathu.onrender.com/api/admin/classes', {
+            // Try primary endpoint - ✅ FIXED
+            response = await fetch('https://school-yathu.onrender.com/api/Admin/classes', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
             if (response.ok) {
                 data = await response.json();
-                console.log('Classes loaded from /api/admin/classes:', data);
+                console.log('Classes loaded from /api/Admin/classes:', data);
             } else {
                 // Try alternative endpoint
                 response = await fetch('https://school-yathu.onrender.com/api/AdminSubjectAllocation/classes', {
@@ -86,7 +86,6 @@ function StudentRegistration({ onStudentAdded }) {
                 }
             }
             
-            // If no classes found from API, extract from registered students
             if (data.length === 0 && registeredStudents.length > 0) {
                 console.log('No classes from API, extracting from students...');
                 const studentClasses = registeredStudents
@@ -240,7 +239,7 @@ function StudentRegistration({ onStudentAdded }) {
                 return;
             }
 
-            // Step 1: Create the student
+            // ✅ FIXED: Step 1 - Create the student using /api/Student
             const studentResponse = await fetch('https://school-yathu.onrender.com/api/Student', {
                 method: 'POST',
                 headers: {
@@ -258,14 +257,14 @@ function StudentRegistration({ onStudentAdded }) {
             const studentData = await studentResponse.json();
             
             if (!studentResponse.ok) {
-                setMessage(`${studentData.message || 'Error adding student'}`);
+                setMessage(` ${studentData.message || 'Error adding student'}`);
                 setMessageType('error');
                 setLoading(false);
                 return;
             }
             
-            // Step 2: Create user account for the student
-            const userResponse = await fetch('https://school-yathu.onrender.com/api/auth/register', {
+            // ✅ FIXED: Step 2 - Create user account using /api/Auth/register (capital A)
+            const userResponse = await fetch('https://school-yathu.onrender.com/api/Auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -283,10 +282,10 @@ function StudentRegistration({ onStudentAdded }) {
             
             if (userResponse.ok) {
                 setMessage(
-                    `Student "${formData.fullName}" added successfully!\n\n` +
+                    ` Student "${formData.fullName}" added successfully!\n\n` +
                     `Login Email: ${email}\n` +
                     `Temporary Password: ${password}\n\n` +
-                    `Student must change password on first login.`
+                    ` Student must change password on first login.`
                 );
                 setMessageType('success');
                 setFormData({
@@ -297,19 +296,17 @@ function StudentRegistration({ onStudentAdded }) {
                     root: '',
                     selectedSubjectIds: []
                 });
-                // Notify parent component
                 if (onStudentAdded) {
                     onStudentAdded();
                 }
-                // Refresh classes after adding student
                 await loadClasses();
             } else {
-                setMessage(`Student added but user account creation failed: ${userData.message}`);
+                setMessage(` Student added but user account creation failed: ${userData.message}`);
                 setMessageType('warning');
             }
         } catch (error) {
             console.error('Error:', error);
-            setMessage(`${error.message || 'Network error'}`);
+            setMessage(` ${error.message || 'Network error'}`);
             setMessageType('error');
         } finally {
             setLoading(false);
@@ -369,7 +366,6 @@ function StudentRegistration({ onStudentAdded }) {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Basic Information */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-gray-700 mb-2 font-semibold">
@@ -400,7 +396,6 @@ function StudentRegistration({ onStudentAdded }) {
                         </div>
                     </div>
 
-                    {/* Class and Stream Selection */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-gray-700 mb-2 font-semibold">
@@ -420,7 +415,7 @@ function StudentRegistration({ onStudentAdded }) {
                             {uniqueClasses.length === 0 ? (
                                 <div className="mt-2 p-2 bg-yellow-50 rounded border border-yellow-200">
                                     <p className="text-xs text-yellow-700">
-                                        ⚠️ No classes found. 
+                                        No classes found. 
                                         <button 
                                             onClick={() => window.location.href = '/admin-dashboard?tab=classes'}
                                             className="ml-1 text-blue-600 hover:underline font-medium"
@@ -460,7 +455,6 @@ function StudentRegistration({ onStudentAdded }) {
                         </div>
                     </div>
 
-                    {/* Root Selection (Only for Form 3 & 4) */}
                     {isUpperForm() && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <label className="block text-gray-700 mb-3 font-semibold">Root/Specialization <span className="text-red-500">*</span></label>
@@ -473,7 +467,7 @@ function StudentRegistration({ onStudentAdded }) {
                                         onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
                                         className="mr-2 w-4 h-4"
                                     />
-                                    <span className="text-lg">📚</span>
+                                    <span className="text-lg"></span>
                                     <span className="ml-2">Humanities (History, Geography, Social Studies)</span>
                                 </label>
                                 <label className="flex items-center cursor-pointer">
@@ -484,14 +478,13 @@ function StudentRegistration({ onStudentAdded }) {
                                         onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
                                         className="mr-2 w-4 h-4"
                                     />
-                                    <span className="text-lg">🔬</span>
+                                    <span className="text-lg"></span>
                                     <span className="ml-2">Sciences (Physics, Chemistry, Biology)</span>
                                 </label>
                             </div>
                         </div>
                     )}
 
-                    {/* Subjects Display */}
                     {formData.class && formData.stream && (
                         <div className="border rounded-lg p-4 bg-gray-50">
                             <h3 className="font-bold text-lg mb-3 text-gray-800">Subjects Allocation</h3>
@@ -583,7 +576,7 @@ function StudentRegistration({ onStudentAdded }) {
                     
                     {uniqueClasses.length === 0 && (
                         <div className="text-center text-sm text-red-500 mt-2">
-                            ⚠️ Cannot register student. Please add classes first.
+                            Cannot register student. Please add classes first.
                         </div>
                     )}
 

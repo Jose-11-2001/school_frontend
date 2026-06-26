@@ -8,12 +8,10 @@ function AdminUserManagement() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   
-  // Edit states
   const [editingTeacher, setEditingTeacher] = useState(null);
   const [editingStudent, setEditingStudent] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   
-  // Form states for editing
   const [editFormData, setEditFormData] = useState({
     name: '',
     email: '',
@@ -29,61 +27,62 @@ function AdminUserManagement() {
     loadStudents();
   }, []);
 
+  // ✅ FIXED: Load teachers using /api/Admin/teachers (capital A)
   const loadTeachers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/teachers', {
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       setTeachers(data);
     } catch (error) {
       console.error('Error loading teachers:', error);
-      setMessage('❌ Error loading teachers');
+      setMessage(' Error loading teachers');
       setMessageType('error');
     }
   };
 
+  // ✅ FIXED: Load students using /api/Admin/all-students (capital A)
   const loadStudents = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/all-students', {
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/all-students', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       setStudents(data);
     } catch (error) {
       console.error('Error loading students:', error);
-      setMessage('❌ Error loading students');
+      setMessage(' Error loading students');
       setMessageType('error');
     } finally {
       setLoading(false);
     }
   };
 
-  // ==================== TEACHER CRUD OPERATIONS ====================
-
+  // ✅ FIXED: Delete teacher using /api/Admin/teachers (capital A)
   const handleDeleteTeacher = async (id, name) => {
-    if (confirm(`Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(` Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/admin/teachers/${id}`, {
+        const response = await fetch(`https://school-yathu.onrender.com/api/Admin/teachers/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
         if (response.ok) {
-          setMessage(`Teacher "${name}" deleted successfully!`);
+          setMessage(` Teacher "${name}" deleted successfully!`);
           setMessageType('success');
           loadTeachers();
         } else {
           const error = await response.json();
-          setMessage(`Error: ${error.message || 'Failed to delete teacher'}`);
+          setMessage(` Error: ${error.message || 'Failed to delete teacher'}`);
           setMessageType('error');
         }
       } catch (error) {
         console.error('Error:', error);
-        setMessage('Error deleting teacher');
+        setMessage(' Error deleting teacher');
         setMessageType('error');
       }
       setTimeout(() => setMessage(''), 3000);
@@ -102,13 +101,14 @@ function AdminUserManagement() {
     setShowEditModal(true);
   };
 
+  // ✅ FIXED: Update teacher using /api/Admin/teachers (capital A)
   const handleUpdateTeacher = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://school-yathu.onrender.com/api/admin/teachers/${editingTeacher.id}`, {
+      const response = await fetch(`https://school-yathu.onrender.com/api/Admin/teachers/${editingTeacher.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -118,19 +118,19 @@ function AdminUserManagement() {
       });
       
       if (response.ok) {
-        setMessage(`Teacher "${editFormData.name}" updated successfully!`);
+        setMessage(` Teacher "${editFormData.name}" updated successfully!`);
         setMessageType('success');
         setShowEditModal(false);
         setEditingTeacher(null);
         loadTeachers();
       } else {
         const error = await response.json();
-        setMessage(`Error: ${error.message || 'Failed to update teacher'}`);
+        setMessage(` Error: ${error.message || 'Failed to update teacher'}`);
         setMessageType('error');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('Error updating teacher');
+      setMessage(' Error updating teacher');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -138,24 +138,23 @@ function AdminUserManagement() {
     }
   };
 
-  // ==================== STUDENT CRUD OPERATIONS ====================
-
+  // ✅ FIXED: Delete student using /api/Admin/students (capital A)
   const handleDeleteStudent = async (id, name) => {
-    if (confirm(`Are you sure you want to delete student "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(` Are you sure you want to delete student "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/admin/students/${id}`, {
+        const response = await fetch(`https://school-yathu.onrender.com/api/Admin/students/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
         if (response.ok) {
-          setMessage(`Student "${name}" deleted successfully!`);
+          setMessage(` Student "${name}" deleted successfully!`);
           setMessageType('success');
           loadStudents();
         } else {
           const error = await response.json();
-          setMessage(`Error: ${error.message || 'Failed to delete student'}`);
+          setMessage(` Error: ${error.message || 'Failed to delete student'}`);
           setMessageType('error');
         }
       } catch (error) {
@@ -178,13 +177,14 @@ function AdminUserManagement() {
     setShowEditModal(true);
   };
 
+  // ✅ FIXED: Update student using /api/Admin/students (capital A)
   const handleUpdateStudent = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://school-yathu.onrender.com/api/admin/students/${editingStudent.id}`, {
+      const response = await fetch(`https://school-yathu.onrender.com/api/Admin/students/${editingStudent.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +198,7 @@ function AdminUserManagement() {
       });
       
       if (response.ok) {
-        setMessage(`Student "${editFormData.name}" updated successfully!`);
+        setMessage(` Student "${editFormData.name}" updated successfully!`);
         setMessageType('success');
         setShowEditModal(false);
         setEditingStudent(null);
@@ -218,13 +218,12 @@ function AdminUserManagement() {
     }
   };
 
-  // PASSWORD RESET 
-
+  // ✅ FIXED: Reset password using /api/Auth/reset-password (capital A)
   const handleResetPassword = async (id, name, type) => {
-    if (confirm(`Reset password for ${type} "${name}"?\n\nThey will need to change it on next login.`)) {
+    if (confirm(` Reset password for ${type} "${name}"?\n\nThey will need to change it on next login.`)) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/auth/reset-password/${id}`, {
+        const response = await fetch(`https://school-yathu.onrender.com/api/Auth/reset-password/${id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -234,23 +233,21 @@ function AdminUserManagement() {
         
         const data = await response.json();
         if (response.ok) {
-          alert(`Password reset for ${name}\n\n New Password: ${data.newPassword}\n\n User must change password on next login.`);
+          alert(` Password reset for ${name}\n\n New Password: ${data.newPassword}\n\n User must change password on next login.`);
           if (type === 'teacher') {
             loadTeachers();
           } else {
             loadStudents();
           }
         } else {
-          alert(`Error: ${data.message || 'Failed to reset password'}`);
+          alert(` Error: ${data.message || 'Failed to reset password'}`);
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('Error resetting password');
+        alert(' Error resetting password');
       }
     }
   };
-
-  // MODAL CLOSE
 
   const closeModal = () => {
     setShowEditModal(false);
@@ -317,7 +314,6 @@ function AdminUserManagement() {
         </div>
       )}
 
-      {/* Teachers Table */}
       {activeTab === 'teachers' && (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex justify-between items-center">
@@ -368,7 +364,7 @@ function AdminUserManagement() {
                           </span>
                         ) : (
                           <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                             Active
+                            Active
                           </span>
                         )}
                       </td>
@@ -404,7 +400,6 @@ function AdminUserManagement() {
         </div>
       )}
 
-      {/* Students Table */}
       {activeTab === 'students' && (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex justify-between items-center">
@@ -464,14 +459,14 @@ function AdminUserManagement() {
                           className="text-yellow-600 hover:text-yellow-800 transition-colors"
                           title="Reset Password"
                         >
-                          Reset Pwd
+                           Reset Pwd
                         </button>
                         <button
                           onClick={() => handleDeleteStudent(student.id, student.fullName)}
                           className="text-red-600 hover:text-red-800 transition-colors"
                           title="Delete Student"
                         >
-                          Delete
+                           Delete
                         </button>
                       </td>
                     </tr>
@@ -483,14 +478,13 @@ function AdminUserManagement() {
         </div>
       )}
 
-      {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-800">
-                  {editingTeacher ? 'Edit Teacher' : 'Edit Student'}
+                  {editingTeacher ? ' Edit Teacher' : ' Edit Student'}
                 </h3>
                 <button
                   onClick={closeModal}
@@ -502,7 +496,6 @@ function AdminUserManagement() {
               
               <form onSubmit={editingTeacher ? handleUpdateTeacher : handleUpdateStudent}>
                 {editingTeacher ? (
-                  // Teacher Edit Form
                   <>
                     <div className="mb-4">
                       <label className="block text-gray-700 text-sm font-semibold mb-2">Full Name *</label>
@@ -553,7 +546,6 @@ function AdminUserManagement() {
                     </div>
                   </>
                 ) : (
-                  // Student Edit Form
                   <>
                     <div className="mb-4">
                       <label className="block text-gray-700 text-sm font-semibold mb-2">Full Name *</label>

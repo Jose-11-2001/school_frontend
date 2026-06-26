@@ -8,6 +8,7 @@ function SubjectsManagement() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
+  // ✅ FIXED: Load subjects using /api/Subjects (capital S)
   const loadSubjects = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -29,6 +30,7 @@ function SubjectsManagement() {
     loadSubjects();
   }, []);
 
+  // ✅ FIXED: Add subject using /api/Subjects (capital S)
   const handleAddSubject = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -46,7 +48,7 @@ function SubjectsManagement() {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        setMessage('⚠️ Please login first');
+        setMessage('Please login first');
         setMessageType('error');
         setLoading(false);
         return;

@@ -21,10 +21,11 @@ function ClassManagement() {
     loadStudents();
   }, []);
 
+  // ✅ FIXED: Load classes using /api/Admin/classes (capital A)
   const loadClasses = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/classes', {
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/classes', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -35,10 +36,11 @@ function ClassManagement() {
     }
   };
 
+  // ✅ FIXED: Load teachers using /api/Admin/teachers (capital A)
   const loadTeachers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/teachers', {
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -49,10 +51,11 @@ function ClassManagement() {
     }
   };
 
+  // ✅ FIXED: Load students using /api/Admin/all-students (capital A)
   const loadStudents = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/all-students', {
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/all-students', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -77,11 +80,12 @@ function ClassManagement() {
     return { status: 'success', message: 'Available', color: 'green' };
   };
 
+  // ✅ FIXED: Add class using /api/Admin/classes (capital A)
   const handleAddClass = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/classes', {
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/classes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,12 +117,13 @@ function ClassManagement() {
     }
   };
 
+  // ✅ FIXED: Update class using /api/Admin/classes (capital A)
   const handleUpdateClass = async (e) => {
     e.preventDefault();
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://school-yathu.onrender.com/api/admin/classes/${editingClass.id}`, {
+      const response = await fetch(`https://school-yathu.onrender.com/api/Admin/classes/${editingClass.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -151,11 +156,12 @@ function ClassManagement() {
     }
   };
 
+  // ✅ FIXED: Delete class using /api/Admin/classes (capital A)
   const handleDeleteClass = async (id, name) => {
     if (confirm(`Are you sure you want to delete class "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/admin/classes/${id}`, {
+        const response = await fetch(`https://school-yathu.onrender.com/api/Admin/classes/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -224,7 +230,7 @@ function ClassManagement() {
 
       {message && (
         <div className={`p-3 rounded-lg mb-4 ${
-          message.includes('') 
+          message.includes('✅') 
             ? 'bg-green-50 text-green-700 border border-green-200' 
             : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
@@ -405,7 +411,7 @@ function ClassManagement() {
                             <span className="text-sm text-gray-500">/ {cls.capacity}</span>
                           )}
                           {isOverCapacity && (
-                            <span className="text-red-500 text-xs" title="Over capacity">⚠️</span>
+                            <span className="text-red-500 text-xs" title="Over capacity"></span>
                           )}
                         </div>
                       </td>

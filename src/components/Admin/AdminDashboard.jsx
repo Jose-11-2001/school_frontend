@@ -12,7 +12,6 @@ import StudentRegistration from './StudentRegistration';
 import SubjectAllocation from './SubjectAllocation';
 import SubjectsManagement from './SubjectsManagement';
 
-
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('teachers');
@@ -47,7 +46,6 @@ function AdminDashboard() {
   };
 
   const handleStudentRegistered = () => {
-    // Toggle refresh to update student list
     setRefreshStudents(prev => !prev);
   };
 
@@ -107,7 +105,7 @@ function AdminDashboard() {
         />
       )}
 
-      {/* Sidebar - Fixed position with independent scrolling */}
+      {/* Sidebar */}
       <div className={`
         fixed lg:fixed z-50
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -116,7 +114,7 @@ function AdminDashboard() {
         h-screen overflow-y-auto
         ${!mobileOpen && 'lg:block'}
       `}>
-        {/* Sidebar Header - Sticky */}
+        {/* Sidebar Header */}
         <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button
@@ -135,7 +133,7 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Sidebar Navigation - Scrollable */}
+        {/* Sidebar Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
           {menuItems.map((item) => (
             <button
@@ -156,7 +154,7 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer - Sticky at bottom */}
+        {/* Sidebar Footer */}
         <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
           <button
             onClick={handleLogout}
@@ -168,16 +166,14 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Main Content - Scrollable */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
-        {/* Desktop Navbar - Fixed */}
+        {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
-          {/* Left side - empty or can add other items */}
           <div className="flex items-center gap-4">
-            {/* Add any header items here if needed */}
+            {/* Empty - can add items here */}
           </div>
           
-          {/* Right side - Welcome message and notifications */}
           <div className="flex items-center gap-6">
             <AdminNotifications />
             <div className="h-6 w-px bg-blue-600"></div>
@@ -188,10 +184,11 @@ function AdminDashboard() {
           </div>
         </nav>
 
-        {/* Content Area - With padding for fixed navbar */}
+        {/* Content Area */}
         <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 lg:p-6">
+              {/* Error boundary - each tab renders independently */}
               {activeTab === 'teachers' && <TeacherManagement />}
               {activeTab === 'classes' && <ClassManagement />}
               {activeTab === 'allocation' && <SubjectAllocation />}

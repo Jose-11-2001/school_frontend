@@ -21,10 +21,11 @@ function TeacherManagement() {
     loadTeachers();
   }, []);
 
+  // ✅ FIXED: Load teachers using /api/Admin/teachers (capital A)
   const loadTeachers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/teachers', {
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -50,7 +51,6 @@ function TeacherManagement() {
 
   const generateEmailFromName = (name) => {
     const cleanName = name.toLowerCase().replace(/\s/g, '');
-    // For teachers, use first initial + last name format
     const parts = name.trim().split(' ');
     if (parts.length >= 2) {
       const firstNameInitial = parts[0].substring(0, 1);
@@ -70,12 +70,13 @@ function TeacherManagement() {
     }
   };
 
+  // ✅ FIXED: Add teacher using /api/Admin/teachers (capital A)
   const handleAddTeacher = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/teachers', {
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,17 +115,18 @@ function TeacherManagement() {
     }
   };
 
+  // ✅ FIXED: Delete teacher using /api/Admin/teachers (capital A)
   const handleDeleteTeacher = async (id, name) => {
-    if (confirm(` Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/admin/teachers/${id}`, {
+        const response = await fetch(`https://school-yathu.onrender.com/api/Admin/teachers/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
         if (response.ok) {
-          setMessage(` Teacher "${name}" deleted successfully!`);
+          setMessage(`Teacher "${name}" deleted successfully!`);
           setMessageType('success');
           loadTeachers();
         } else {
@@ -141,11 +143,12 @@ function TeacherManagement() {
     }
   };
 
+  // ✅ FIXED: Reset password using /api/Auth/reset-password (capital A)
   const handleResetPassword = async (id, name) => {
-    if (confirm(` Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
+    if (confirm(`Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/auth/reset-password/${id}`, {
+        const response = await fetch(`https://school-yathu.onrender.com/api/Auth/reset-password/${id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -155,7 +158,7 @@ function TeacherManagement() {
         
         const data = await response.json();
         if (response.ok) {
-          alert(` Password reset for ${name}\n\n New Password: ${data.newPassword}\n\n Teacher must change password on next login.`);
+          alert(`Password reset for ${name}\n\n New Password: ${data.newPassword}\n\nTeacher must change password on next login.`);
           loadTeachers();
         } else {
           alert(`Error: ${data.message || 'Failed to reset password'}`);
@@ -283,7 +286,7 @@ function TeacherManagement() {
             </div>
             <div className="md:col-span-2 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                 Save Teacher
+                Save Teacher
               </button>
               <button type="button" onClick={() => setShowAddForm(false)} className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">
                 Cancel
@@ -292,7 +295,7 @@ function TeacherManagement() {
           </form>
           <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
             <p className="text-sm text-yellow-800 flex items-center gap-2">
-              <span>ℹ</span> Teacher will receive auto-generated email and password. They must change password on first login.
+              <span>ℹ️</span> Teacher will receive auto-generated email and password. They must change password on first login.
             </p>
           </div>
         </div>
@@ -331,11 +334,11 @@ function TeacherManagement() {
                     <td className="px-6 py-4">
                       {teacher.mustChangePassword ? (
                         <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                           Password Required
+                          Password Required
                         </span>
                       ) : (
                         <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                           Active
+                          Active
                         </span>
                       )}
                     </td>
@@ -345,14 +348,14 @@ function TeacherManagement() {
                         className="text-blue-600 hover:text-blue-800 transition-colors text-sm"
                         title="Reset Password"
                       >
-                         Reset Pwd
+                        Reset Pwd
                       </button>
                       <button
                         onClick={() => handleDeleteTeacher(teacher.id, teacher.name)}
                         className="text-red-600 hover:text-red-800 transition-colors text-sm"
                         title="Delete Teacher"
                       >
-                         Delete
+                        Delete
                       </button>
                     </td>
                   </tr>
