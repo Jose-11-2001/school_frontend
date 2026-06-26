@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { subjectAPI } from '../services/api';
 
 function SubjectsManagement() {
   const [subjects, setSubjects] = useState([]);
@@ -8,19 +9,10 @@ function SubjectsManagement() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
-  // ✅ FIXED: Load subjects using /api/Subjects (capital S)
   const loadSubjects = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/Subjects', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setSubjects(data);
-      } else {
-        console.error('Failed to load subjects');
-      }
+      const response = await subjectAPI.getAll();
+      setSubjects(response.data);
     } catch (error) {
       console.error('Error loading subjects:', error);
     }
@@ -30,14 +22,13 @@ function SubjectsManagement() {
     loadSubjects();
   }, []);
 
-  // ✅ FIXED: Add subject using /api/Subjects (capital S)
   const handleAddSubject = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
     
     if (!name.trim() || !code.trim()) {
-      setMessage('⚠️ Please enter both name and code');
+      setMessage('Please enter both name and code');
       setMessageType('error');
       setLoading(false);
       setTimeout(() => setMessage(''), 3000);
@@ -45,42 +36,20 @@ function SubjectsManagement() {
     }
     
     try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setMessage('Please login first');
-        setMessageType('error');
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch('https://school-yathu.onrender.com/api/Subjects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          name: name.trim(), 
-          code: code.trim().toUpperCase()
-        })
+      const response = await subjectAPI.create({
+        name: name.trim(),
+        code: code.trim().toUpperCase()
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        setMessage(`Subject "${data.name}" added successfully!`);
-        setMessageType('success');
-        setName('');
-        setCode('');
-        loadSubjects();
-      } else {
-        const error = await response.json();
-        setMessage(`${error.message || 'Failed to add subject'}`);
-        setMessageType('error');
-      }
+      setMessage(`Subject "${response.data.name}" added successfully!`);
+      setMessageType('success');
+      setName('');
+      setCode('');
+      loadSubjects();
     } catch (error) {
       console.error('Error adding subject:', error);
-      setMessage('Error adding subject. Please try again.');
+      const errorMessage = error.response?.data?.message || 'Failed to add subject';
+      setMessage(`Error: ${errorMessage}`);
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -163,7 +132,6 @@ function SubjectsManagement() {
             {subjects.length === 0 ? (
               <tr>
                 <td colSpan="3" className="px-6 py-8 text-center text-gray-500">
-                  <div className="text-4xl mb-2"></div>
                   No subjects found. Add your first subject above.
                 </td>
               </tr>

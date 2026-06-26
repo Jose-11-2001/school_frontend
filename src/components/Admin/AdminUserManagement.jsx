@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { adminAPI, authAPI } from '../services/api';
 
 function AdminUserManagement() {
   const [teachers, setTeachers] = useState([]);
@@ -27,62 +28,41 @@ function AdminUserManagement() {
     loadStudents();
   }, []);
 
-  // ✅ FIXED: Load teachers using /api/Admin/teachers (capital A)
   const loadTeachers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setTeachers(data);
+      const response = await adminAPI.getTeachers();
+      setTeachers(response.data);
     } catch (error) {
       console.error('Error loading teachers:', error);
-      setMessage(' Error loading teachers');
+      setMessage('Error loading teachers');
       setMessageType('error');
     }
   };
 
-  // ✅ FIXED: Load students using /api/Admin/all-students (capital A)
   const loadStudents = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/Admin/all-students', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setStudents(data);
+      const response = await adminAPI.getAllStudents();
+      setStudents(response.data);
     } catch (error) {
       console.error('Error loading students:', error);
-      setMessage(' Error loading students');
+      setMessage('Error loading students');
       setMessageType('error');
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ FIXED: Delete teacher using /api/Admin/teachers (capital A)
   const handleDeleteTeacher = async (id, name) => {
-    if (confirm(` Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/Admin/teachers/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-          setMessage(` Teacher "${name}" deleted successfully!`);
-          setMessageType('success');
-          loadTeachers();
-        } else {
-          const error = await response.json();
-          setMessage(` Error: ${error.message || 'Failed to delete teacher'}`);
-          setMessageType('error');
-        }
+        await adminAPI.deleteTeacher(id);
+        setMessage(`Teacher "${name}" deleted successfully!`);
+        setMessageType('success');
+        loadTeachers();
       } catch (error) {
         console.error('Error:', error);
-        setMessage(' Error deleting teacher');
+        const errorMessage = error.response?.data?.message || 'Failed to delete teacher';
+        setMessage(`Error: ${errorMessage}`);
         setMessageType('error');
       }
       setTimeout(() => setMessage(''), 3000);
@@ -101,36 +81,21 @@ function AdminUserManagement() {
     setShowEditModal(true);
   };
 
-  // ✅ FIXED: Update teacher using /api/Admin/teachers (capital A)
   const handleUpdateTeacher = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`https://school-yathu.onrender.com/api/Admin/teachers/${editingTeacher.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(editFormData)
-      });
-      
-      if (response.ok) {
-        setMessage(` Teacher "${editFormData.name}" updated successfully!`);
-        setMessageType('success');
-        setShowEditModal(false);
-        setEditingTeacher(null);
-        loadTeachers();
-      } else {
-        const error = await response.json();
-        setMessage(` Error: ${error.message || 'Failed to update teacher'}`);
-        setMessageType('error');
-      }
+      await adminAPI.updateTeacher(editingTeacher.id, editFormData);
+      setMessage(`Teacher "${editFormData.name}" updated successfully!`);
+      setMessageType('success');
+      setShowEditModal(false);
+      setEditingTeacher(null);
+      loadTeachers();
     } catch (error) {
       console.error('Error:', error);
-      setMessage(' Error updating teacher');
+      const errorMessage = error.response?.data?.message || 'Failed to update teacher';
+      setMessage(`Error: ${errorMessage}`);
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -138,28 +103,17 @@ function AdminUserManagement() {
     }
   };
 
-  // ✅ FIXED: Delete student using /api/Admin/students (capital A)
   const handleDeleteStudent = async (id, name) => {
-    if (confirm(` Are you sure you want to delete student "${name}"?\n\nThis action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete student "${name}"?\n\nThis action cannot be undone.`)) {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/Admin/students/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-          setMessage(` Student "${name}" deleted successfully!`);
-          setMessageType('success');
-          loadStudents();
-        } else {
-          const error = await response.json();
-          setMessage(` Error: ${error.message || 'Failed to delete student'}`);
-          setMessageType('error');
-        }
+        await adminAPI.deleteStudent(id);
+        setMessage(`Student "${name}" deleted successfully!`);
+        setMessageType('success');
+        loadStudents();
       } catch (error) {
         console.error('Error:', error);
-        setMessage(' Error deleting student');
+        const errorMessage = error.response?.data?.message || 'Failed to delete student';
+        setMessage(`Error: ${errorMessage}`);
         setMessageType('error');
       }
       setTimeout(() => setMessage(''), 3000);
@@ -177,40 +131,25 @@ function AdminUserManagement() {
     setShowEditModal(true);
   };
 
-  // ✅ FIXED: Update student using /api/Admin/students (capital A)
   const handleUpdateStudent = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`https://school-yathu.onrender.com/api/Admin/students/${editingStudent.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          fullName: editFormData.name,
-          class: editFormData.class,
-          stream: editFormData.stream
-        })
+      await adminAPI.updateStudent(editingStudent.id, {
+        fullName: editFormData.name,
+        class: editFormData.class,
+        stream: editFormData.stream
       });
-      
-      if (response.ok) {
-        setMessage(` Student "${editFormData.name}" updated successfully!`);
-        setMessageType('success');
-        setShowEditModal(false);
-        setEditingStudent(null);
-        loadStudents();
-      } else {
-        const error = await response.json();
-        setMessage(` Error: ${error.message || 'Failed to update student'}`);
-        setMessageType('error');
-      }
+      setMessage(`Student "${editFormData.name}" updated successfully!`);
+      setMessageType('success');
+      setShowEditModal(false);
+      setEditingStudent(null);
+      loadStudents();
     } catch (error) {
       console.error('Error:', error);
-      setMessage(' Error updating student');
+      const errorMessage = error.response?.data?.message || 'Failed to update student';
+      setMessage(`Error: ${errorMessage}`);
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -218,33 +157,19 @@ function AdminUserManagement() {
     }
   };
 
-  // ✅ FIXED: Reset password using /api/Auth/reset-password (capital A)
   const handleResetPassword = async (id, name, type) => {
-    if (confirm(` Reset password for ${type} "${name}"?\n\nThey will need to change it on next login.`)) {
+    if (confirm(`Reset password for ${type} "${name}"?\n\nThey will need to change it on next login.`)) {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/Auth/reset-password/${id}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        const data = await response.json();
-        if (response.ok) {
-          alert(` Password reset for ${name}\n\n New Password: ${data.newPassword}\n\n User must change password on next login.`);
-          if (type === 'teacher') {
-            loadTeachers();
-          } else {
-            loadStudents();
-          }
+        const response = await authAPI.resetPassword(id);
+        alert(`Password reset for ${name}\n\n New Password: ${response.data.newPassword}\n\nUser must change password on next login.`);
+        if (type === 'teacher') {
+          loadTeachers();
         } else {
-          alert(` Error: ${data.message || 'Failed to reset password'}`);
+          loadStudents();
         }
       } catch (error) {
         console.error('Error:', error);
-        alert(' Error resetting password');
+        alert(`Error: ${error.response?.data?.message || 'Failed to reset password'}`);
       }
     }
   };
@@ -344,7 +269,6 @@ function AdminUserManagement() {
                 {teachers.length === 0 ? (
                   <tr>
                     <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
-                      <div className="text-4xl mb-2"></div>
                       No teachers found. Add your first teacher in Teacher Management tab.
                     </td>
                   </tr>
@@ -429,7 +353,6 @@ function AdminUserManagement() {
                 {students.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                      <div className="text-4xl mb-2"></div>
                       No students found. Add your first student in Manage Students tab.
                     </td>
                   </tr>
@@ -459,14 +382,14 @@ function AdminUserManagement() {
                           className="text-yellow-600 hover:text-yellow-800 transition-colors"
                           title="Reset Password"
                         >
-                           Reset Pwd
+                          Reset Pwd
                         </button>
                         <button
                           onClick={() => handleDeleteStudent(student.id, student.fullName)}
                           className="text-red-600 hover:text-red-800 transition-colors"
                           title="Delete Student"
                         >
-                           Delete
+                          Delete
                         </button>
                       </td>
                     </tr>
@@ -484,13 +407,13 @@ function AdminUserManagement() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-800">
-                  {editingTeacher ? ' Edit Teacher' : ' Edit Student'}
+                  {editingTeacher ? 'Edit Teacher' : 'Edit Student'}
                 </h3>
                 <button
                   onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600 text-2xl"
                 >
-                  ✕
+                  ×
                 </button>
               </div>
               

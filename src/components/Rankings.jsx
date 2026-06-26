@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { adminAPI, studentAPI } from '../services/api';
 
 function Rankings() {
   const [className, setClassName] = useState('');
@@ -30,17 +31,10 @@ function Rankings() {
   const loadClasses = async () => {
     setLoadingClasses(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/classes', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        // Extract unique class names
-        const uniqueClasses = [...new Set(data.map(c => c.name))];
-        setClasses(uniqueClasses);
-      }
+      const response = await adminAPI.getClasses();
+      // Extract unique class names
+      const uniqueClasses = [...new Set(response.data.map(c => c.name))];
+      setClasses(uniqueClasses);
     } catch (error) {
       console.error('Error loading classes:', error);
     } finally {
@@ -50,21 +44,14 @@ function Rankings() {
 
   const loadStreams = async (selectedClass) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/classes', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        // Get streams for selected class
-        const classStreams = data
-          .filter(c => c.name === selectedClass)
-          .map(c => c.stream)
-          .filter(s => s);
-        setStreams([...new Set(classStreams)]);
-        setStream(''); // Reset stream when class changes
-      }
+      const response = await adminAPI.getClasses();
+      // Get streams for selected class
+      const classStreams = response.data
+        .filter(c => c.name === selectedClass)
+        .map(c => c.stream)
+        .filter(s => s);
+      setStreams([...new Set(classStreams)]);
+      setStream(''); // Reset stream when class changes
     } catch (error) {
       console.error('Error loading streams:', error);
     }
@@ -81,38 +68,21 @@ function Rankings() {
     setError('');
     
     try {
-      const token = localStorage.getItem('token');
-      // Build URL with optional stream parameter
-      let url = `https://school-yathu.onrender.com/api/Student/class-ranking?className=${encodeURIComponent(className)}&year=${year}&term=${encodeURIComponent(term)}`;
-      if (stream) {
-        url += `&stream=${encodeURIComponent(stream)}`;
-      }
+      const response = await studentAPI.getClassRankings(className, year, term, stream);
+      setRankings(response.data);
       
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          setError('No rankings found for this class. Please ensure marks have been entered.');
-        } else if (response.status === 401) {
-          setError('Please login again to view rankings.');
-        } else {
-          setError('Failed to fetch rankings. Please try again.');
-        }
-        setRankings(null);
-        return;
-      }
-      
-      const data = await response.json();
-      setRankings(data);
-      
-      if (!data.rankings || data.rankings.length === 0) {
+      if (!response.data.rankings || response.data.rankings.length === 0) {
         setError('No rankings found for this class. Please ensure marks have been entered.');
       }
     } catch (error) {
       console.error('Error fetching rankings:', error);
-      setError('Network error. Please check your connection and try again.');
+      if (error.response?.status === 404) {
+        setError('No rankings found for this class. Please ensure marks have been entered.');
+      } else if (error.response?.status === 401) {
+        setError('Please login again to view rankings.');
+      } else {
+        setError('Network error. Please check your connection and try again.');
+      }
       setRankings(null);
     } finally {
       setLoading(false);
@@ -149,9 +119,9 @@ function Rankings() {
   };
 
   const getRankBadge = (position) => {
-    if (position === 1) return '';//🥇';
-    if (position === 2) return '';//🥈';
-    if (position === 3) return '';//🥉';
+    if (position === 1) return '#1';
+    if (position === 2) return '#2';
+    if (position === 3) return '#3';
     return `#${position}`;
   };
 
@@ -168,7 +138,7 @@ function Rankings() {
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800"> Class Rankings</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Class Rankings</h2>
           <p className="text-sm text-gray-500 mt-1">View student performance rankings by class and term</p>
         </div>
         <button
@@ -343,7 +313,7 @@ function Rankings() {
                     index === 2 ? 'bg-orange-50' : ''
                   }`}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-bold text-center flex items-center gap-1">
+                      <span className="font-bold text-center">
                         {getRankBadge(rank.position)}
                       </span>
                     </td>
@@ -379,7 +349,6 @@ function Rankings() {
       {/* No Results State */}
       {rankings && rankings.rankings && rankings.rankings.length === 0 && !error && (
         <div className="bg-white rounded-lg shadow p-12 text-center border border-gray-100">
-          <div className="text-6xl mb-4"></div>
           <h3 className="text-xl font-semibold text-gray-700 mb-2">No Rankings Available</h3>
           <p className="text-gray-500 max-w-md mx-auto">
             No rankings found for {className} {stream || ''} in {term} {year}.

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../services/api';
 
 function ChangePassword() {
   const [formData, setFormData] = useState({
@@ -30,46 +31,31 @@ function ChangePassword() {
     setLoading(true);
     
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/auth/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword
-        })
+      const response = await authAPI.changePassword({
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword
       });
       
-      const data = await response.json();
-      if (response.ok) {
-        setMessage(' Password changed successfully! Redirecting to dashboard...');
-        setMessageType('success');
-        
-        // Update user data in localStorage
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        user.mustChangePassword = false;
-        localStorage.setItem('user', JSON.stringify(user));
-        
-        setTimeout(() => {
-          const userRole = user.role;
-          if (userRole === 'Admin') {
-            navigate('/admin-dashboard');
-          } else if (userRole === 'Teacher') {
-            navigate('/teacher-dashboard');
-          } else {
-            navigate('/student-dashboard');
-          }
-        }, 2000);
-      } else {
-        setMessage(`❌ ${data.message}`);
-        setMessageType('error');
-      }
+      setMessage('Password changed successfully! Redirecting to dashboard...');
+      setMessageType('success');
+      
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      user.mustChangePassword = false;
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      setTimeout(() => {
+        const userRole = user.role;
+        if (userRole === 'Admin') {
+          navigate('/admin-dashboard');
+        } else if (userRole === 'Teacher') {
+          navigate('/teacher-dashboard');
+        } else {
+          navigate('/student-dashboard');
+        }
+      }, 2000);
     } catch (error) {
       console.error('Error changing password:', error);
-      setMessage('❌ Error changing password. Please try again.');
+      setMessage(`Error: ${error.response?.data?.message || 'Error changing password. Please try again.'}`);
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -81,7 +67,7 @@ function ChangePassword() {
       <div className="bg-white p-8 rounded-xl shadow-xl w-96 border border-gray-100">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-2xl"></span>
+            <span className="text-2xl">🔒</span>
           </div>
           <h2 className="text-2xl font-bold text-gray-800">Change Password</h2>
           <p className="text-sm text-gray-500 mt-1">You are required to change your password on first login</p>
@@ -116,7 +102,7 @@ function ChangePassword() {
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-semibold mb-2">New Password</label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-gray-400"></span>
+              <span className="absolute left-3 top-2.5 text-gray-400">🔑</span>
               <input
                 type="password"
                 value={formData.newPassword}

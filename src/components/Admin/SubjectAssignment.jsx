@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { authAPI, subjectAPI } from '../../services/api';
+import { adminAPI, subjectAPI, teacherSubjectsAPI } from '../services/api';
 
 function SubjectAssignment() {
   const [teachers, setTeachers] = useState([]);
@@ -19,16 +19,8 @@ function SubjectAssignment() {
 
   const loadTeachers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/admin/teachers', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTeachers(data);
-      } else {
-        console.error('Failed to load teachers');
-      }
+      const response = await adminAPI.getTeachers();
+      setTeachers(response.data);
     } catch (error) {
       console.error('Error loading teachers:', error);
     }
@@ -36,14 +28,8 @@ function SubjectAssignment() {
 
   const loadSubjects = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/subjects', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setSubjects(data);
-      }
+      const response = await subjectAPI.getAll();
+      setSubjects(response.data);
     } catch (error) {
       console.error('Error loading subjects:', error);
     }
@@ -51,14 +37,8 @@ function SubjectAssignment() {
 
   const loadAssignments = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/TeacherSubjects/all-assignments', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setAssignments(data);
-      }
+      const response = await teacherSubjectsAPI.getAllAssignments();
+      setAssignments(response.data);
     } catch (error) {
       console.error('Error loading assignments:', error);
     }
@@ -66,7 +46,7 @@ function SubjectAssignment() {
 
   const handleAssign = async () => {
     if (!selectedTeacher || !selectedSubject) {
-      setMessage(' Please select both teacher and subject');
+      setMessage('Please select both teacher and subject');
       setMessageType('error');
       setTimeout(() => setMessage(''), 3000);
       return;
@@ -74,33 +54,20 @@ function SubjectAssignment() {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/TeacherSubjects/assign', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          teacherId: parseInt(selectedTeacher),
-          subjectId: parseInt(selectedSubject)
-        })
+      const response = await teacherSubjectsAPI.assign({
+        teacherId: parseInt(selectedTeacher),
+        subjectId: parseInt(selectedSubject)
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        setMessage(` ${data.message || 'Subject assigned successfully!'}`);
-        setMessageType('success');
-        loadAssignments();
-        setSelectedTeacher('');
-        setSelectedSubject('');
-      } else {
-        setMessage(`❌ ${data.message || 'Failed to assign subject'}`);
-        setMessageType('error');
-      }
+      setMessage(`Subject assigned successfully!`);
+      setMessageType('success');
+      loadAssignments();
+      setSelectedTeacher('');
+      setSelectedSubject('');
     } catch (error) {
       console.error('Error:', error);
-      setMessage('❌ Error assigning subject');
+      const errorMessage = error.response?.data?.message || 'Failed to assign subject';
+      setMessage(`Error: ${errorMessage}`);
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -109,27 +76,17 @@ function SubjectAssignment() {
   };
 
   const handleRemoveAssignment = async (id, teacherName, subjectName) => {
-    if (!confirm(` Remove assignment: ${teacherName} → ${subjectName}?`)) return;
+    if (!confirm(`Remove assignment: ${teacherName} -> ${subjectName}?`)) return;
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`https://school-yathu.onrender.com/api/TeacherSubjects/remove/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        setMessage(` Assignment removed successfully`);
-        setMessageType('success');
-        loadAssignments();
-      } else {
-        const data = await response.json();
-        setMessage(`❌ ${data.message || 'Failed to remove assignment'}`);
-        setMessageType('error');
-      }
+      await teacherSubjectsAPI.remove(id);
+      setMessage('Assignment removed successfully');
+      setMessageType('success');
+      loadAssignments();
     } catch (error) {
       console.error('Error:', error);
-      setMessage('❌ Error removing assignment');
+      const errorMessage = error.response?.data?.message || 'Failed to remove assignment';
+      setMessage(`Error: ${errorMessage}`);
       setMessageType('error');
     }
     setTimeout(() => setMessage(''), 3000);
@@ -138,7 +95,7 @@ function SubjectAssignment() {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
-        <h2 className="text-2xl font-bold text-white"> Assign Subjects to Teachers</h2>
+        <h2 className="text-2xl font-bold text-white">Assign Subjects to Teachers</h2>
         <p className="text-purple-100 text-sm mt-1">Manage which subjects each teacher can teach</p>
       </div>
       
@@ -169,7 +126,7 @@ function SubjectAssignment() {
               ))}
             </select>
             {teachers.length === 0 && (
-              <p className="text-xs text-yellow-600 mt-1"> No teachers available. Add teachers first.</p>
+              <p className="text-xs text-yellow-600 mt-1">No teachers available. Add teachers first.</p>
             )}
           </div>
           
@@ -212,13 +169,12 @@ function SubjectAssignment() {
         </button>
         
         <h3 className="text-xl font-bold mt-8 mb-4 text-gray-800 flex items-center gap-2">
-           Current Assignments
+          Current Assignments
           <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">({assignments.length})</span>
         </h3>
         
         {assignments.length === 0 ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
-            <div className="text-4xl mb-2"></div>
             <p className="text-gray-500">No assignments yet. Use the form above to assign subjects to teachers.</p>
           </div>
         ) : (
@@ -235,21 +191,17 @@ function SubjectAssignment() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {assignments.map((assignment) => (
                   <tr key={assignment.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      <span className="flex items-center gap-1"> {assignment.teacherName}</span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      <span className="flex items-center gap-1"> {assignment.subjectName}</span>
-                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{assignment.teacherName}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{assignment.subjectName}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {new Date(assignment.assignedAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <button
                         onClick={() => handleRemoveAssignment(assignment.id, assignment.teacherName, assignment.subjectName)}
-                        className="text-red-600 hover:text-red-800 transition-colors flex items-center gap-1"
+                        className="text-red-600 hover:text-red-800 transition-colors"
                       >
-                        🗑️ Remove
+                        Remove
                       </button>
                     </td>
                   </tr>

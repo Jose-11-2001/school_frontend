@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { adminAPI } from '../services/api';
 
 function ClassManagement() {
   const [classes, setClasses] = useState([]);
@@ -21,45 +22,28 @@ function ClassManagement() {
     loadStudents();
   }, []);
 
-  // ✅ FIXED: Load classes using /api/Admin/classes (capital A)
   const loadClasses = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/Admin/classes', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      console.log('Classes loaded:', data);
-      setClasses(data);
+      const response = await adminAPI.getClasses();
+      setClasses(response.data);
     } catch (error) {
       console.error('Error loading classes:', error);
     }
   };
 
-  // ✅ FIXED: Load teachers using /api/Admin/teachers (capital A)
   const loadTeachers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      console.log('Teachers loaded:', data);
-      setTeachers(data.filter(t => t.isActive !== false));
+      const response = await adminAPI.getTeachers();
+      setTeachers(response.data.filter(t => t.isActive !== false));
     } catch (error) {
       console.error('Error loading teachers:', error);
     }
   };
 
-  // ✅ FIXED: Load students using /api/Admin/all-students (capital A)
   const loadStudents = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/Admin/all-students', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setStudents(data);
+      const response = await adminAPI.getAllStudents();
+      setStudents(response.data);
     } catch (error) {
       console.error('Error loading students:', error);
     } finally {
@@ -80,104 +64,64 @@ function ClassManagement() {
     return { status: 'success', message: 'Available', color: 'green' };
   };
 
-  // ✅ FIXED: Add class using /api/Admin/classes (capital A)
   const handleAddClass = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/Admin/classes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          stream: formData.stream,
-          teacherId: formData.teacherId ? parseInt(formData.teacherId) : null,
-          capacity: formData.capacity ? parseInt(formData.capacity) : null
-        })
+      await adminAPI.addClass({
+        name: formData.name,
+        stream: formData.stream,
+        teacherId: formData.teacherId ? parseInt(formData.teacherId) : null,
+        capacity: formData.capacity ? parseInt(formData.capacity) : null
       });
       
-      if (response.ok) {
-        setMessage('Class added successfully!');
-        setShowAddForm(false);
-        setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
-        loadClasses();
-        setTimeout(() => setMessage(''), 3000);
-      } else {
-        const error = await response.json();
-        setMessage(`Error: ${error.message || 'Failed to add class'}`);
-        setTimeout(() => setMessage(''), 3000);
-      }
+      setMessage('Class added successfully!');
+      setShowAddForm(false);
+      setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
+      loadClasses();
+      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error:', error);
-      setMessage('Error adding class');
+      const errorMessage = error.response?.data?.message || 'Failed to add class';
+      setMessage(`Error: ${errorMessage}`);
       setTimeout(() => setMessage(''), 3000);
     }
   };
 
-  // ✅ FIXED: Update class using /api/Admin/classes (capital A)
   const handleUpdateClass = async (e) => {
     e.preventDefault();
     
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`https://school-yathu.onrender.com/api/Admin/classes/${editingClass.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          stream: formData.stream,
-          teacherId: formData.teacherId ? parseInt(formData.teacherId) : null,
-          capacity: formData.capacity ? parseInt(formData.capacity) : null
-        })
+      await adminAPI.updateClass(editingClass.id, {
+        name: formData.name,
+        stream: formData.stream,
+        teacherId: formData.teacherId ? parseInt(formData.teacherId) : null,
+        capacity: formData.capacity ? parseInt(formData.capacity) : null
       });
       
-      const data = await response.json();
-      
-      if (response.ok) {
-        setMessage('Class updated successfully!');
-        setEditingClass(null);
-        setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
-        loadClasses();
-        setTimeout(() => setMessage(''), 3000);
-      } else {
-        setMessage(`Error: ${data.message || 'Failed to update class'}`);
-        setTimeout(() => setMessage(''), 3000);
-      }
+      setMessage('Class updated successfully!');
+      setEditingClass(null);
+      setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
+      loadClasses();
+      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error:', error);
-      setMessage(`Error updating class: ${error.message}`);
+      const errorMessage = error.response?.data?.message || 'Failed to update class';
+      setMessage(`Error: ${errorMessage}`);
       setTimeout(() => setMessage(''), 3000);
     }
   };
 
-  // ✅ FIXED: Delete class using /api/Admin/classes (capital A)
   const handleDeleteClass = async (id, name) => {
     if (confirm(`Are you sure you want to delete class "${name}"?\n\nThis action cannot be undone.`)) {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/Admin/classes/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-          setMessage(`Class "${name}" deleted successfully!`);
-          loadClasses();
-          setTimeout(() => setMessage(''), 3000);
-        } else {
-          const error = await response.json();
-          setMessage(`Error: ${error.message || 'Failed to delete class'}`);
-          setTimeout(() => setMessage(''), 3000);
-        }
+        await adminAPI.deleteClass(id);
+        setMessage(`Class "${name}" deleted successfully!`);
+        loadClasses();
+        setTimeout(() => setMessage(''), 3000);
       } catch (error) {
         console.error('Error:', error);
-        setMessage('Error deleting class');
+        const errorMessage = error.response?.data?.message || 'Failed to delete class';
+        setMessage(`Error: ${errorMessage}`);
         setTimeout(() => setMessage(''), 3000);
       }
     }
@@ -230,7 +174,7 @@ function ClassManagement() {
 
       {message && (
         <div className={`p-3 rounded-lg mb-4 ${
-          message.includes('✅') 
+          message.includes('successfully') 
             ? 'bg-green-50 text-green-700 border border-green-200' 
             : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
@@ -240,9 +184,7 @@ function ClassManagement() {
 
       {showAddForm && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6 border border-blue-200 shadow-sm">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-            <span></span> Add New Class
-          </h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">Add New Class</h3>
           <form onSubmit={handleAddClass} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-700 text-sm font-semibold mb-1">Class Name *</label>
@@ -302,9 +244,7 @@ function ClassManagement() {
 
       {editingClass && (
         <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg mb-6 border border-yellow-300 shadow-sm">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-            <span></span> Edit Class: {editingClass.name}
-          </h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">Edit Class: {editingClass.name}</h3>
           <form onSubmit={handleUpdateClass} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-700 text-sm font-semibold mb-1">Class Name *</label>
@@ -349,7 +289,7 @@ function ClassManagement() {
             </div>
             <div className="md:col-span-2 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                🔄 Update Class
+                Update Class
               </button>
               <button type="button" onClick={cancelEdit} className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">
                 Cancel
@@ -377,7 +317,6 @@ function ClassManagement() {
               {classes.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                    <div className="text-4xl mb-2"></div>
                     No classes found. Click "Add New Class" to create your first class.
                   </td>
                 </tr>
@@ -393,13 +332,9 @@ function ClassManagement() {
                       <td className="px-6 py-4 text-gray-600">{cls.stream || '-'}</td>
                       <td className="px-6 py-4">
                         {cls.teacherId ? (
-                          <span className="text-green-600 font-medium flex items-center gap-1">
-                            <span></span> {getTeacherName(cls.teacherId)}
-                          </span>
+                          <span className="text-green-600 font-medium">{getTeacherName(cls.teacherId)}</span>
                         ) : (
-                          <span className="text-orange-500 flex items-center gap-1">
-                            <span></span> Not Assigned
-                          </span>
+                          <span className="text-orange-500">Not Assigned</span>
                         )}
                       </td>
                       <td className="px-6 py-4">
@@ -409,9 +344,6 @@ function ClassManagement() {
                           </span>
                           {cls.capacity && (
                             <span className="text-sm text-gray-500">/ {cls.capacity}</span>
-                          )}
-                          {isOverCapacity && (
-                            <span className="text-red-500 text-xs" title="Over capacity"></span>
                           )}
                         </div>
                       </td>
@@ -454,9 +386,7 @@ function ClassManagement() {
       
       {teachers.length === 0 && (
         <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-          <p className="text-yellow-800 flex items-center gap-2">
-            <span></span> No teachers available. Please add teachers first in Teacher Management tab.
-          </p>
+          <p className="text-yellow-800">No teachers available. Please add teachers first in Teacher Management tab.</p>
         </div>
       )}
     </div>
