@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../../services/api';
+import { authAPI } from '../services/api';
 import schoolLogo from '../../assets/images/logoo.jpg';
 import backgroundImage from '../../assets/images/home.jpg';
 
@@ -16,63 +16,65 @@ function Login({ setUser }) {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
+      // ✅ Using authAPI from services/api.js
       const response = await authAPI.login({ email, password });
       const data = response.data;
-      
-      console.log('Login response:', data); // Debug log
-      
+
+      console.log('🔍 Login Response:', data);
+
       const { token, id, name, email: userEmail, role, mustChangePassword } = data;
-      
+
       if (!token) {
         throw new Error('No token received from server');
       }
-      
+
+      console.log('🔍 Role received:', role);
+      console.log('🔍 Must change password:', mustChangePassword);
+
       // Store token and user data
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify({ 
-        id, 
-        name, 
-        email: userEmail, 
-        role, 
-        mustChangePassword 
+      localStorage.setItem('user', JSON.stringify({
+        id,
+        name,
+        email: userEmail,
+        role,
+        mustChangePassword
       }));
-      
-      console.log('User stored:', { role, mustChangePassword }); // Debug log
-      
+
+      console.log('🔍 Stored user:', localStorage.getItem('user'));
+
       // Update parent component state
       if (setUser) {
         setUser({ id, name, email: userEmail, role, mustChangePassword });
       }
-      
+
       // Check if password change is required
       if (mustChangePassword === true) {
-        console.log('Redirecting to change password');
+        console.log('🔍 Redirecting to change-password');
         navigate('/change-password');
         return;
       }
-      
+
       // Navigate based on role
-      console.log('Navigating to dashboard for role:', role);
-      switch(role) {
-        case 'Admin':
-          navigate('/admin-dashboard');
-          break;
-        case 'Teacher':
-          navigate('/teacher-dashboard');
-          break;
-        case 'Student':
-          navigate('/student-dashboard');
-          break;
-        default:
-          console.error('Unknown role:', role);
-          setError('Unknown user role. Please contact support.');
-          navigate('/login');
+      console.log(`🔍 Navigating to dashboard for role: "${role}"`);
+
+      // ✅ Match exact case from Swagger
+      if (role === 'Admin') {
+        navigate('/admin-dashboard');
+      } else if (role === 'Teacher') {
+        navigate('/teacher-dashboard');
+      } else if (role === 'Student') {
+        navigate('/student-dashboard');
+      } else {
+        console.error('❌ Unknown role:', role);
+        setError(`Unknown user role: "${role}". Please contact support.`);
+        setLoading(false);
       }
-      
+
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('❌ Login error:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password. Please try again.';
       setError(errorMessage);
     } finally {
@@ -89,14 +91,14 @@ function Login({ setUser }) {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: `url(${backgroundImage})`,
       }}
     >
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-      
+
       <div className="relative z-10 bg-white p-8 rounded-xl shadow-2xl w-96">
         <button
           onClick={handleGoBack}
@@ -107,10 +109,10 @@ function Login({ setUser }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
         </button>
-        
+
         <div className="text-center mb-8">
           <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg bg-white">
-            <img 
+            <img
               src={schoolLogo}
               alt="School Logo"
               className="w-full h-full object-cover"
@@ -123,13 +125,13 @@ function Login({ setUser }) {
           <h2 className="text-2xl font-bold text-gray-800">Mkondezi Secondary School</h2>
           <p className="text-gray-600 mt-2">Grading System</p>
         </div>
-        
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-semibold mb-2">Email Address</label>
@@ -142,7 +144,7 @@ function Login({ setUser }) {
               required
             />
           </div>
-          
+
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-semibold mb-2">Password</label>
             <div className="relative">
@@ -172,7 +174,7 @@ function Login({ setUser }) {
               </button>
             </div>
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}
@@ -191,7 +193,7 @@ function Login({ setUser }) {
             )}
           </button>
         </form>
-        
+
         <div className="mt-4 text-center text-xs text-gray-400">
           <p>© {new Date().getFullYear()} Mkondezi Secondary School</p>
         </div>
