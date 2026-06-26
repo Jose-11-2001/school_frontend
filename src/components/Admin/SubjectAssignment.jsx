@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminAPI, subjectAPI, teacherSubjectsAPI } from '../services/api';
+import { adminAPI, subjectAPI, teacherSubjectsAPI } from '../../services/api';
 
 function SubjectAssignment() {
   const [teachers, setTeachers] = useState([]);

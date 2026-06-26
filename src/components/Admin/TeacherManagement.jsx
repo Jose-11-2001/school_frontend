@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminAPI, authAPI } from '../services/api';
+import { adminAPI, authAPI } from '../../services/api';
 
 function TeacherManagement() {
   const [teachers, setTeachers] = useState([]);

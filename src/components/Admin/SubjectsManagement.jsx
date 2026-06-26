@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { subjectAPI } from '../services/api';
+import { subjectAPI } from '../../services/api';
 
 function SubjectsManagement() {
   const [subjects, setSubjects] = useState([]);
