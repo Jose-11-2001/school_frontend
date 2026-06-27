@@ -1,4 +1,4 @@
-// src/services/api.js - Updated with correct endpoints
+
 import axios from 'axios';
 
 const API_BASE_URL = 'https://school-yathu.onrender.com/api';

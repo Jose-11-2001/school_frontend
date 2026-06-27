@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// ✅ FIXED: Correct path - ../services/api (not ../../services/api)
 import { authAPI } from '../../services/api';
 import schoolLogo from '../../assets/images/logoo.jpg';
 import backgroundImage from '../../assets/images/home.jpg';
