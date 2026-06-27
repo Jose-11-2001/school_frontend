@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
+import { getCurrentUser, getUserName } from '../../utils/roleUtils';
 import TeacherManagement from './TeacherManagement';
 import ClassManagement from './ClassManagement';
 import ResultsApproval from './ResultsApproval';
@@ -22,17 +22,37 @@ function AdminDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
     const userData = getCurrentUser();
     
-    if (!userData || !hasRole('Admin')) {
+    console.log('🔍 AdminDashboard - Token:', !!token);
+    console.log('🔍 AdminDashboard - User data:', userData);
+    
+    if (!token) {
+      console.log('🔍 AdminDashboard - No token, redirecting to login');
       navigate('/login');
       return;
     }
     
+    if (!userData) {
+      console.log('🔍 AdminDashboard - No user data, redirecting to login');
+      navigate('/login');
+      return;
+    }
+    
+    // ✅ Exact match with backend role
+    if (userData.role !== 'Admin') {
+      console.log(`🔍 AdminDashboard - Role "${userData.role}" is not Admin, redirecting`);
+      navigate('/login');
+      return;
+    }
+    
+    console.log('✅ AdminDashboard - User is valid Admin!');
     setUser(userData);
   }, [navigate]);
 
   const handleLogout = () => {
+    console.log('🔍 Logging out...');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');

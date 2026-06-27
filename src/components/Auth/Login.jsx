@@ -21,7 +21,7 @@ function Login({ setUser }) {
       const response = await authAPI.login({ email, password });
       const data = response.data;
 
-      console.log('Login Response:', data);
+      console.log('🔍 Login Response:', data);
 
       const { token, id, name, email: userEmail, role, mustChangePassword } = data;
 
@@ -29,31 +29,34 @@ function Login({ setUser }) {
         throw new Error('No token received from server');
       }
 
-      console.log('Role received:', role);
-      console.log('Must change password:', mustChangePassword);
+      console.log('🔍 Role received:', role);
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify({
+      // ✅ Save user data with trimmed role
+      const userData = {
         id,
         name,
         email: userEmail,
-        role,
-        mustChangePassword
-      }));
+        role: role?.trim() || 'Student',
+        mustChangePassword: mustChangePassword || false
+      };
 
-      console.log('Stored user:', localStorage.getItem('user'));
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      console.log('✅ Stored user:', localStorage.getItem('user'));
 
       if (setUser) {
-        setUser({ id, name, email: userEmail, role, mustChangePassword });
+        setUser(userData);
       }
 
       if (mustChangePassword === true) {
-        console.log('Redirecting to change-password');
+        console.log('🔍 Redirecting to change-password');
         navigate('/change-password');
         return;
       }
 
-      console.log(`Navigating to dashboard for role: "${role}"`);
+      // ✅ Navigate based on role (exact match with backend)
+      console.log(`🔍 Navigating to dashboard for role: "${role}"`);
 
       if (role === 'Admin') {
         navigate('/admin-dashboard');
@@ -62,13 +65,13 @@ function Login({ setUser }) {
       } else if (role === 'Student') {
         navigate('/student-dashboard');
       } else {
-        console.error('Unknown role:', role);
+        console.error('❌ Unknown role:', role);
         setError(`Unknown user role: "${role}". Please contact support.`);
         setLoading(false);
       }
 
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('❌ Login error:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password. Please try again.';
       setError(errorMessage);
     } finally {
