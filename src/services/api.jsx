@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './components/Home';
-import Login from './components/Auth/Login';
-import AdminDashboard from './components/Admin/AdminDashboard';
-import TeacherDashboard from './components/Teacher/TeacherDashboard';
-import StudentDashboard from './components/Student/StudentDashboard';
-import ChangePassword from './components/Auth/ChangePassword';
+import Home from './components/Home.jsx';
+import Login from './components/Auth/Login.jsx';
+import AdminDashboard from './components/Admin/AdminDashboard.jsx';
+import TeacherDashboard from './components/Teacher/TeacherDashboard.jsx';
+import StudentDashboard from './components/Student/StudentDashboard.jsx';
+import ChangePassword from './components/Auth/ChangePassword.jsx';
 
 function App() {
   const [user, setUser] = useState(null);
