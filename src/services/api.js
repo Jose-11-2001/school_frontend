@@ -1,133 +1,78 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Home from './components/Home';
+import Login from './components/Auth/Login';
+import AdminDashboard from './components/Admin/AdminDashboard';
+import TeacherDashboard from './components/Teacher/TeacherDashboard';
+import StudentDashboard from './components/Student/StudentDashboard';
+import ChangePassword from './components/Auth/ChangePassword';
 
-import axios from 'axios';
+function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const API_BASE_URL = 'https://school-yathu.onrender.com/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-});
-
-// Request interceptor
-api.interceptors.request.use(
-  (config) => {
+  useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
+    const userData = localStorage.getItem('user');
+    
+    console.log('🔍 App - Token:', !!token);
+    console.log('🔍 App - User data:', userData);
+    
+    if (token && userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        console.log('🔍 App - Parsed user:', parsedUser);
+        console.log('🔍 App - Role:', parsedUser.role);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('❌ App - Error parsing user data:', error);
+        localStorage.removeItem('user');
       }
     }
-    return Promise.reject(error);
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
-);
 
-// ============================================
-// AUTH API (Matches Swagger: /api/Auth) - ✅ CORRECTED
-// ============================================
-export const authAPI = {
-  login: (data) => api.post('/Auth/login', data),
-  changePassword: (data) => api.post('/Auth/change-password', data),
-  register: (data) => api.post('/Auth/register', data),
-  resetPassword: (userId) => api.post(`/Auth/reset-password/${userId}`),
-  generateEmail: (data) => api.post('/Auth/generate-email', data),
-  generatePassword: () => api.post('/Auth/generate-password'),
-};
+  // ✅ Helper function for case-insensitive role check
+  const hasRole = (role) => {
+    if (!user?.role) return false;
+    return user.role.trim().toLowerCase() === role.toLowerCase();
+  };
 
-// ============================================
-// ADMIN API (Matches Swagger: /api/Admin) - ✅ CORRECTED
-// ============================================
-export const adminAPI = {
-  getTeachers: () => api.get('/Admin/teachers'),
-  addTeacher: (data) => api.post('/Admin/teachers', data),
-  updateTeacher: (id, data) => api.put(`/Admin/teachers/${id}`, data),
-  deleteTeacher: (id) => api.delete(`/Admin/teachers/${id}`),
-  getClasses: () => api.get('/Admin/classes'),
-  addClass: (data) => api.post('/Admin/classes', data),
-  updateClass: (id, data) => api.put(`/Admin/classes/${id}`, data),
-  deleteClass: (id) => api.delete(`/Admin/classes/${id}`),
-  getAllStudents: () => api.get('/Admin/all-students'),
-  updateStudent: (id, data) => api.put(`/Admin/students/${id}`, data),
-  deleteStudent: (id) => api.delete(`/Admin/students/${id}`),
-  allocateTeacher: (data) => api.post('/Admin/allocate-teacher', data),
-  getClassAllocations: (classId) => api.get(`/Admin/class-allocations/${classId}`),
-  removeAllocation: (id) => api.delete(`/Admin/allocations/${id}`),
-};
+  console.log('🔍 App - Current user role:', user?.role);
+  console.log('🔍 App - Is Admin:', hasRole('Admin'));
+  console.log('🔍 App - Is Teacher:', hasRole('Teacher'));
+  console.log('🔍 App - Is Student:', hasRole('Student'));
 
-// ============================================
-// STUDENT API (Matches Swagger: /api/Student) - ✅ CORRECTED
-// ============================================
-export const studentAPI = {
-  getAll: () => api.get('/Student'),
-  create: (data) => api.post('/Student', data),
-  getByEmail: (email) => api.get(`/Student/student-by-email?email=${encodeURIComponent(email)}`),
-  getByName: (name) => api.get(`/Student/student-by-name?name=${encodeURIComponent(name)}`),
-  getByAdmission: (admissionNumber) => api.get(`/Student/by-admission/${admissionNumber}`),
-  update: (id, data) => api.put(`/Student/${id}`, data),
-  delete: (id) => api.delete(`/Student/${id}`),
-  getStudentSubjects: (className, stream) => 
-    api.get(`/Student/student-subjects?className=${encodeURIComponent(className)}&stream=${encodeURIComponent(stream)}`),
-  getMySubjects: () => api.get('/Student/my-subjects'),
-  getStudentResults: (admissionNumber, year, term) => 
-    api.get(`/Student/student-results?admissionNumber=${encodeURIComponent(admissionNumber)}&year=${year}&term=${encodeURIComponent(term)}`),
-  getMyMarks: (subjectId, year, term) => 
-    api.get(`/Student/my-marks/${subjectId}?year=${year}&term=${encodeURIComponent(term)}`),
-  getStudentMarks: (studentId, year, term) => 
-    api.get(`/Student/marks/${studentId}?year=${year}&term=${encodeURIComponent(term)}`),
-  getStudentRank: (studentId, year, term) => 
-    api.get(`/Student/rank/${studentId}?year=${year}&term=${encodeURIComponent(term)}`),
-  getClassRankings: (className, year, term) => 
-    api.get(`/Student/class-ranking?className=${encodeURIComponent(className)}&year=${year}&term=${encodeURIComponent(term)}`),
-  getDashboard: () => api.get('/Student/dashboard'),
-};
+  return (
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login setUser={setUser} />} />
+        <Route path="/change-password" element={<ChangePassword />} />
+        
+        {/* Protected Routes - Using case-insensitive check */}
+        <Route 
+          path="/admin-dashboard" 
+          element={hasRole('Admin') ? <AdminDashboard /> : <Navigate to="/login" />} 
+        />
+        
+        <Route 
+          path="/teacher-dashboard" 
+          element={hasRole('Teacher') ? <TeacherDashboard /> : <Navigate to="/login" />} 
+        />
+        
+        <Route 
+          path="/student-dashboard" 
+          element={hasRole('Student') ? <StudentDashboard /> : <Navigate to="/login" />} 
+        />
+      </Routes>
+    </Router>
+  );
+}
 
-// ============================================
-// SUBJECTS API (Matches Swagger: /api/Subjects) - ✅ CORRECTED
-// ============================================
-export const subjectAPI = {
-  getAll: () => api.get('/Subjects'),
-  create: (data) => api.post('/Subjects', data),
-};
-
-// ============================================
-// NOTIFICATIONS API (Matches Swagger: /api/Notifications) - ✅ CORRECTED
-// ============================================
-export const notificationsAPI = {
-  getStudentNotifications: () => api.get('/Notifications/student'),
-  getTeacherNotifications: () => api.get('/Notifications/teacher'),
-  getAdminNotifications: () => api.get('/Notifications/admin'),
-  getUnreadCount: () => api.get('/Notifications/unread-count'),
-  markAsRead: (id) => api.put(`/Notifications/${id}/read`),
-  markAllAsRead: () => api.put('/Notifications/read-all'),
-  send: (data) => api.post('/Notifications/send', data),
-};
-
-// ============================================
-// TEACHER MARKS API (Matches Swagger: /api/TeacherMarks) - ✅ CORRECTED
-// ============================================
-export const teacherMarksAPI = {
-  getMyStudents: () => api.get('/TeacherMarks/my-students'),
-  getStudentMarks: (studentId, subjectId, year, term) => 
-    api.get(`/TeacherMarks/student-marks/${studentId}/${subjectId}/${year}/${encodeURIComponent(term)}`),
-  enterMarks: (data) => api.post('/TeacherMarks/enter-marks', data),
-  publishResults: (subjectId, year, term) => 
-    api.post(`/TeacherMarks/publish-results/${subjectId}/${year}/${encodeURIComponent(term)}`),
-};
-
-export default api;
+export default App;
