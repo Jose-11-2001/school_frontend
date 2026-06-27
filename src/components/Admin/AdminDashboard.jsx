@@ -45,11 +45,12 @@ function AdminDashboard() {
       console.log('🔍 AdminDashboard - Role:', parsedUser.role);
       console.log('🔍 AdminDashboard - Role type:', typeof parsedUser.role);
       
-      // ✅ FIX: Case-insensitive role check
+      // ✅ FIX: Case-insensitive role check with trimming
       const userRole = parsedUser.role?.trim();
       console.log('🔍 AdminDashboard - Cleaned Role:', userRole);
       
-      if (userRole?.toLowerCase() !== 'admin') {
+      // ✅ Check if user is Admin (case insensitive)
+      if (!userRole || userRole.toLowerCase() !== 'admin') {
         console.log(`🔍 Role is "${userRole}", not admin - redirecting to login`);
         navigate('/login');
         return;
