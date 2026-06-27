@@ -24,18 +24,44 @@ function AdminDashboard() {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
+    console.log('🔍 AdminDashboard - Token exists:', !!token);
+    console.log('🔍 AdminDashboard - User data:', userData);
+    
     if (!token) {
+      console.log('🔍 No token, redirecting to login');
       navigate('/login');
-    } else {
+      return;
+    }
+    
+    if (!userData) {
+      console.log('🔍 No user data, redirecting to login');
+      navigate('/login');
+      return;
+    }
+    
+    try {
       const parsedUser = JSON.parse(userData);
+      console.log('🔍 AdminDashboard - Parsed user:', parsedUser);
+      console.log('🔍 AdminDashboard - Role:', parsedUser.role);
+      console.log('🔍 AdminDashboard - Role type:', typeof parsedUser.role);
+      
+      // ✅ Check if role is Admin (case sensitive)
       if (parsedUser.role !== 'Admin') {
+        console.log(`🔍 Role is "${parsedUser.role}", not "Admin" - redirecting to login`);
         navigate('/login');
+        return;
       }
+      
+      console.log('✅ AdminDashboard - User is valid Admin!');
       setUser(parsedUser);
+    } catch (error) {
+      console.error('❌ AdminDashboard - Error parsing user data:', error);
+      navigate('/login');
     }
   }, [navigate]);
 
   const handleLogout = () => {
+    console.log('🔍 Logging out...');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
@@ -50,16 +76,16 @@ function AdminDashboard() {
   };
 
   const menuItems = [
-    { id: 'teachers', label: 'Teacher Management', icon: '' },
-    { id: 'student-registration', label: 'Register Students', icon: '' },
-    { id: 'students', label: 'Student List', icon: '' },
-    { id: 'users', label: 'Manage Users', icon: '' },
-    { id: 'classes', label: 'Class Management', icon: '' },
-    { id: 'allocation', label: 'Subject Allocation (Teachers)', icon: '' },
-    { id: 'student-subjects', label: 'Student Subject Allocation', icon: '' },
-    { id: 'subjects', label: 'Manage Subjects', icon: '' },
-    { id: 'approval', label: 'Results Approval', icon: '' },
-    { id: 'rankings', label: 'View Rankings', icon: '' },
+    { id: 'teachers', label: 'Teacher Management' },
+    { id: 'student-registration', label: 'Register Students' },
+    { id: 'students', label: 'Student List' },
+    { id: 'users', label: 'Manage Users' },
+    { id: 'classes', label: 'Class Management' },
+    { id: 'allocation', label: 'Subject Allocation (Teachers)' },
+    { id: 'student-subjects', label: 'Student Subject Allocation' },
+    { id: 'subjects', label: 'Manage Subjects' },
+    { id: 'approval', label: 'Results Approval' },
+    { id: 'rankings', label: 'View Rankings' },
   ];
 
   const toggleSidebar = () => {
@@ -148,7 +174,6 @@ function AdminDashboard() {
                   : 'hover:bg-blue-700 text-blue-100'
               }`}
             >
-              <span className="text-xl">{item.icon}</span>
               <span className="text-sm font-medium">{item.label}</span>
             </button>
           ))}
@@ -160,7 +185,6 @@ function AdminDashboard() {
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
           >
-            <span className="text-xl"></span>
             <span className="text-white font-bold">Logout</span>
           </button>
         </div>
@@ -188,7 +212,6 @@ function AdminDashboard() {
         <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 lg:p-6">
-              {/* Error boundary - each tab renders independently */}
               {activeTab === 'teachers' && <TeacherManagement />}
               {activeTab === 'classes' && <ClassManagement />}
               {activeTab === 'allocation' && <SubjectAllocation />}
