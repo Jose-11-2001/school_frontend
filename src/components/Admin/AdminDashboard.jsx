@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
 import TeacherManagement from './TeacherManagement';
 import ClassManagement from './ClassManagement';
 import ResultsApproval from './ResultsApproval';
@@ -21,51 +22,17 @@ function AdminDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
+    const userData = getCurrentUser();
     
-    console.log('🔍 AdminDashboard - Token exists:', !!token);
-    console.log('🔍 AdminDashboard - User data:', userData);
-    
-    if (!token) {
-      console.log('🔍 No token, redirecting to login');
+    if (!userData || !hasRole('Admin')) {
       navigate('/login');
       return;
     }
     
-    if (!userData) {
-      console.log('🔍 No user data, redirecting to login');
-      navigate('/login');
-      return;
-    }
-    
-    try {
-      const parsedUser = JSON.parse(userData);
-      console.log('🔍 AdminDashboard - Parsed user:', parsedUser);
-      console.log('🔍 AdminDashboard - Role:', parsedUser.role);
-      console.log('🔍 AdminDashboard - Role type:', typeof parsedUser.role);
-      
-      // ✅ FIX: Case-insensitive role check with trimming
-      const userRole = parsedUser.role?.trim();
-      console.log('🔍 AdminDashboard - Cleaned Role:', userRole);
-      
-      // ✅ Check if user is Admin (case insensitive)
-      if (!userRole || userRole.toLowerCase() !== 'admin') {
-        console.log(`🔍 Role is "${userRole}", not admin - redirecting to login`);
-        navigate('/login');
-        return;
-      }
-      
-      console.log('✅ AdminDashboard - User is valid Admin!');
-      setUser(parsedUser);
-    } catch (error) {
-      console.error('❌ AdminDashboard - Error parsing user data:', error);
-      navigate('/login');
-    }
+    setUser(userData);
   }, [navigate]);
 
   const handleLogout = () => {
-    console.log('🔍 Logging out...');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
@@ -198,16 +165,14 @@ function AdminDashboard() {
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
-          <div className="flex items-center gap-4">
-            {/* Empty - can add items here */}
-          </div>
+          <div className="flex items-center gap-4" />
           
           <div className="flex items-center gap-6">
             <AdminNotifications />
-            <div className="h-6 w-px bg-blue-600"></div>
+            <div className="h-6 w-px bg-blue-600" />
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
-              <span className="text-sm font-bold">{user?.name || 'Headteacher'}</span>
+              <span className="text-sm font-bold">{getUserName()}</span>
             </div>
           </div>
         </nav>

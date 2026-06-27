@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
 import TeacherMarksEntry from './TeacherMarksEntry';
 import MySubjects from './MySubjects';
 import Rankings from '../Rankings';
@@ -13,18 +14,14 @@ function TeacherDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
+    const userData = getCurrentUser();
     
-    if (!token) {
+    if (!userData || !hasRole('Teacher')) {
       navigate('/login');
-    } else {
-      const parsedUser = JSON.parse(userData);
-      if (parsedUser.role !== 'Teacher') {
-        navigate('/login');
-      }
-      setUser(parsedUser);
+      return;
     }
+    
+    setUser(userData);
   }, [navigate]);
 
   const handleLogout = () => {
@@ -42,10 +39,10 @@ function TeacherDashboard() {
   };
 
   const menuItems = [
-    { id: 'students', label: 'My Students', icon: '' },
-    { id: 'my-subjects', label: 'My Subjects', icon: '' },
-    { id: 'marks', label: 'Enter Marks', icon: '' },
-    { id: 'rankings', label: 'Rankings', icon: '' },
+    { id: 'students', label: 'My Students' },
+    { id: 'my-subjects', label: 'My Subjects' },
+    { id: 'marks', label: 'Enter Marks' },
+    { id: 'rankings', label: 'Rankings' },
   ];
 
   return (
@@ -65,7 +62,6 @@ function TeacherDashboard() {
           <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Add notification icon to mobile header */}
           <TeacherNotifications />
           <button
             onClick={handleLogout}
@@ -126,7 +122,6 @@ function TeacherDashboard() {
                   : 'hover:bg-blue-700 text-blue-100'
               }`}
             >
-              <span className="text-xl">{item.icon}</span>
               <span className="text-sm font-medium">{item.label}</span>
             </button>
           ))}
@@ -147,17 +142,14 @@ function TeacherDashboard() {
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
-          <div className="flex items-center gap-4">
-            {/* Left side empty or can add items */}
-          </div>
+          <div className="flex items-center gap-4" />
           
           <div className="flex items-center gap-6">
-            {/* Add notification icon to desktop header */}
             <TeacherNotifications />
-            <div className="h-6 w-px bg-blue-600"></div>
+            <div className="h-6 w-px bg-blue-600" />
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
-              <span className="text-sm font-bold">{user?.name}</span>
+              <span className="text-sm font-bold">{getUserName()}</span>
             </div>
           </div>
         </nav>

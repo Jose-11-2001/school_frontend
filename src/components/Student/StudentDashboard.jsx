@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
 import StudentNotifications from './StudentNotifications';
 
 function StudentDashboard() {
@@ -16,22 +17,15 @@ function StudentDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
+    const userData = getCurrentUser();
     
-    if (!token || !userData) {
+    if (!userData || !hasRole('Student')) {
       navigate('/login');
       return;
     }
 
-    const parsedUser = JSON.parse(userData);
-    if (parsedUser.role !== 'Student') {
-      navigate('/login');
-      return;
-    }
-
-    setUser(parsedUser);
-    loadStudentData(parsedUser);
+    setUser(userData);
+    loadStudentData(userData);
   }, [navigate]);
 
   useEffect(() => {
@@ -48,7 +42,6 @@ function StudentDashboard() {
     try {
       const token = localStorage.getItem('token');
       
-      // Try to get student by email first
       const response = await fetch(`https://school-yathu.onrender.com/api/Student/student-by-email?email=${encodeURIComponent(userData.email)}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -57,7 +50,6 @@ function StudentDashboard() {
         const data = await response.json();
         setStudentData(data);
       } else {
-        // Try alternative - get by name
         const altResponse = await fetch(`https://school-yathu.onrender.com/api/Student/student-by-name?name=${encodeURIComponent(userData.name)}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -65,7 +57,6 @@ function StudentDashboard() {
           const data = await altResponse.json();
           setStudentData(data);
         } else {
-          // If no student found, use user data
           setStudentData({
             admissionNumber: userData.email?.split('@')[0] || 'N/A',
             fullName: userData.name,
@@ -76,7 +67,6 @@ function StudentDashboard() {
       }
     } catch (error) {
       console.error('Error loading student data:', error);
-      // Fallback to user data
       setStudentData({
         admissionNumber: userData.email?.split('@')[0] || 'N/A',
         fullName: userData.name,
@@ -93,7 +83,6 @@ function StudentDashboard() {
     try {
       const token = localStorage.getItem('token');
       
-      // Fetch subjects for this student's class and stream
       const response = await fetch(
         `https://school-yathu.onrender.com/api/StudentRegistration/student-subjects?class=${encodeURIComponent(studentData.class)}&stream=${encodeURIComponent(studentData.stream)}`,
         {
@@ -105,7 +94,6 @@ function StudentDashboard() {
         const data = await response.json();
         setSubjects(data.subjects || []);
       } else {
-        // Try alternative endpoint
         const altResponse = await fetch(
           `https://school-yathu.onrender.com/api/AdminSubjectAllocation/class-subjects?class=${encodeURIComponent(studentData.class)}&stream=${encodeURIComponent(studentData.stream)}`,
           {
@@ -116,7 +104,6 @@ function StudentDashboard() {
           const data = await altResponse.json();
           setSubjects(data.subjects || []);
         } else {
-          // Fallback: use subjects from user data
           setSubjects(user.subjects || []);
         }
       }
@@ -134,7 +121,6 @@ function StudentDashboard() {
     try {
       const token = localStorage.getItem('token');
       
-      // Fetch results
       const response = await fetch(
         `https://school-yathu.onrender.com/api/Results/student-results?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
         {
@@ -147,7 +133,6 @@ function StudentDashboard() {
         setMarks(data.results || []);
         setRanking(data.ranking || null);
       } else {
-        // Try alternative endpoint
         const altResponse = await fetch(
           `https://school-yathu.onrender.com/api/StudentMarks/student-marks?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
           {
@@ -275,11 +260,10 @@ function StudentDashboard() {
   const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
 
   const menuItems = [
-    { id: 'my-subjects', label: 'My Subjects', icon: '' },
-    { id: 'results', label: 'My Results', icon: '' },
+    { id: 'my-subjects', label: 'My Subjects' },
+    { id: 'results', label: 'My Results' },
   ];
 
-  // Render My Subjects section (similar to teacher's MySubjects)
   const renderMySubjects = () => {
     if (loading) {
       return (
@@ -292,7 +276,6 @@ function StudentDashboard() {
 
     return (
       <div>
-        {/* Student Info Card */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6 border border-blue-200">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
@@ -314,25 +297,22 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* Subjects List */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800"> My Subjects</h2>
+              <h2 className="text-2xl font-bold text-gray-800">My Subjects</h2>
               <p className="text-gray-600 mt-1">Total Subjects: {subjects.length}</p>
             </div>
             <button
               onClick={loadStudentSubjects}
               className="text-blue-500 hover:text-blue-700 text-sm"
-              title="Refresh"
             >
-              🔄 Refresh
+              Refresh
             </button>
           </div>
           
           {subjects.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <div className="text-6xl mb-4"></div>
               <p className="text-gray-500 text-lg">No subjects allocated yet.</p>
               <p className="text-sm text-gray-400 mt-2">Please contact the administrator to assign subjects to you.</p>
             </div>
@@ -371,7 +351,6 @@ function StudentDashboard() {
     );
   };
 
-  // Render Results section
   const renderResults = () => {
     if (loading) {
       return (
@@ -384,7 +363,6 @@ function StudentDashboard() {
 
     return (
       <div>
-        {/* Grading System Info */}
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-6 border border-blue-200">
           <div className="flex justify-between items-center">
             <div>
@@ -399,7 +377,6 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6 border">
           <div className="flex flex-wrap gap-4 items-end">
             <div>
@@ -438,7 +415,6 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* Performance Summary */}
         {ranking && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6 border">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Performance Summary</h2>
@@ -474,12 +450,10 @@ function StudentDashboard() {
           </div>
         )}
 
-        {/* Marks Table */}
         <div className="bg-white rounded-lg shadow-md p-6 border">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">My Marks</h2>
           {marks.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4"></div>
               <p className="text-gray-500 text-lg">No marks available yet.</p>
               <p className="text-sm text-gray-400 mt-2">Check back later when teachers publish results.</p>
             </div>
@@ -542,7 +516,6 @@ function StudentDashboard() {
           )}
         </div>
 
-        {/* Grade Guide */}
         <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
           <h3 className="font-bold mb-2">
             {isUpperForm ? 'Points Grading Guide (Form 3 & Form 4):' : 'Letter Grade Guide (Form 1 & Form 2):'}
@@ -642,7 +615,6 @@ function StudentDashboard() {
 
         {/* Sidebar Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
-          
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -656,7 +628,6 @@ function StudentDashboard() {
                   : 'hover:bg-blue-700 text-blue-100'
               }`}
             >
-              <span className="text-xl">{item.icon}</span>
               <span className="text-sm font-medium">{item.label}</span>
             </button>
           ))}
@@ -671,7 +642,6 @@ function StudentDashboard() {
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors mt-2"
           >
-            <span className="text-xl"></span>
             <span className="font-bold text-white">Logout</span>
           </button>
         </div>
@@ -683,7 +653,7 @@ function StudentDashboard() {
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
             <div className="bg-white/20 px-3 py-1 rounded-full text-sm">
-              {classLevel ? classLevel.toUpperCase() :''}
+              {classLevel ? classLevel.toUpperCase() : ''}
               {isUpperForm && ' • Points System'}
               {!isUpperForm && classLevel && ' • Letter Grades'}
             </div>
@@ -691,7 +661,7 @@ function StudentDashboard() {
           
           <div className="flex items-center gap-6">
             <StudentNotifications />
-            <div className="h-6 w-px bg-blue-600"></div>
+            <div className="h-6 w-px bg-blue-600" />
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
               <span className="text-sm font-bold">{user?.name}</span>
