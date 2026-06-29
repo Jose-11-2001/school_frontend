@@ -18,10 +18,23 @@ function Login({ setUser }) {
     setError('');
 
     try {
+      console.log('🔍 Attempting login with:', { email, password: '***' });
+      
       const response = await authAPI.login({ email, password });
       const data = response.data;
 
-      console.log('🔍 Login Response:', data);
+      // ✅ LOG EVERYTHING
+      console.log('🔍 ====== FULL LOGIN RESPONSE ======');
+      console.log('🔍 Raw response:', response);
+      console.log('🔍 Response data:', JSON.stringify(data, null, 2));
+      console.log('🔍 ================================');
+      console.log('🔍 token:', data.token);
+      console.log('🔍 id:', data.id);
+      console.log('🔍 name:', data.name);
+      console.log('🔍 email:', data.email);
+      console.log('🔍 role:', data.role);
+      console.log('🔍 role type:', typeof data.role);
+      console.log('🔍 mustChangePassword:', data.mustChangePassword);
 
       const { token, id, name, email: userEmail, role, mustChangePassword } = data;
 
@@ -29,16 +42,24 @@ function Login({ setUser }) {
         throw new Error('No token received from server');
       }
 
-      console.log('🔍 Role received:', role);
+      // ✅ If role is missing, log it and use default
+      let finalRole = role?.trim() || 'Student';
+      if (!role) {
+        console.warn('⚠️ ROLE IS MISSING! Setting to "Student" as default');
+        finalRole = 'Student';
+      }
 
-      // ✅ Save user data with trimmed role
+      console.log('🔍 Final role to save:', finalRole);
+
       const userData = {
         id,
         name,
         email: userEmail,
-        role: role?.trim() || 'Student',
+        role: finalRole,
         mustChangePassword: mustChangePassword || false
       };
+
+      console.log('🔍 User data to save:', userData);
 
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -55,10 +76,10 @@ function Login({ setUser }) {
         return;
       }
 
-      // ✅ Navigate based on role (case insensitive)
-      console.log(`🔍 Navigating to dashboard for role: "${role}"`);
+      // ✅ NAVIGATE BASED ON ROLE
+      const roleLower = finalRole.toLowerCase();
+      console.log(`🔍 Navigating to dashboard for role: "${roleLower}"`);
 
-      const roleLower = role?.toLowerCase();
       if (roleLower === 'admin') {
         navigate('/admin-dashboard');
       } else if (roleLower === 'teacher') {
@@ -66,8 +87,8 @@ function Login({ setUser }) {
       } else if (roleLower === 'student') {
         navigate('/student-dashboard');
       } else {
-        console.error('❌ Unknown role:', role);
-        setError(`Unknown user role: "${role}". Please contact support.`);
+        console.error('❌ Unknown role:', finalRole);
+        setError(`Unknown user role: "${finalRole}". Please contact support.`);
         setLoading(false);
       }
 
