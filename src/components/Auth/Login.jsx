@@ -55,14 +55,15 @@ function Login({ setUser }) {
         return;
       }
 
-      // ✅ Navigate based on role (exact match with backend)
+      // ✅ Navigate based on role (case insensitive)
       console.log(`🔍 Navigating to dashboard for role: "${role}"`);
 
-      if (role === 'Admin') {
+      const roleLower = role?.toLowerCase();
+      if (roleLower === 'admin') {
         navigate('/admin-dashboard');
-      } else if (role === 'Teacher') {
+      } else if (roleLower === 'teacher') {
         navigate('/teacher-dashboard');
-      } else if (role === 'Student') {
+      } else if (roleLower === 'student') {
         navigate('/student-dashboard');
       } else {
         console.error('❌ Unknown role:', role);

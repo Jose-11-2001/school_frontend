@@ -38,7 +38,7 @@ api.interceptors.response.use(
 );
 
 // ============================================
-// AUTH API (Matches Swagger: /api/Auth) - ✅ CORRECTED
+// AUTH API (Matches Swagger: /api/Auth)
 // ============================================
 export const authAPI = {
   login: (data) => api.post('/Auth/login', data),
@@ -50,7 +50,7 @@ export const authAPI = {
 };
 
 // ============================================
-// ADMIN API (Matches Swagger: /api/Admin) - ✅ CORRECTED
+// ADMIN API (Matches Swagger: /api/Admin)
 // ============================================
 export const adminAPI = {
   getTeachers: () => api.get('/Admin/teachers'),
@@ -70,7 +70,7 @@ export const adminAPI = {
 };
 
 // ============================================
-// STUDENT API (Matches Swagger: /api/Student) - ✅ CORRECTED
+// STUDENT API (Matches Swagger: /api/Student)
 // ============================================
 export const studentAPI = {
   getAll: () => api.get('/Student'),
@@ -97,7 +97,7 @@ export const studentAPI = {
 };
 
 // ============================================
-// SUBJECTS API (Matches Swagger: /api/Subjects) - ✅ CORRECTED
+// SUBJECTS API (Matches Swagger: /api/Subjects)
 // ============================================
 export const subjectAPI = {
   getAll: () => api.get('/Subjects'),
@@ -105,7 +105,7 @@ export const subjectAPI = {
 };
 
 // ============================================
-// NOTIFICATIONS API (Matches Swagger: /api/Notifications) - ✅ CORRECTED
+// NOTIFICATIONS API (Matches Swagger: /api/Notifications)
 // ============================================
 export const notificationsAPI = {
   getStudentNotifications: () => api.get('/Notifications/student'),
@@ -118,7 +118,7 @@ export const notificationsAPI = {
 };
 
 // ============================================
-// TEACHER MARKS API (Matches Swagger: /api/TeacherMarks) - ✅ CORRECTED
+// TEACHER MARKS API (Matches Swagger: /api/TeacherMarks)
 // ============================================
 export const teacherMarksAPI = {
   getMyStudents: () => api.get('/TeacherMarks/my-students'),
@@ -127,6 +127,53 @@ export const teacherMarksAPI = {
   enterMarks: (data) => api.post('/TeacherMarks/enter-marks', data),
   publishResults: (subjectId, year, term) => 
     api.post(`/TeacherMarks/publish-results/${subjectId}/${year}/${encodeURIComponent(term)}`),
+};
+
+// ============================================
+// TEACHER SUBJECTS API (Matches Swagger: /api/TeacherSubjects)
+// ============================================
+export const teacherSubjectsAPI = {
+  getMySubjects: () => api.get('/TeacherSubjects/my-subjects'),
+  assign: (data) => api.post('/TeacherSubjects/assign', data),
+  getAllAssignments: () => api.get('/TeacherSubjects/all-assignments'),
+  remove: (id) => api.delete(`/TeacherSubjects/remove/${id}`),
+};
+
+// ============================================
+// STUDENT SUBJECT API (Matches Swagger: /api/StudentSubject)
+// ============================================
+export const studentSubjectAPI = {
+  getAvailableSubjects: () => api.get('/StudentSubject/available-subjects'),
+  register: (subjectId) => api.post('/StudentSubject/register', { subjectId }),
+  getMySubjects: () => api.get('/StudentSubject/my-subjects'),
+  getTeacherStudents: () => api.get('/StudentSubject/teacher-students'),
+};
+
+// ============================================
+// RESULTS APPROVAL API (Matches Swagger: /api/ResultsApproval)
+// ============================================
+export const resultsApprovalAPI = {
+  getPendingResults: () => api.get('/ResultsApproval/pending-results'),
+  getResultsDetails: (subjectId, year, term) => 
+    api.get(`/ResultsApproval/results-details/${subjectId}/${year}/${encodeURIComponent(term)}`),
+  approveResults: (data) => api.post('/ResultsApproval/approve-results', data),
+  getApprovedResults: () => api.get('/ResultsApproval/approved-results'),
+};
+
+// ============================================
+// STUDENT REGISTRATION API (Matches Swagger: /api/StudentRegistration)
+// ============================================
+export const studentRegistrationAPI = {
+  getClasses: () => api.get('/StudentRegistration/classes'),
+  getAvailableSubjects: (className, stream, root) => 
+    api.get(`/StudentRegistration/available-subjects/${encodeURIComponent(className)}/${encodeURIComponent(stream)}${root ? `?root=${encodeURIComponent(root)}` : ''}`),
+  getRegisteredStudents: (className, stream) => 
+    api.get(`/StudentRegistration/registered-students?className=${className || ''}&stream=${stream || ''}`),
+  getStudentSubjects: (className, stream) => 
+    api.get(`/StudentRegistration/student-subjects?className=${encodeURIComponent(className)}&stream=${encodeURIComponent(stream)}`),
+  register: (data) => api.post('/StudentRegistration/register', data),
+  getStudentDetails: (studentId) => api.get(`/StudentRegistration/student-details/${studentId}`),
+  updateStudent: (studentId, data) => api.put(`/StudentRegistration/update/${studentId}`, data),
 };
 
 export default api;

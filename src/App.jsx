@@ -6,7 +6,7 @@ import AdminDashboard from './components/Admin/AdminDashboard';
 import TeacherDashboard from './components/Teacher/TeacherDashboard';
 import StudentDashboard from './components/Student/StudentDashboard';
 import ChangePassword from './components/Auth/ChangePassword';
-import { getCurrentUser } from './utils/roleUtils';
+import { getCurrentUser, hasRole } from './utils/roleUtils';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -25,10 +25,10 @@ function App() {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  // ✅ Exact match with backend roles (Admin, Teacher, Student)
-  const isAdmin = user?.role === 'Admin';
-  const isTeacher = user?.role === 'Teacher';
-  const isStudent = user?.role === 'Student';
+  // ✅ Use the utility function for case-insensitive role check
+  const isAdmin = hasRole('Admin');
+  const isTeacher = hasRole('Teacher');
+  const isStudent = hasRole('Student');
 
   console.log('🔍 App - User role:', user?.role);
   console.log('🔍 App - Is Admin:', isAdmin);
