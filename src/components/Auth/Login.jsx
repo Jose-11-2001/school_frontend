@@ -23,7 +23,6 @@ function Login({ setUser }) {
       const response = await authAPI.login({ email, password });
       const data = response.data;
 
-      // ✅ LOG EVERYTHING
       console.log('🔍 ====== FULL LOGIN RESPONSE ======');
       console.log('🔍 Raw response:', response);
       console.log('🔍 Response data:', JSON.stringify(data, null, 2));
@@ -42,7 +41,7 @@ function Login({ setUser }) {
         throw new Error('No token received from server');
       }
 
-      // ✅ If role is missing, log it and use default
+      // ✅ Use the role from backend, trim it
       let finalRole = role?.trim() || 'Student';
       if (!role) {
         console.warn('⚠️ ROLE IS MISSING! Setting to "Student" as default');
@@ -66,7 +65,9 @@ function Login({ setUser }) {
 
       console.log('✅ Stored user:', localStorage.getItem('user'));
 
+      // ✅ IMPORTANT: Update the user state in App.jsx
       if (setUser) {
+        console.log('🔍 Setting user in App state:', userData);
         setUser(userData);
       }
 
