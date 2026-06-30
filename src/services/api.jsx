@@ -38,7 +38,7 @@ api.interceptors.response.use(
 );
 
 // ============================================
-// AUTH API (Matches Swagger: /api/Auth)
+// AUTH API
 // ============================================
 export const authAPI = {
   login: (data) => api.post('/Auth/login', data),
@@ -50,7 +50,7 @@ export const authAPI = {
 };
 
 // ============================================
-// ADMIN API (Matches Swagger: /api/Admin)
+// ADMIN API
 // ============================================
 export const adminAPI = {
   getTeachers: () => api.get('/Admin/teachers'),
@@ -67,10 +67,27 @@ export const adminAPI = {
   allocateTeacher: (data) => api.post('/Admin/allocate-teacher', data),
   getClassAllocations: (classId) => api.get(`/Admin/class-allocations/${classId}`),
   removeAllocation: (id) => api.delete(`/Admin/allocations/${id}`),
+  getDepartments: () => api.get('/Admin/departments'),
+  createDepartment: (data) => api.post('/Admin/departments', data),
+  updateDepartment: (id, data) => api.put(`/Admin/departments/${id}`, data),
+  deleteDepartment: (id) => api.delete(`/Admin/departments/${id}`),
+  assignHeadOfDepartment: (data) => api.post('/Admin/assign-head-of-department', data),
+  removeHeadOfDepartment: (departmentId) => api.post(`/Admin/remove-head-of-department`, { departmentId }),
+  assignFormTeacher: (data) => api.post('/Admin/assign-form-teacher', data),
+  getSubjects: () => api.get('/Admin/subjects'),
+  createSubject: (data) => api.post('/Admin/subjects', data),
+  updateSubject: (id, data) => api.put(`/Admin/subjects/${id}`, data),
+  deleteSubject: (id) => api.delete(`/Admin/subjects/${id}`),
+  getPendingResults: () => api.get('/Admin/pending-results'),
+  approveResults: (data) => api.post('/Admin/approve-results', data),
+  getApprovedResults: () => api.get('/Admin/approved-results'),
+  getStatistics: () => api.get('/Admin/statistics'),
+  getStudentsByClass: (classId) => api.get(`/Admin/students-by-class/${classId}`),
+  getTeacherSubjects: (teacherId) => api.get(`/Admin/teacher-subjects/${teacherId}`),
 };
 
 // ============================================
-// STUDENT API (Matches Swagger: /api/Student)
+// STUDENT API
 // ============================================
 export const studentAPI = {
   getAll: () => api.get('/Student'),
@@ -94,10 +111,19 @@ export const studentAPI = {
   getClassRankings: (className, year, term) => 
     api.get(`/Student/class-ranking?className=${encodeURIComponent(className)}&year=${year}&term=${encodeURIComponent(term)}`),
   getDashboard: () => api.get('/Student/dashboard'),
+  getAvailableSubjects: () => api.get('/Student/available-subjects'),
+  selectSubject: (data) => api.post('/Student/select-subject', data),
 };
 
 // ============================================
-// SUBJECTS API (Matches Swagger: /api/Subjects)
+// CONTACTS API
+// ============================================
+export const contactsAPI = {
+  getContacts: () => api.get('/Contacts'),
+};
+
+// ============================================
+// SUBJECTS API
 // ============================================
 export const subjectAPI = {
   getAll: () => api.get('/Subjects'),
@@ -105,12 +131,14 @@ export const subjectAPI = {
 };
 
 // ============================================
-// NOTIFICATIONS API (Matches Swagger: /api/Notifications)
+// NOTIFICATIONS API
 // ============================================
 export const notificationsAPI = {
   getStudentNotifications: () => api.get('/Notifications/student'),
   getTeacherNotifications: () => api.get('/Notifications/teacher'),
   getAdminNotifications: () => api.get('/Notifications/admin'),
+  getHeadOfDepartmentNotifications: () => api.get('/Notifications/head-of-department'),
+  getFormTeacherNotifications: () => api.get('/Notifications/form-teacher'),
   getUnreadCount: () => api.get('/Notifications/unread-count'),
   markAsRead: (id) => api.put(`/Notifications/${id}/read`),
   markAllAsRead: () => api.put('/Notifications/read-all'),
@@ -118,7 +146,7 @@ export const notificationsAPI = {
 };
 
 // ============================================
-// TEACHER MARKS API (Matches Swagger: /api/TeacherMarks)
+// TEACHER MARKS API
 // ============================================
 export const teacherMarksAPI = {
   getMyStudents: () => api.get('/TeacherMarks/my-students'),
@@ -127,10 +155,11 @@ export const teacherMarksAPI = {
   enterMarks: (data) => api.post('/TeacherMarks/enter-marks', data),
   publishResults: (subjectId, year, term) => 
     api.post(`/TeacherMarks/publish-results/${subjectId}/${year}/${encodeURIComponent(term)}`),
+  submitForApproval: (data) => api.post('/TeacherMarks/submit-for-approval', data),
 };
 
 // ============================================
-// TEACHER SUBJECTS API (Matches Swagger: /api/TeacherSubjects)
+// TEACHER SUBJECTS API
 // ============================================
 export const teacherSubjectsAPI = {
   getMySubjects: () => api.get('/TeacherSubjects/my-subjects'),
@@ -140,7 +169,7 @@ export const teacherSubjectsAPI = {
 };
 
 // ============================================
-// STUDENT SUBJECT API (Matches Swagger: /api/StudentSubject)
+// STUDENT SUBJECT API
 // ============================================
 export const studentSubjectAPI = {
   getAvailableSubjects: () => api.get('/StudentSubject/available-subjects'),
@@ -150,7 +179,7 @@ export const studentSubjectAPI = {
 };
 
 // ============================================
-// RESULTS APPROVAL API (Matches Swagger: /api/ResultsApproval)
+// RESULTS APPROVAL API
 // ============================================
 export const resultsApprovalAPI = {
   getPendingResults: () => api.get('/ResultsApproval/pending-results'),
@@ -158,10 +187,11 @@ export const resultsApprovalAPI = {
     api.get(`/ResultsApproval/results-details/${subjectId}/${year}/${encodeURIComponent(term)}`),
   approveResults: (data) => api.post('/ResultsApproval/approve-results', data),
   getApprovedResults: () => api.get('/ResultsApproval/approved-results'),
+  submitForApproval: (data) => api.post('/ResultsApproval/submit-for-approval', data),
 };
 
 // ============================================
-// STUDENT REGISTRATION API (Matches Swagger: /api/StudentRegistration)
+// STUDENT REGISTRATION API
 // ============================================
 export const studentRegistrationAPI = {
   getClasses: () => api.get('/StudentRegistration/classes'),
@@ -174,6 +204,39 @@ export const studentRegistrationAPI = {
   register: (data) => api.post('/StudentRegistration/register', data),
   getStudentDetails: (studentId) => api.get(`/StudentRegistration/student-details/${studentId}`),
   updateStudent: (studentId, data) => api.put(`/StudentRegistration/update/${studentId}`, data),
+};
+
+// ============================================
+// HEAD OF DEPARTMENT API
+// ============================================
+export const hodAPI = {
+  getMyDepartment: () => api.get('/HeadOfDepartment/my-department'),
+  getDepartmentTeachers: () => api.get('/HeadOfDepartment/department-teachers'),
+  getDepartmentSubjects: () => api.get('/HeadOfDepartment/department-subjects'),
+  assignTeacherToSubject: (data) => api.post('/HeadOfDepartment/assign-teacher-to-subject', data),
+  removeTeacherFromSubject: (assignmentId) => api.delete(`/HeadOfDepartment/remove-teacher-from-subject/${assignmentId}`),
+  getDepartmentStudentResults: (year, term) => 
+    api.get(`/HeadOfDepartment/department-student-results?year=${year}&term=${encodeURIComponent(term)}`),
+  getDepartmentStats: () => api.get('/HeadOfDepartment/department-stats'),
+  getPendingApprovals: (year, term) => 
+    api.get(`/HeadOfDepartment/pending-approvals?year=${year}&term=${encodeURIComponent(term)}`),
+  getActivityLog: () => api.get('/HeadOfDepartment/activity-log'),
+  getPerformanceReport: (year, term) => 
+    api.get(`/HeadOfDepartment/performance-report?year=${year}&term=${encodeURIComponent(term)}`),
+};
+
+// ============================================
+// FORM TEACHER API
+// ============================================
+export const formTeacherAPI = {
+  getMyClasses: () => api.get('/FormTeacher/my-classes'),
+  getMyStudents: (classId) => api.get(`/FormTeacher/my-students${classId ? `?classId=${classId}` : ''}`),
+  getSubjectSelections: (classId, pendingOnly) => 
+    api.get(`/FormTeacher/subject-selections${classId ? `?classId=${classId}` : ''}${pendingOnly !== undefined ? `&pendingOnly=${pendingOnly}` : ''}`),
+  approveSubjectSelection: (selectionId) => api.post(`/FormTeacher/approve-subject-selection/${selectionId}`),
+  getClassResultsSummary: (year, term) => 
+    api.get(`/FormTeacher/class-results-summary?year=${year}&term=${encodeURIComponent(term)}`),
+  submitResults: (data) => api.post('/FormTeacher/submit-results', data),
 };
 
 export default api;

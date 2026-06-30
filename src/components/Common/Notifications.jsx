@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react';
 
-const StudentNotifications = () => {
+function Notifications({ role }) {
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const getEndpoint = () => {
+    switch(role) {
+      case 'Admin': return '/api/Notifications/admin';
+      case 'Teacher': return '/api/Notifications/teacher';
+      case 'Student': return '/api/Notifications/student';
+      case 'HeadOfDepartment': return '/api/Notifications/head-of-department';
+      case 'FormTeacher': return '/api/Notifications/form-teacher';
+      default: return '/api/Notifications/student';
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
-    // Refresh every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [role]);
 
   const fetchNotifications = async () => {
     try {
@@ -23,8 +33,7 @@ const StudentNotifications = () => {
         return;
       }
 
-      // ✅ UPDATED: Using Render URL
-      const response = await fetch('https://school-yathu.onrender.com/api/Notifications/student', {
+      const response = await fetch(`https://school-yathu.onrender.com${getEndpoint()}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -33,11 +42,10 @@ const StudentNotifications = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data);
-        const unread = data.filter((n) => !n.isRead).length;
+        setNotifications(data.notifications || []);
+        const unread = (data.notifications || []).filter((n) => !n.isRead).length;
         setUnreadCount(unread);
       } else if (response.status === 401) {
-        // Token expired or invalid
         console.error('Unauthorized - please login again');
       } else {
         console.error('Failed to fetch notifications');
@@ -58,7 +66,6 @@ const StudentNotifications = () => {
         return;
       }
 
-      // ✅ UPDATED: Using Render URL
       const response = await fetch(`https://school-yathu.onrender.com/api/Notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
@@ -68,7 +75,6 @@ const StudentNotifications = () => {
       });
 
       if (response.ok) {
-        // Update local state
         setNotifications(notifications.map(n => 
           n.id === notificationId ? { ...n, isRead: true } : n
         ));
@@ -90,7 +96,6 @@ const StudentNotifications = () => {
         return;
       }
 
-      // ✅ UPDATED: Using Render URL
       const response = await fetch('https://school-yathu.onrender.com/api/Notifications/read-all', {
         method: 'PUT',
         headers: {
@@ -135,7 +140,6 @@ const StudentNotifications = () => {
 
   return (
     <div className="relative">
-      {/* Notification Bell Button */}
       <button
         onClick={toggleDropdown}
         className="relative p-2 rounded-full hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
@@ -157,7 +161,6 @@ const StudentNotifications = () => {
           />
         </svg>
         
-        {/* Loading Spinner */}
         {loading && (
           <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5">
             <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -167,7 +170,6 @@ const StudentNotifications = () => {
           </span>
         )}
         
-        {/* Unread Count Badge */}
         {!loading && unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full border-2 border-white min-w-[20px] min-h-[20px]">
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -175,10 +177,8 @@ const StudentNotifications = () => {
         )}
       </button>
 
-      {/* Dropdown Menu */}
       {showDropdown && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-2xl z-50 max-h-96 overflow-hidden border border-gray-200">
-          {/* Header */}
           <div className="p-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-semibold text-gray-800">Notifications</h3>
@@ -193,7 +193,6 @@ const StudentNotifications = () => {
             </div>
           </div>
 
-          {/* Notifications List */}
           <div className="overflow-y-auto max-h-72">
             {loading ? (
               <div className="p-8 text-center">
@@ -241,7 +240,6 @@ const StudentNotifications = () => {
             )}
           </div>
 
-          {/* Footer */}
           {notifications.length > 0 && !loading && (
             <div className="p-2 border-t bg-gray-50">
               <button 
@@ -255,7 +253,6 @@ const StudentNotifications = () => {
         </div>
       )}
 
-      {/* Click Outside Handler */}
       {showDropdown && (
         <div 
           className="fixed inset-0 z-40"
@@ -264,6 +261,6 @@ const StudentNotifications = () => {
       )}
     </div>
   );
-};
+}
 
-export default StudentNotifications;
+export default Notifications;

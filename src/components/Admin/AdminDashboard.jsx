@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, getUserName } from '../../utils/roleUtils';
+import Notifications from '../Common/Notifications';
 import TeacherManagement from './TeacherManagement';
 import ClassManagement from './ClassManagement';
 import ResultsApproval from './ResultsApproval';
 import StudentList from './StudentList';
 import AdminUserManagement from './AdminUserManagement';
 import Rankings from '../Rankings';
-import AdminNotifications from './AdminNotifications';
 import AdminSubjectAllocation from './AdminSubjectAllocation';
 import StudentRegistration from './StudentRegistration';
 import SubjectAllocation from './SubjectAllocation';
 import SubjectsManagement from './SubjectsManagement';
+import DepartmentManagement from './DepartmentManagement';
+import FormTeacherAssignment from './FormTeacherAssignment';
+import HeadOfDepartmentAssignment from './HeadOfDepartmentAssignment';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
@@ -67,16 +70,19 @@ function AdminDashboard() {
   };
 
   const menuItems = [
-    { id: 'teachers', label: 'Teacher Management' },
-    { id: 'student-registration', label: 'Register Students' },
-    { id: 'students', label: 'Student List' },
-    { id: 'users', label: 'Manage Users' },
-    { id: 'classes', label: 'Class Management' },
-    { id: 'allocation', label: 'Subject Allocation (Teachers)' },
-    { id: 'student-subjects', label: 'Student Subject Allocation' },
-    { id: 'subjects', label: 'Manage Subjects' },
-    { id: 'approval', label: 'Results Approval' },
-    { id: 'rankings', label: 'View Rankings' },
+    { id: 'teachers', label: '👨‍🏫 Teacher Management' },
+    { id: 'departments', label: '🏛️ Department Management' },
+    { id: 'form-teacher', label: '👨‍🏫 Form Teacher Assignment' },
+    { id: 'hod-assignment', label: '👔 Head of Department' },
+    { id: 'student-registration', label: '📝 Register Students' },
+    { id: 'students', label: '👨‍🎓 Student List' },
+    { id: 'users', label: '👥 Manage Users' },
+    { id: 'classes', label: '🏫 Class Management' },
+    { id: 'allocation', label: '📚 Subject Allocation (Teachers)' },
+    { id: 'student-subjects', label: '📖 Student Subject Allocation' },
+    { id: 'subjects', label: '📋 Manage Subjects' },
+    { id: 'approval', label: '✅ Results Approval' },
+    { id: 'rankings', label: '🏆 View Rankings' },
   ];
 
   const toggleSidebar = () => {
@@ -104,7 +110,7 @@ function AdminDashboard() {
           <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
-          <AdminNotifications />
+          <Notifications role="Admin" />
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
@@ -188,7 +194,7 @@ function AdminDashboard() {
           <div className="flex items-center gap-4" />
           
           <div className="flex items-center gap-6">
-            <AdminNotifications />
+            <Notifications role="Admin" />
             <div className="h-6 w-px bg-blue-600" />
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
@@ -202,6 +208,9 @@ function AdminDashboard() {
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 lg:p-6">
               {activeTab === 'teachers' && <TeacherManagement />}
+              {activeTab === 'departments' && <DepartmentManagement />}
+              {activeTab === 'form-teacher' && <FormTeacherAssignment />}
+              {activeTab === 'hod-assignment' && <HeadOfDepartmentAssignment />}
               {activeTab === 'classes' && <ClassManagement />}
               {activeTab === 'allocation' && <SubjectAllocation />}
               {activeTab === 'student-subjects' && <AdminSubjectAllocation />}

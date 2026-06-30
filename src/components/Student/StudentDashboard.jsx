@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
-import StudentNotifications from './StudentNotifications';
+import Notifications from '../Common/Notifications';
+import SubjectSelection from './SubjectSelection';
+import ContactInfo from '../Common/ContactInfo';
 
 function StudentDashboard() {
   const [user, setUser] = useState(null);
@@ -34,6 +36,8 @@ function StudentDashboard() {
         loadStudentSubjects();
       } else if (activeTab === 'results') {
         fetchStudentResults();
+      } else if (activeTab === 'subject-selection') {
+        // Subject selection is handled in its own component
       }
     }
   }, [studentData, activeTab, selectedYear, selectedTerm]);
@@ -260,9 +264,15 @@ function StudentDashboard() {
   const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
 
   const menuItems = [
-    { id: 'my-subjects', label: 'My Subjects' },
-    { id: 'results', label: 'My Results' },
+    { id: 'my-subjects', label: '📚 My Subjects' },
+    { id: 'results', label: '📊 My Results' },
+    { id: 'contacts', label: '📞 Contacts' },  // ✅ Added Contacts tab
   ];
+
+  // ✅ Add Subject Selection for Form 3 and Form 4 students
+  if (isUpperForm) {
+    menuItems.push({ id: 'subject-selection', label: '📝 Select Subjects' });
+  }
 
   const renderMySubjects = () => {
     if (loading) {
@@ -675,6 +685,10 @@ function StudentDashboard() {
             <div className="p-4 lg:p-6">
               {activeTab === 'my-subjects' && renderMySubjects()}
               {activeTab === 'results' && renderResults()}
+              {activeTab === 'contacts' && <ContactInfo role="Student" />}
+              {activeTab === 'subject-selection' && isUpperForm && (
+                <SubjectSelection studentData={studentData} />
+              )}
             </div>
           </div>
         </div>

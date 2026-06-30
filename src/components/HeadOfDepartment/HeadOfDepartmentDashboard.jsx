@@ -1,28 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
-import Notifications from '../Common/Notifications';
-import TeacherMarksEntry from './TeacherMarksEntry';
-import MySubjects from './MySubjects';
-import Rankings from '../Rankings';
-import MyStudents from './MyStudents';
+import HodDashboard from './HodDashboard';
+import HodTeachers from './HodTeachers';
+import HodSubjects from './HodSubjects';
+import HodStudentResults from './HodStudentResults';
+import HodNotifications from './HodNotifications';
 
-function TeacherDashboard() {
+function HeadOfDepartmentDashboard() {
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('students');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [department, setDepartment] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const userData = getCurrentUser();
     
-    if (!userData || !hasRole('Teacher')) {
+    if (!userData || !hasRole('HeadOfDepartment')) {
       navigate('/login');
       return;
     }
     
     setUser(userData);
+    loadDepartment();
   }, [navigate]);
+
+  const loadDepartment = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://school-yathu.onrender.com/api/HeadOfDepartment/my-department', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDepartment(data);
+      }
+    } catch (error) {
+      console.error('Error loading department:', error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -38,41 +55,31 @@ function TeacherDashboard() {
     setMobileOpen(!mobileOpen);
   };
 
-  const isFormTeacher = user?.isFormTeacher || false;
-
   const menuItems = [
-    { id: 'students', label: '👨‍🎓 My Students' },
-    { id: 'my-subjects', label: '📚 My Subjects' },
-    { id: 'marks', label: '✏️ Enter Marks' },
-    { id: 'rankings', label: '🏆 Rankings' },
+    { id: 'dashboard', label: '📊 Dashboard' },
+    { id: 'teachers', label: '👨‍🏫 Department Teachers' },
+    { id: 'subjects', label: '📚 Department Subjects' },
+    { id: 'results', label: '📈 Student Results' },
   ];
-
-  if (isFormTeacher) {
-    menuItems.push(
-      { id: 'form-classes', label: '🏫 My Form Classes' },
-      { id: 'subject-approvals', label: '✅ Subject Approvals' },
-      { id: 'class-results', label: '📊 Class Results' }
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Mobile Hamburger Menu */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-800 to-purple-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <button
             onClick={toggleMobileSidebar}
-            className="p-1 rounded-lg hover:bg-blue-700"
+            className="p-1 rounded-lg hover:bg-purple-700"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <h1 className="text-sm font-bold">Teacher Portal</h1>
-          <p className="text-xs text-blue-200">Mkondezi Secondary</p>
+          <h1 className="text-sm font-bold">Head of Department</h1>
+          <p className="text-xs text-purple-200">{department?.name || 'Loading...'}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Notifications role="Teacher" />
+          <HodNotifications />
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
@@ -95,15 +102,14 @@ function TeacherDashboard() {
         fixed lg:fixed z-50
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         transition-transform duration-300 ease-in-out
-        w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl
+        w-64 bg-gradient-to-b from-purple-800 to-purple-900 text-white shadow-xl
         h-screen overflow-y-auto
       `}>
-        {/* Sidebar Header */}
-        <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
-          <div className="flex items-center gap-4 p-4 border-b border-blue-700">
+        <div className="sticky top-0 bg-gradient-to-b from-purple-800 to-purple-900 z-10">
+          <div className="flex items-center gap-4 p-4 border-b border-purple-700">
             <button
               onClick={handleGoBack}
-              className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0"
+              className="hover:bg-purple-700 p-2 rounded-full transition-colors flex-shrink-0"
               title="Go back"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -111,13 +117,12 @@ function TeacherDashboard() {
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold">Teacher Portal</h1>
-              <p className="text-xs text-blue-200">Mkondezi Secondary</p>
+              <h1 className="text-xl font-bold">HOD Portal</h1>
+              <p className="text-xs text-purple-200">{department?.name || 'Department'}</p>
             </div>
           </div>
         </div>
 
-        {/* Sidebar Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
           {menuItems.map((item) => (
             <button
@@ -128,8 +133,8 @@ function TeacherDashboard() {
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${
                 activeTab === item.id
-                  ? 'bg-blue-700 border-r-4 border-white text-white'
-                  : 'hover:bg-blue-700 text-blue-100'
+                  ? 'bg-purple-700 border-r-4 border-white text-white'
+                  : 'hover:bg-purple-700 text-purple-100'
               }`}
             >
               <span className="text-sm font-medium">{item.label}</span>
@@ -137,11 +142,14 @@ function TeacherDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer */}
-        <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
+        <div className="sticky bottom-0 bg-gradient-to-t from-purple-800 to-transparent p-4 border-t border-purple-700">
+          <div className="px-4 py-2 text-sm text-purple-200">
+            <p className="font-semibold">{user?.name}</p>
+            <p className="text-xs opacity-75">Head of Department</p>
+          </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors mt-2"
           >
             <span className="text-white font-bold">Logout</span>
           </button>
@@ -150,13 +158,18 @@ function TeacherDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
-        {/* Desktop Navbar */}
-        <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
-          <div className="flex items-center gap-4" />
-          
+        <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-purple-800 to-purple-900 text-white shadow-md px-6 py-3 justify-between items-center">
+          <div className="flex items-center gap-4">
+            <span className="bg-purple-700 px-3 py-1 rounded-full text-sm">
+              {department?.name || 'Department'}
+            </span>
+            <span className="text-sm text-purple-200">
+              {department?.teacherCount || 0} Teachers | {department?.subjectCount || 0} Subjects
+            </span>
+          </div>
           <div className="flex items-center gap-6">
-            <Notifications role="Teacher" />
-            <div className="h-6 w-px bg-blue-600" />
+            <HodNotifications />
+            <div className="h-6 w-px bg-purple-600" />
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
               <span className="text-sm font-bold">{getUserName()}</span>
@@ -164,16 +177,12 @@ function TeacherDashboard() {
           </div>
         </nav>
 
-        {/* Content Area */}
         <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
           <div className="bg-white rounded-lg shadow p-4 lg:p-6">
-            {activeTab === 'students' && <MyStudents />}
-            {activeTab === 'my-subjects' && <MySubjects />}
-            {activeTab === 'marks' && <TeacherMarksEntry />}
-            {activeTab === 'rankings' && <Rankings />}
-            {activeTab === 'form-classes' && isFormTeacher && <FormTeacherClasses />}
-            {activeTab === 'subject-approvals' && isFormTeacher && <SubjectApprovals />}
-            {activeTab === 'class-results' && isFormTeacher && <ClassResults />}
+            {activeTab === 'dashboard' && <HodDashboard />}
+            {activeTab === 'teachers' && <HodTeachers />}
+            {activeTab === 'subjects' && <HodSubjects />}
+            {activeTab === 'results' && <HodStudentResults />}
           </div>
         </div>
       </div>
@@ -181,4 +190,4 @@ function TeacherDashboard() {
   );
 }
 
-export default TeacherDashboard;
+export default HeadOfDepartmentDashboard;

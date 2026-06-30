@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
+import FormTeacherClasses from './FormTeacherClasses';
+import FormTeacherStudents from './FormTeacherStudents';
+import SubjectApprovals from './SubjectApprovals';
+import ClassResults from './ClassResults';
 import Notifications from '../Common/Notifications';
-import TeacherMarksEntry from './TeacherMarksEntry';
-import MySubjects from './MySubjects';
-import Rankings from '../Rankings';
-import MyStudents from './MyStudents';
 
-function TeacherDashboard() {
+function FormTeacherDashboard() {
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('students');
+  const [activeTab, setActiveTab] = useState('classes');
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const userData = getCurrentUser();
     
-    if (!userData || !hasRole('Teacher')) {
+    if (!userData || !hasRole('FormTeacher')) {
       navigate('/login');
       return;
     }
@@ -38,26 +38,16 @@ function TeacherDashboard() {
     setMobileOpen(!mobileOpen);
   };
 
-  const isFormTeacher = user?.isFormTeacher || false;
-
   const menuItems = [
+    { id: 'classes', label: '📚 My Classes' },
     { id: 'students', label: '👨‍🎓 My Students' },
-    { id: 'my-subjects', label: '📚 My Subjects' },
-    { id: 'marks', label: '✏️ Enter Marks' },
-    { id: 'rankings', label: '🏆 Rankings' },
+    { id: 'approvals', label: '✅ Subject Approvals' },
+    { id: 'results', label: '📊 Class Results' },
   ];
-
-  if (isFormTeacher) {
-    menuItems.push(
-      { id: 'form-classes', label: '🏫 My Form Classes' },
-      { id: 'subject-approvals', label: '✅ Subject Approvals' },
-      { id: 'class-results', label: '📊 Class Results' }
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Mobile Hamburger Menu */}
+      {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <button
@@ -68,11 +58,11 @@ function TeacherDashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <h1 className="text-sm font-bold">Teacher Portal</h1>
+          <h1 className="text-sm font-bold">Form Teacher</h1>
           <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
-          <Notifications role="Teacher" />
+          <FormTeacherNotifications />
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
@@ -98,7 +88,6 @@ function TeacherDashboard() {
         w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl
         h-screen overflow-y-auto
       `}>
-        {/* Sidebar Header */}
         <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button
@@ -111,13 +100,12 @@ function TeacherDashboard() {
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold">Teacher Portal</h1>
-              <p className="text-xs text-blue-200">Mkondezi Secondary</p>
+              <h1 className="text-xl font-bold">Form Teacher</h1>
+              <p className="text-xs text-blue-200">Portal</p>
             </div>
           </div>
         </div>
 
-        {/* Sidebar Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
           {menuItems.map((item) => (
             <button
@@ -137,7 +125,6 @@ function TeacherDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer */}
         <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
           <button
             onClick={handleLogout}
@@ -153,9 +140,8 @@ function TeacherDashboard() {
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4" />
-          
           <div className="flex items-center gap-6">
-            <Notifications role="Teacher" />
+            <FormTeacherNotifications />
             <div className="h-6 w-px bg-blue-600" />
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
@@ -164,16 +150,12 @@ function TeacherDashboard() {
           </div>
         </nav>
 
-        {/* Content Area */}
         <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
           <div className="bg-white rounded-lg shadow p-4 lg:p-6">
-            {activeTab === 'students' && <MyStudents />}
-            {activeTab === 'my-subjects' && <MySubjects />}
-            {activeTab === 'marks' && <TeacherMarksEntry />}
-            {activeTab === 'rankings' && <Rankings />}
-            {activeTab === 'form-classes' && isFormTeacher && <FormTeacherClasses />}
-            {activeTab === 'subject-approvals' && isFormTeacher && <SubjectApprovals />}
-            {activeTab === 'class-results' && isFormTeacher && <ClassResults />}
+            {activeTab === 'classes' && <FormTeacherClasses />}
+            {activeTab === 'students' && <FormTeacherStudents />}
+            {activeTab === 'approvals' && <SubjectApprovals />}
+            {activeTab === 'results' && <ClassResults />}
           </div>
         </div>
       </div>
@@ -181,4 +163,4 @@ function TeacherDashboard() {
   );
 }
 
-export default TeacherDashboard;
+export default FormTeacherDashboard;
