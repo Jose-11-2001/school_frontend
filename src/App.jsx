@@ -72,25 +72,16 @@ function App() {
   console.log('🔍 App - Is Student:', isStudent);
   console.log('🔍 =========================');
 
-  // ✅ IF NO ROLE, SHOW LOGIN
-  if (!role) {
-    console.log('🔍 No role found, showing login');
-    return (
-      <Router>
-        <Routes>
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      </Router>
-    );
-  }
-
+  // ✅ ALWAYS SHOW THE ROUTER WITH ALL ROUTES
   return (
     <Router>
       <Routes>
+        {/* Public Routes - Always accessible */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/change-password" element={<ChangePassword />} />
         
+        {/* Protected Routes - Only if logged in with correct role */}
         <Route 
           path="/admin-dashboard" 
           element={isAdmin ? <AdminDashboard /> : <Navigate to="/login" />} 
@@ -105,6 +96,9 @@ function App() {
           path="/student-dashboard" 
           element={isStudent ? <StudentDashboard /> : <Navigate to="/login" />} 
         />
+        
+        {/* Catch all - redirect to home or login */}
+        <Route path="*" element={<Navigate to={role ? '/' : '/login'} />} />
       </Routes>
     </Router>
   );
