@@ -20,7 +20,6 @@ function Login({ setUser }) {
     try {
       console.log('🔍 Attempting login with:', { email, password: '***' });
       
-      // ✅ This uses the authAPI from services/api.js
       const response = await authAPI.login({ email, password });
       const data = response.data;
 
