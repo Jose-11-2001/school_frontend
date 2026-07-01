@@ -46,7 +46,7 @@ function StudentDashboard() {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`https://school-yathu.onrender.com/api/Student/student-by-email?email=${encodeURIComponent(userData.email)}`, {
+      const response = await fetch(`https://school-yathu-api.onrender.com/api/Student/student-by-email?email=${encodeURIComponent(userData.email)}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -54,7 +54,7 @@ function StudentDashboard() {
         const data = await response.json();
         setStudentData(data);
       } else {
-        const altResponse = await fetch(`https://school-yathu.onrender.com/api/Student/student-by-name?name=${encodeURIComponent(userData.name)}`, {
+        const altResponse = await fetch(`https://school-yathu-api.onrender.com/api/Student/student-by-name?name=${encodeURIComponent(userData.name)}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (altResponse.ok) {
@@ -88,7 +88,7 @@ function StudentDashboard() {
       const token = localStorage.getItem('token');
       
       const response = await fetch(
-        `https://school-yathu.onrender.com/api/StudentRegistration/student-subjects?class=${encodeURIComponent(studentData.class)}&stream=${encodeURIComponent(studentData.stream)}`,
+        `https://school-yathu-api.onrender.com/api/StudentRegistration/student-subjects?class=${encodeURIComponent(studentData.class)}&stream=${encodeURIComponent(studentData.stream)}`,
         {
           headers: { 'Authorization': `Bearer ${token}` }
         }
@@ -99,7 +99,7 @@ function StudentDashboard() {
         setSubjects(data.subjects || []);
       } else {
         const altResponse = await fetch(
-          `https://school-yathu.onrender.com/api/AdminSubjectAllocation/class-subjects?class=${encodeURIComponent(studentData.class)}&stream=${encodeURIComponent(studentData.stream)}`,
+          `https://school-yathu-api.onrender.com/api/AdminSubjectAllocation/class-subjects?class=${encodeURIComponent(studentData.class)}&stream=${encodeURIComponent(studentData.stream)}`,
           {
             headers: { 'Authorization': `Bearer ${token}` }
           }
@@ -126,7 +126,7 @@ function StudentDashboard() {
       const token = localStorage.getItem('token');
       
       const response = await fetch(
-        `https://school-yathu.onrender.com/api/Results/student-results?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
+        `https://school-yathu-api.onrender.com/api/Results/student-results?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
         {
           headers: { 'Authorization': `Bearer ${token}` }
         }
@@ -138,7 +138,7 @@ function StudentDashboard() {
         setRanking(data.ranking || null);
       } else {
         const altResponse = await fetch(
-          `https://school-yathu.onrender.com/api/StudentMarks/student-marks?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
+          `https://school-yathu-api.onrender.com/api/StudentMarks/student-marks?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
           {
             headers: { 'Authorization': `Bearer ${token}` }
           }
@@ -264,14 +264,13 @@ function StudentDashboard() {
   const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
 
   const menuItems = [
-    { id: 'my-subjects', label: '📚 My Subjects' },
-    { id: 'results', label: '📊 My Results' },
-    { id: 'contacts', label: '📞 Contacts' },  // ✅ Added Contacts tab
+    { id: 'my-subjects', label: 'My Subjects' },
+    { id: 'results', label: 'My Results' },
+    { id: 'contacts', label: 'Contacts' },
   ];
 
-  // ✅ Add Subject Selection for Form 3 and Form 4 students
   if (isUpperForm) {
-    menuItems.push({ id: 'subject-selection', label: '📝 Select Subjects' });
+    menuItems.push({ id: 'subject-selection', label: 'Select Subjects' });
   }
 
   const renderMySubjects = () => {
@@ -289,12 +288,12 @@ function StudentDashboard() {
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6 border border-blue-200">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-gray-500">Admission Number</p>
-              <p className="font-semibold">{studentData?.admissionNumber || 'N/A'}</p>
+              <p className="text-sm text-gray-500">Student Name</p>
+              <p className="font-semibold text-lg text-blue-800">{studentData?.fullName || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Full Name</p>
-              <p className="font-semibold">{studentData?.fullName || 'N/A'}</p>
+              <p className="text-sm text-gray-500">Admission Number</p>
+              <p className="font-semibold">{studentData?.admissionNumber || 'N/A'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Class</p>
@@ -562,7 +561,6 @@ function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Mobile Hamburger Menu */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <button
@@ -577,7 +575,7 @@ function StudentDashboard() {
           <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
-          <StudentNotifications />
+          <Notifications role="Student" />
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
@@ -587,7 +585,6 @@ function StudentDashboard() {
         </div>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       {mobileOpen && (
         <div 
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
@@ -595,7 +592,6 @@ function StudentDashboard() {
         />
       )}
 
-      {/* Sidebar */}
       <div className={`
         fixed lg:fixed z-50
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -604,7 +600,6 @@ function StudentDashboard() {
         h-screen overflow-y-auto
         ${!mobileOpen && 'lg:block'}
       `}>
-        {/* Sidebar Header */}
         <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button
@@ -623,7 +618,6 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* Sidebar Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
           {menuItems.map((item) => (
             <button
@@ -643,7 +637,6 @@ function StudentDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer */}
         <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
           <div className="px-4 py-2 text-sm text-blue-200">
             <p className="font-semibold">{user?.name}</p>
@@ -657,9 +650,7 @@ function StudentDashboard() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
-        {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
             <div className="bg-white/20 px-3 py-1 rounded-full text-sm">
@@ -670,7 +661,7 @@ function StudentDashboard() {
           </div>
           
           <div className="flex items-center gap-6">
-            <StudentNotifications />
+            <Notifications role="Student" />
             <div className="h-6 w-px bg-blue-600" />
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
@@ -679,7 +670,6 @@ function StudentDashboard() {
           </div>
         </nav>
 
-        {/* Content Area */}
         <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 lg:p-6">

@@ -20,19 +20,17 @@ function Login({ setUser }) {
     try {
       console.log('🔍 Attempting login with:', { email, password: '***' });
       
+      // ✅ This uses the authAPI from services/api.js
       const response = await authAPI.login({ email, password });
       const data = response.data;
 
       console.log('🔍 ====== FULL LOGIN RESPONSE ======');
-      console.log('🔍 Raw response:', response);
       console.log('🔍 Response data:', JSON.stringify(data, null, 2));
       console.log('🔍 ================================');
       console.log('🔍 token:', data.token);
-      console.log('🔍 id:', data.id);
       console.log('🔍 name:', data.name);
       console.log('🔍 email:', data.email);
       console.log('🔍 role:', data.role);
-      console.log('🔍 role type:', typeof data.role);
       console.log('🔍 mustChangePassword:', data.mustChangePassword);
 
       const { token, id, name, email: userEmail, role, mustChangePassword } = data;
@@ -95,8 +93,16 @@ function Login({ setUser }) {
 
     } catch (err) {
       console.error('❌ Login error:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password. Please try again.';
-      setError(errorMessage);
+      
+      // ✅ Better error messages
+      if (err.code === 'ERR_NETWORK') {
+        setError('Network error: Cannot connect to the server. Please check your internet connection.');
+      } else if (err.response?.status === 401) {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password. Please try again.';
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
