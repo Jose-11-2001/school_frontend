@@ -17,14 +17,14 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const user = getCurrentUser();
   
   if (!token || !user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/Login" replace />;
   }
 
   // Check if user has any of the allowed roles
   const hasAllowedRole = allowedRoles.some(role => hasRole(role));
   
   if (!hasAllowedRole) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/Login" replace />;
   }
 
   return children;
@@ -47,7 +47,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login setUser={setUser} />} />
+        <Route path="/Login" element={<Login setUser={setUser} />} />
         <Route path="/change-password" element={<ChangePassword />} />
         
         {/* Admin Routes */}
