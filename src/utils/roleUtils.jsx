@@ -94,25 +94,3 @@ export const canSwitchToTeacherMode = () => {
   const isAdminOrDeputy = hasRole('Admin') || hasRole('DeputyHeadTeacher');
   return isAdminOrDeputy && hasTeacherAllocations();
 };
-
-/**
- * Get teacher subject allocations for a user
- * This checks if the user has been allocated as a teacher for any subject
- */
-export const getTeacherSubjectAllocations = async (userId) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`https://school-yathu.onrender.com/api/Admin/teacher-subjects/${userId}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      return data;
-    }
-    return [];
-  } catch (error) {
-    console.error('Error fetching teacher allocations:', error);
-    return [];
-  }
-};
