@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Auth/Login';
+import ForgetPassword from './components/Auth/ForgetPassword';
 import Home from './components/Home';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import TeacherDashboard from './components/Teacher/TeacherDashboard';
@@ -48,6 +49,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/Login" element={<Login setUser={setUser} />} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
         <Route path="/change-password" element={<ChangePassword />} />
         
         {/* Admin Routes */}
