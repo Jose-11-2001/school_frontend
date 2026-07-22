@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import StudentDetailsModal from './StudentDetailsModal';
 
 function StudentList({ refreshTrigger }) {
     const [students, setStudents] = useState([]);
     const [filteredStudents, setFilteredStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [classes, setClasses] = useState([]);
+    const [selectedStudentId, setSelectedStudentId] = useState(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
     
     // Filter states
     const [searchTerm, setSearchTerm] = useState('');
@@ -109,6 +112,11 @@ function StudentList({ refreshTrigger }) {
         setCurrentPage(1); // Reset to first page when filters change
     };
 
+    const handleStudentClick = (studentId) => {
+        setSelectedStudentId(studentId);
+        setShowDetailsModal(true);
+    };
+
     const uniqueClasses = [...new Set(classes.map(c => c.Name).filter(Boolean))];
 
     // Pagination calculations
@@ -161,7 +169,7 @@ function StudentList({ refreshTrigger }) {
                         onClick={loadStudents}
                         className="bg-white/20 text-white px-4 py-2 rounded-lg hover:bg-white/30 transition-colors"
                     >
-                        🔄 Refresh
+                        Refresh
                     </button>
                 </div>
             </div>
@@ -231,7 +239,6 @@ function StudentList({ refreshTrigger }) {
                 <div className="overflow-x-auto">
                     {filteredStudents.length === 0 ? (
                         <div className="text-center py-12">
-                            <div className="text-6xl mb-4"></div>
                             <p className="text-gray-500 text-lg">No students found</p>
                             {searchTerm || filterClass || filterStream ? (
                                 <p className="text-sm text-gray-400 mt-2">Try adjusting your search or filters</p>
@@ -270,7 +277,10 @@ function StudentList({ refreshTrigger }) {
                                             <td className="px-4 py-2 border text-sm font-mono text-gray-600">
                                                 {student.admissionNumber || 'N/A'}
                                             </td>
-                                            <td className="px-4 py-2 border text-sm font-medium text-gray-900">
+                                            <td 
+                                                className="px-4 py-2 border text-sm font-medium text-blue-600 cursor-pointer hover:underline"
+                                                onClick={() => handleStudentClick(student.id)}
+                                            >
                                                 {student.fullName}
                                             </td>
                                             <td className="px-4 py-2 border text-sm">
@@ -335,6 +345,16 @@ function StudentList({ refreshTrigger }) {
                     )}
                 </div>
             </div>
+
+            {/* Student Details Modal */}
+            <StudentDetailsModal
+                studentId={selectedStudentId}
+                isOpen={showDetailsModal}
+                onClose={() => {
+                    setShowDetailsModal(false);
+                    setSelectedStudentId(null);
+                }}
+            />
         </div>
     );
 }

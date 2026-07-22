@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, hasRole, getUserName } from '../utils/roleUtils';
-import HodDashboard from '../components/HOD/HodDashboard';
-import HodTeachers from '../components/HOD/HodTeachers';
-import HodSubjects from '../components/HOD/HodSubjects';
-import HodStudentResults from '../components/HOD/HodStudentResults';
-import HodNotifications from '../components/HOD/HodNotifications';
+import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
+import HodDashboard from './HodDashboard';
+import HodTeachers from './HodTeachers';
+import HodSubjects from './HodSubjects';
+import HodStudentResults from './HodStudentResults';
+
 
 function HeadOfDepartmentDashboard() {
   const [user, setUser] = useState(null);

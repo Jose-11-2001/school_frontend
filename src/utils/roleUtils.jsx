@@ -54,3 +54,65 @@ export const mustChangePassword = () => {
   const user = getCurrentUser();
   return user?.mustChangePassword === true;
 };
+
+/**
+ * Check if the current user has teacher allocations
+ * (can be used as a teacher)
+ */
+export const hasTeacherAllocations = () => {
+  const user = getCurrentUser();
+  if (!user) return false;
+  
+  // Check if user has teacherAllocations property
+  if (user.hasTeacherAllocations !== undefined) {
+    return user.hasTeacherAllocations;
+  }
+  
+  // Check if role is Teacher or FormTeacher
+  return hasRole('Teacher') || hasRole('FormTeacher');
+};
+
+/**
+ * Set teacher allocation status for the current user
+ */
+export const setTeacherAllocations = (hasAllocations) => {
+  const user = getCurrentUser();
+  if (user) {
+    user.hasTeacherAllocations = hasAllocations;
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+};
+
+/**
+ * Check if user can switch to teacher mode
+ * (Admin or DeputyHeadTeacher with teacher allocations)
+ */
+export const canSwitchToTeacherMode = () => {
+  const user = getCurrentUser();
+  if (!user) return false;
+  
+  const isAdminOrDeputy = hasRole('Admin') || hasRole('DeputyHeadTeacher');
+  return isAdminOrDeputy && hasTeacherAllocations();
+};
+
+/**
+ * Get teacher subject allocations for a user
+ * This checks if the user has been allocated as a teacher for any subject
+ */
+export const getTeacherSubjectAllocations = async (userId) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`https://school-yathu.onrender.com/api/Admin/teacher-subjects/${userId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching teacher allocations:', error);
+    return [];
+  }
+};

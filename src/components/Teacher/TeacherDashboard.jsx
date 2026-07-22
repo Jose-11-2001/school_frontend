@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, hasRole, getUserName } from '../utils/roleUtils';
-import Notifications from '../components/Common/Notifications';
-import TeacherMarksEntry from '../components/Teacher/TeacherMarksEntry';
-import MySubjects from '../components/Teacher/MySubjects';
-import Rankings from '../components/Rankings';
-import MyStudents from '../components/Teacher/MyStudents';
-import FormTeacherClasses from '../components/FormTeacher/FormTeacherClasses';
-import SubjectApprovals from '../components/FormTeacher/SubjectApprovals';
-import ClassResults from '../components/FormTeacher/ClassResults';
+import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
+import Notifications from '../Common/Notifications';
+import TeacherMarksEntry from './TeacherMarksEntry';
+import MySubjects from './MySubjects';
+import Rankings from '../Rankings';
+import MyStudents from './MyStudents';
+import FormTeacherClasses from '../FormTeacher/FormTeacherClasses';
+import SubjectApprovals from '../FormTeacher/SubjectApprovals';
+import ClassResults from '../FormTeacher/ClassResults';
 
 function TeacherDashboard() {
   const [user, setUser] = useState(null);

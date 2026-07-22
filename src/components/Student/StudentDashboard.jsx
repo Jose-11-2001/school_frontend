@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, hasRole, getUserName } from '../utils/roleUtils';
-import Notifications from '../components/Common/Notifications';
-import SubjectSelection from '../components/Student/SubjectSelection';
-import ContactInfo from '../components/Common/ContactInfo';
+import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
+import Notifications from '../Common/Notifications';
+import SubjectSelection from './SubjectSelection';
+import ContactInfo from '../Common/ContactInfo';
 
 function StudentDashboard() {
   const [user, setUser] = useState(null);

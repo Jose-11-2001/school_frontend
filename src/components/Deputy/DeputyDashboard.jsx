@@ -2,68 +2,62 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, hasRole, getUserName, hasTeacherAllocations } from '../../utils/roleUtils';
 import Notifications from '../Common/Notifications';
-import TeacherManagement from './TeacherManagement';
-import ClassManagement from './ClassManagement';
-import ResultsApproval from './ResultsApproval';
-import StudentList from './StudentList';
-import AdminUserManagement from './AdminUserManagement';
-import Rankings from '../Rankings';
-import AdminSubjectAllocation from './AdminSubjectAllocation';
-import StudentRegistration from './StudentRegistration';
-import SubjectAllocation from './SubjectAllocation';
-import SubjectsManagement from './SubjectsManagement';
-import DepartmentManagement from './DepartmentManagement';
-import FormTeacherAssignment from './FormTeacherAssignment';
-import HeadOfDepartmentAssignment from './HeadOfDepartmentAssignment';
-import DeputyAssignment from './DeputyAssignment';
-import StudentDetailsModal from './StudentDetailsModal';
+import StudentList from '../Admin/StudentList';
+import TeacherManagement from '../Admin/TeacherManagement';
+import AdminUserManagement from '../Admin/AdminUserManagement';
+import StudentRegistration from '../Admin/StudentRegistration';
+import MyAssignments from './MyAssignments';
+import SubjectAllocation from '../Admin/SubjectAllocation';
+import StudentDetailsModal from '../Admin/StudentDetailsModal';
 import TeacherMarksEntry from '../Teacher/TeacherMarksEntry';
 import MySubjects from '../Teacher/MySubjects';
 import MyStudents from '../Teacher/MyStudents';
 
-function AdminDashboard() {
+function DeputyDashboard() {
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState('teachers');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [refreshStudents, setRefreshStudents] = useState(false);
-  const [hasTeacherAccess, setHasTeacherAccess] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [hasTeacherAccess, setHasTeacherAccess] = useState(false);
+  const [stats, setStats] = useState({
+    totalAssignments: 0,
+    pendingAssignments: 0,
+    inProgressAssignments: 0,
+    completedAssignments: 0
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
     const userData = getCurrentUser();
     
-    console.log('AdminDashboard - Token:', !!token);
-    console.log('AdminDashboard - User data:', userData);
-    
-    if (!token) {
-      console.log('AdminDashboard - No token, redirecting to login');
+    if (!userData || !hasRole('DeputyHeadTeacher')) {
       navigate('/login');
       return;
     }
     
-    if (!userData) {
-      console.log('AdminDashboard - No user data, redirecting to login');
-      navigate('/login');
-      return;
-    }
-    
-    if (!hasRole('Admin')) {
-      console.log(`AdminDashboard - Role "${userData.role}" is not Admin, redirecting`);
-      navigate('/login');
-      return;
-    }
-    
-    console.log('AdminDashboard - User is valid Admin!');
     setUser(userData);
     setHasTeacherAccess(hasTeacherAllocations());
+    loadStats();
   }, [navigate]);
 
+  const loadStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://school-yathu.onrender.com/api/Deputy/dashboard-stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
   const handleLogout = () => {
-    console.log('Logging out...');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
@@ -71,6 +65,10 @@ function AdminDashboard() {
 
   const handleGoBack = () => {
     navigate(-1);
+  };
+
+  const toggleMobileSidebar = () => {
+    setMobileOpen(!mobileOpen);
   };
 
   const handleStudentRegistered = () => {
@@ -87,23 +85,16 @@ function AdminDashboard() {
   };
 
   const menuItems = [
-    { id: 'teachers', label: 'Teacher Management' },
-    { id: 'departments', label: 'Department Management' },
-    { id: 'form-teacher', label: 'Form Teacher Assignment' },
-    { id: 'hod-assignment', label: 'Head of Department' },
-    { id: 'deputy-assignment', label: 'Deputy Head Tasks' },
-    { id: 'student-registration', label: 'Register Students' },
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'assignments', label: 'My Assignments' },
     { id: 'students', label: 'Student List' },
+    { id: 'student-registration', label: 'Register Students' },
+    { id: 'teachers', label: 'Teacher Management' },
     { id: 'users', label: 'Manage Users' },
-    { id: 'classes', label: 'Class Management' },
-    { id: 'allocation', label: 'Subject Allocation (Teachers)' },
-    { id: 'student-subjects', label: 'Student Subject Allocation' },
-    { id: 'subjects', label: 'Manage Subjects' },
-    { id: 'approval', label: 'Results Approval' },
-    { id: 'rankings', label: 'View Rankings' },
+    { id: 'subjects', label: 'Subject Allocation' },
   ];
 
-  // Teacher-specific tabs (available when admin has teacher allocations)
+  // Teacher-specific tabs
   const teacherMenuItems = [
     { id: 'my-students', label: 'My Students' },
     { id: 'my-subjects', label: 'My Subjects' },
@@ -111,27 +102,27 @@ function AdminDashboard() {
   ];
 
   const allMenuItems = hasTeacherAccess 
-    ? [...menuItems.slice(0, 4), ...teacherMenuItems, ...menuItems.slice(4)]
+    ? [...menuItems.slice(0, 2), ...teacherMenuItems, ...menuItems.slice(2)]
     : menuItems;
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Mobile Hamburger Menu */}
+      {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={toggleMobileSidebar}
             className="p-1 rounded-lg hover:bg-blue-700"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <h1 className="text-sm font-bold">Admin Portal</h1>
+          <h1 className="text-sm font-bold">Deputy Head Teacher</h1>
           <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
-          <Notifications role="Admin" />
+          <Notifications role="DeputyHeadTeacher" />
           {hasTeacherAccess && (
             <button
               onClick={goToTeacherDashboard}
@@ -153,7 +144,7 @@ function AdminDashboard() {
       {mobileOpen && (
         <div 
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setMobileOpen(false)}
+          onClick={toggleMobileSidebar}
         />
       )}
 
@@ -164,9 +155,7 @@ function AdminDashboard() {
         transition-transform duration-300 ease-in-out
         w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl
         h-screen overflow-y-auto
-        ${!mobileOpen && 'lg:block'}
       `}>
-        {/* Sidebar Header */}
         <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button
@@ -179,8 +168,8 @@ function AdminDashboard() {
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold">Admin Portal</h1>
-              <p className="text-xs text-blue-200">Secondary School</p>
+              <h1 className="text-xl font-bold">Deputy Portal</h1>
+              <p className="text-xs text-blue-200">Mkondezi Secondary</p>
               {hasTeacherAccess && (
                 <span className="text-xs bg-green-500 px-2 py-0.5 rounded-full">+ Teacher</span>
               )}
@@ -188,7 +177,6 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Sidebar Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
           {allMenuItems.map((item) => (
             <button
@@ -208,8 +196,11 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer */}
         <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
+          <div className="px-4 py-2 text-sm text-blue-200">
+            <p className="font-semibold">{user?.name}</p>
+            <p className="text-xs opacity-75">Deputy Head Teacher</p>
+          </div>
           {hasTeacherAccess && (
             <button
               onClick={goToTeacherDashboard}
@@ -220,7 +211,7 @@ function AdminDashboard() {
           )}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors mt-2"
           >
             <span className="text-white font-bold">Logout</span>
           </button>
@@ -229,11 +220,13 @@ function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
-        {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
             <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">
-              Admin
+              Deputy Head Teacher
+            </span>
+            <span className="text-sm text-blue-200">
+              {stats.pendingAssignments} Pending | {stats.totalAssignments} Total
             </span>
             {hasTeacherAccess && (
               <span className="bg-green-600 px-3 py-1 rounded-full text-sm">
@@ -241,9 +234,8 @@ function AdminDashboard() {
               </span>
             )}
           </div>
-          
           <div className="flex items-center gap-6">
-            <Notifications role="Admin" />
+            <Notifications role="DeputyHeadTeacher" />
             <div className="h-6 w-px bg-blue-600" />
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
@@ -260,41 +252,83 @@ function AdminDashboard() {
           </div>
         </nav>
 
-        {/* Content Area */}
         <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-4 lg:p-6">
-              {activeTab === 'teachers' && <TeacherManagement />}
-              {activeTab === 'departments' && <DepartmentManagement />}
-              {activeTab === 'form-teacher' && <FormTeacherAssignment />}
-              {activeTab === 'hod-assignment' && <HeadOfDepartmentAssignment />}
-              {activeTab === 'deputy-assignment' && <DeputyAssignment />}
-              {activeTab === 'classes' && <ClassManagement />}
-              {activeTab === 'allocation' && <SubjectAllocation />}
-              {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
-              {activeTab === 'student-registration' && (
-                <StudentRegistration onStudentAdded={handleStudentRegistered} />
-              )}
-              {activeTab === 'subjects' && <SubjectsManagement />}
-              {activeTab === 'students' && (
-                <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow p-4 lg:p-6">
+            {activeTab === 'dashboard' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <h3 className="text-lg font-semibold text-blue-800">Student Management</h3>
-                    <p className="text-sm text-blue-600">View and manage all registered students</p>
+                    <p className="text-sm text-blue-600">Total Assignments</p>
+                    <p className="text-2xl font-bold text-blue-700">{stats.totalAssignments}</p>
                   </div>
-                  <StudentList 
-                    refreshTrigger={refreshStudents} 
-                    onStudentClick={handleStudentClick}
-                  />
+                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <p className="text-sm text-yellow-600">Pending</p>
+                    <p className="text-2xl font-bold text-yellow-700">{stats.pendingAssignments}</p>
+                  </div>
+                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                    <p className="text-sm text-orange-600">In Progress</p>
+                    <p className="text-2xl font-bold text-orange-700">{stats.inProgressAssignments}</p>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-600">Completed</p>
+                    <p className="text-2xl font-bold text-green-700">{stats.completedAssignments}</p>
+                  </div>
                 </div>
-              )}
-              {activeTab === 'users' && <AdminUserManagement />}
-              {activeTab === 'approval' && <ResultsApproval />}
-              {activeTab === 'rankings' && <Rankings />}
-              {activeTab === 'my-students' && <MyStudents />}
-              {activeTab === 'my-subjects' && <MySubjects />}
-              {activeTab === 'enter-marks' && <TeacherMarksEntry />}
-            </div>
+                <div className="bg-gray-50 p-4 rounded-lg border">
+                  <h3 className="font-semibold text-gray-700 mb-3">Quick Actions</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <button 
+                      onClick={() => setActiveTab('assignments')}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                    >
+                      View Assignments
+                    </button>
+                    <button 
+                      onClick={() => setActiveTab('student-registration')}
+                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
+                    >
+                      Add Student
+                    </button>
+                    <button 
+                      onClick={() => setActiveTab('teachers')}
+                      className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors text-sm"
+                    >
+                      Add Teacher
+                    </button>
+                    <button 
+                      onClick={() => setActiveTab('students')}
+                      className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-colors text-sm"
+                    >
+                      View Students
+                    </button>
+                  </div>
+                </div>
+                {hasTeacherAccess && (
+                  <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-700">
+                      You have teacher access. You can switch to teacher mode to enter marks and manage your students.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+            {activeTab === 'assignments' && <MyAssignments />}
+            {activeTab === 'students' && (
+              <StudentList 
+                refreshTrigger={refreshStudents} 
+                onStudentClick={handleStudentClick}
+              />
+            )}
+            {activeTab === 'student-registration' && (
+              <StudentRegistration onStudentAdded={handleStudentRegistered} />
+            )}
+            {activeTab === 'teachers' && <TeacherManagement />}
+            {activeTab === 'users' && <AdminUserManagement />}
+            {activeTab === 'subjects' && <SubjectAllocation />}
+            {activeTab === 'my-students' && <MyStudents />}
+            {activeTab === 'my-subjects' && <MySubjects />}
+            {activeTab === 'enter-marks' && <TeacherMarksEntry />}
           </div>
         </div>
       </div>
@@ -311,4 +345,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default DeputyDashboard;
