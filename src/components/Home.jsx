@@ -5,6 +5,10 @@ import backgroundImage from '../assets/images/home.jpg';
 function Home() {
   const navigate = useNavigate();
 
+  const handleLogin = () => {
+    navigate('/Login');
+  };
+
   return (
     <div 
       className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
@@ -17,7 +21,7 @@ function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-end">
             <button
-              onClick={() => navigate('./Login')}
+              onClick={handleLogin}
               className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
             >
               Login
@@ -41,7 +45,7 @@ function Home() {
             <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
               <div className="rounded-md shadow">
                 <button
-                  onClick={() => navigate('./Login')}
+                  onClick={handleLogin}
                   className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
                 >
                   Get Started
