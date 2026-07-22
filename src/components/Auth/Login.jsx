@@ -78,7 +78,7 @@ function Login({ setUser }) {
 
       if (mustChangePassword === true) {
         console.log('🔍 Redirecting to change-password');
-        navigate('/change-password');
+        navigate('/changePassword');
         return;
       }
 
@@ -89,19 +89,19 @@ function Login({ setUser }) {
       // ✅ Use switch for cleaner navigation
       switch(roleLower) {
         case 'admin':
-          navigate('/admin-dashboard');
+          navigate('/AdminDashboard');
           break;
         case 'teacher':
-          navigate('/teacher-dashboard');
+          navigate('/TeacherDashboard');
           break;
         case 'formteacher':
-          navigate('/form-teacher-dashboard');
+          navigate('/FormTeacherDashboard');
           break;
         case 'headofdepartment':
-          navigate('/hod-dashboard');
+          navigate('/HodDashboard');
           break;
         case 'student':
-          navigate('/student-dashboard');
+          navigate('/StudentDashboard');
           break;
         default:
           console.error('❌ Unknown role:', finalRole);
