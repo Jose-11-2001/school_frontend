@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
-import FormTeacherClasses from './FormTeacherClasses';
-import FormTeacherStudents from './FormTeacherStudents';
-import SubjectApprovals from './SubjectApprovals';
-import ClassResults from './ClassResults';
-import Notifications from '../Common/Notifications';
+import { getCurrentUser, hasRole, getUserName } from '../utils/roleUtils';
+import FormTeacherClasses from '../components/FormTeacher/FormTeacherClasses';
+import FormTeacherStudents from '../components/FormTeacher/FormTeacherStudents';
+import SubjectApprovals from '../components/FormTeacher/SubjectApprovals';
+import ClassResults from '../components/FormTeacher/ClassResults';
+import FormTeacherNotifications from '../components/FormTeacher/FormTeacherNotifications';
 
 function FormTeacherDashboard() {
   const [user, setUser] = useState(null);
@@ -16,6 +16,7 @@ function FormTeacherDashboard() {
   useEffect(() => {
     const userData = getCurrentUser();
     
+    // ✅ Use hasRole for case-insensitive check
     if (!userData || !hasRole('FormTeacher')) {
       navigate('/login');
       return;

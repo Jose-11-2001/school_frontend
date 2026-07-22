@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../../services/api';
-import schoolLogo from '../../assets/images/logoo.jpg';
-import backgroundImage from '../../assets/images/home.jpg';
+import { authAPI } from '../services/api';
+import schoolLogo from '../assets/images/logoo.jpg';
+import backgroundImage from '../assets/images/home.jpg';
 
 function Login({ setUser }) {
   const [email, setEmail] = useState('');
@@ -60,7 +60,15 @@ function Login({ setUser }) {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
 
-      console.log('✅ Stored user:', localStorage.getItem('user'));
+      // ✅ DEBUG: Verify stored data
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      console.log('🔍 === DEBUG ROLE INFO ===');
+      console.log('🔍 Raw role from backend:', data.role);
+      console.log('🔍 Role after trim:', data.role?.trim());
+      console.log('🔍 Role in stored user:', storedUser.role);
+      console.log('🔍 Role in stored user (trimmed):', storedUser.role?.trim());
+      console.log('🔍 Role type:', typeof storedUser.role);
+      console.log('🔍 === END DEBUG ===');
 
       // ✅ IMPORTANT: Update the user state in App.jsx
       if (setUser) {
@@ -78,16 +86,27 @@ function Login({ setUser }) {
       const roleLower = finalRole.toLowerCase();
       console.log(`🔍 Navigating to dashboard for role: "${roleLower}"`);
 
-      if (roleLower === 'admin') {
-        navigate('/admin-dashboard');
-      } else if (roleLower === 'teacher') {
-        navigate('/teacher-dashboard');
-      } else if (roleLower === 'student') {
-        navigate('/student-dashboard');
-      } else {
-        console.error('❌ Unknown role:', finalRole);
-        setError(`Unknown user role: "${finalRole}". Please contact support.`);
-        setLoading(false);
+      // ✅ Use switch for cleaner navigation
+      switch(roleLower) {
+        case 'admin':
+          navigate('/admin-dashboard');
+          break;
+        case 'teacher':
+          navigate('/teacher-dashboard');
+          break;
+        case 'formteacher':
+          navigate('/form-teacher-dashboard');
+          break;
+        case 'headofdepartment':
+          navigate('/hod-dashboard');
+          break;
+        case 'student':
+          navigate('/student-dashboard');
+          break;
+        default:
+          console.error('❌ Unknown role:', finalRole);
+          setError(`Unknown user role: "${finalRole}". Please contact support.`);
+          setLoading(false);
       }
 
     } catch (err) {

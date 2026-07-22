@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, getUserName } from '../../utils/roleUtils';
-import Notifications from '../Common/Notifications';
-import TeacherManagement from './TeacherManagement';
-import ClassManagement from './ClassManagement';
-import ResultsApproval from './ResultsApproval';
-import StudentList from './StudentList';
-import AdminUserManagement from './AdminUserManagement';
-import Rankings from '../Rankings';
-import AdminSubjectAllocation from './AdminSubjectAllocation';
-import StudentRegistration from './StudentRegistration';
-import SubjectAllocation from './SubjectAllocation';
-import SubjectsManagement from './SubjectsManagement';
-import DepartmentManagement from './DepartmentManagement';
-import FormTeacherAssignment from './FormTeacherAssignment';
-import HeadOfDepartmentAssignment from './HeadOfDepartmentAssignment';
+import { getCurrentUser, hasRole, getUserName } from '../utils/roleUtils';
+import Notifications from '../components/Common/Notifications';
+import TeacherManagement from '../components/Admin/TeacherManagement';
+import ClassManagement from '../components/Admin/ClassManagement';
+import ResultsApproval from '../components/Admin/ResultsApproval';
+import StudentList from '../components/Admin/StudentList';
+import AdminUserManagement from '../components/Admin/AdminUserManagement';
+import Rankings from '../components/Rankings';
+import AdminSubjectAllocation from '../components/Admin/AdminSubjectAllocation';
+import StudentRegistration from '../components/Admin/StudentRegistration';
+import SubjectAllocation from '../components/Admin/SubjectAllocation';
+import SubjectsManagement from '../components/Admin/SubjectsManagement';
+import DepartmentManagement from '../components/Admin/DepartmentManagement';
+import FormTeacherAssignment from '../components/Admin/FormTeacherAssignment';
+import HeadOfDepartmentAssignment from '../components/Admin/HeadOfDepartmentAssignment';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
@@ -43,8 +43,8 @@ function AdminDashboard() {
       return;
     }
     
-    // ✅ Exact match with backend role
-    if (userData.role !== 'Admin') {
+    // ✅ Use hasRole for case-insensitive check
+    if (!hasRole('Admin')) {
       console.log(`🔍 AdminDashboard - Role "${userData.role}" is not Admin, redirecting`);
       navigate('/login');
       return;

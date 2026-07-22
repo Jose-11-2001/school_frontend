@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
-import HodDashboard from './HodDashboard';
-import HodTeachers from './HodTeachers';
-import HodSubjects from './HodSubjects';
-import HodStudentResults from './HodStudentResults';
-import HodNotifications from './HodNotifications';
+import { getCurrentUser, hasRole, getUserName } from '../utils/roleUtils';
+import HodDashboard from '../components/HOD/HodDashboard';
+import HodTeachers from '../components/HOD/HodTeachers';
+import HodSubjects from '../components/HOD/HodSubjects';
+import HodStudentResults from '../components/HOD/HodStudentResults';
+import HodNotifications from '../components/HOD/HodNotifications';
 
 function HeadOfDepartmentDashboard() {
   const [user, setUser] = useState(null);
@@ -17,6 +17,7 @@ function HeadOfDepartmentDashboard() {
   useEffect(() => {
     const userData = getCurrentUser();
     
+    // ✅ Use hasRole for case-insensitive check
     if (!userData || !hasRole('HeadOfDepartment')) {
       navigate('/login');
       return;
