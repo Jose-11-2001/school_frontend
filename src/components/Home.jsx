@@ -1,22 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import backgroundImage from '../assets/images/home.jpg';
 
 function Home() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
+    console.log('Login button clicked - navigating to /Login');
     navigate('/Login');
   };
 
   return (
-    <div 
-      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-      }}
-    >
-      <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-700">
       <div className="relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-end">
@@ -34,6 +28,9 @@ function Home() {
       <div className="relative z-10 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="text-center">
+            <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <span className="text-white text-4xl font-bold">M</span>
+            </div>
             <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
               <span className="block">Mkondezi Secondary School</span>
               <span className="block text-blue-300">Grading System</span>
