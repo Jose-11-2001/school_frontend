@@ -20,7 +20,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Check if user has any of the allowed roles
   const hasAllowedRole = allowedRoles.some(role => hasRole(role));
   
   if (!hasAllowedRole) {
@@ -34,7 +33,6 @@ function App() {
   const [user, setUser] = React.useState(null);
 
   React.useEffect(() => {
-    // Check for existing session
     const token = localStorage.getItem('token');
     const userData = getCurrentUser();
     if (token && userData) {

@@ -30,7 +30,6 @@ function Home() {
         </div>
       </div>
       
-      {/* Hero Section */}
       <div className="relative z-10 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="text-center">
@@ -56,7 +55,6 @@ function Home() {
         </div>
       </div>
 
-      {/* Features Section */}
       <div className="relative z-10 py-12 bg-white bg-opacity-95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:text-center">
@@ -77,7 +75,7 @@ function Home() {
                 <div className="ml-16">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">Student Management</h3>
                   <p className="mt-2 text-base text-gray-500">
-                    Easily manage student profiles, classes, and streams. Track admission numbers and contact details.
+                    Easily manage student profiles, classes, and streams.
                   </p>
                 </div>
               </div>
@@ -91,7 +89,7 @@ function Home() {
                 <div className="ml-16">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">Marks Entry & Grading</h3>
                   <p className="mt-2 text-base text-gray-500">
-                    Enter marks with automatic grade calculation. Weighted scoring for continuous tests and end term exams.
+                    Enter marks with automatic grade calculation. Weighted scoring for tests and exams.
                   </p>
                 </div>
               </div>
@@ -128,7 +126,6 @@ function Home() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="relative z-10 bg-gray-900 text-white py-8 bg-opacity-95">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <span>{new Date().getFullYear()} Mkondezi Secondary School. All rights reserved.</span>

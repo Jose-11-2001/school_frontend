@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../../services/api';
-import Logo from '../../assets/images/logoo.jpg';
+import schoolLogo from '../../assets/images/logoo.jpg';
 import backgroundImage from '../../assets/images/home.jpg';
 
 function Login({ setUser }) {
@@ -18,19 +18,19 @@ function Login({ setUser }) {
     setError('');
 
     try {
-      console.log('🔍 Attempting login with:', { email, password: '***' });
+      console.log('Attempting login with:', { email, password: '***' });
       
       const response = await authAPI.login({ email, password });
       const data = response.data;
 
-      console.log('🔍 ====== FULL LOGIN RESPONSE ======');
-      console.log('🔍 Response data:', JSON.stringify(data, null, 2));
-      console.log('🔍 ================================');
-      console.log('🔍 token:', data.token);
-      console.log('🔍 name:', data.name);
-      console.log('🔍 email:', data.email);
-      console.log('🔍 role:', data.role);
-      console.log('🔍 mustChangePassword:', data.mustChangePassword);
+      console.log('===== FULL LOGIN RESPONSE =====');
+      console.log('Response data:', JSON.stringify(data, null, 2));
+      console.log('===============================');
+      console.log('token:', data.token);
+      console.log('name:', data.name);
+      console.log('email:', data.email);
+      console.log('role:', data.role);
+      console.log('mustChangePassword:', data.mustChangePassword);
 
       const { token, id, name, email: userEmail, role, mustChangePassword } = data;
 
@@ -38,14 +38,13 @@ function Login({ setUser }) {
         throw new Error('No token received from server');
       }
 
-      // ✅ Use the role from backend, trim it
       let finalRole = role?.trim() || 'Student';
       if (!role) {
-        console.warn('⚠️ ROLE IS MISSING! Setting to "Student" as default');
+        console.warn('ROLE IS MISSING! Setting to "Student" as default');
         finalRole = 'Student';
       }
 
-      console.log('🔍 Final role to save:', finalRole);
+      console.log('Final role to save:', finalRole);
 
       const userData = {
         id,
@@ -55,64 +54,63 @@ function Login({ setUser }) {
         mustChangePassword: mustChangePassword || false
       };
 
-      console.log('🔍 User data to save:', userData);
+      console.log('User data to save:', userData);
 
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
 
-      // ✅ DEBUG: Verify stored data
       const storedUser = JSON.parse(localStorage.getItem('user'));
-      console.log('🔍 === DEBUG ROLE INFO ===');
-      console.log('🔍 Raw role from backend:', data.role);
-      console.log('🔍 Role after trim:', data.role?.trim());
-      console.log('🔍 Role in stored user:', storedUser.role);
-      console.log('🔍 Role in stored user (trimmed):', storedUser.role?.trim());
-      console.log('🔍 Role type:', typeof storedUser.role);
-      console.log('🔍 === END DEBUG ===');
+      console.log('=== DEBUG ROLE INFO ===');
+      console.log('Raw role from backend:', data.role);
+      console.log('Role after trim:', data.role?.trim());
+      console.log('Role in stored user:', storedUser.role);
+      console.log('Role in stored user (trimmed):', storedUser.role?.trim());
+      console.log('Role type:', typeof storedUser.role);
+      console.log('=== END DEBUG ===');
 
-      // ✅ IMPORTANT: Update the user state in App.jsx
       if (setUser) {
-        console.log('🔍 Setting user in App state:', userData);
+        console.log('Setting user in App state:', userData);
         setUser(userData);
       }
 
       if (mustChangePassword === true) {
-        console.log('🔍 Redirecting to change-password');
-        navigate('/changePassword');
+        console.log('Redirecting to change-password');
+        navigate('/change-password');
         return;
       }
 
-      // ✅ NAVIGATE BASED ON ROLE
       const roleLower = finalRole.toLowerCase();
-      console.log(`🔍 Navigating to dashboard for role: "${roleLower}"`);
+      console.log(`Navigating to dashboard for role: "${roleLower}"`);
 
-      // ✅ Use switch for cleaner navigation
+      // ✅ FIXED: All paths are lowercase
       switch(roleLower) {
         case 'admin':
-          navigate('/AdminDashboard');
+          navigate('/admin-dashboard');
+          break;
+        case 'deputyheadteacher':
+          navigate('/deputy-dashboard');
           break;
         case 'teacher':
-          navigate('/TeacherDashboard');
+          navigate('/teacher-dashboard');
           break;
         case 'formteacher':
-          navigate('/FormTeacherDashboard');
+          navigate('/form-teacher-dashboard');
           break;
         case 'headofdepartment':
-          navigate('/HodDashboard');
+          navigate('/hod-dashboard');
           break;
         case 'student':
-          navigate('/StudentDashboard');
+          navigate('/student-dashboard');
           break;
         default:
-          console.error('❌ Unknown role:', finalRole);
+          console.error('Unknown role:', finalRole);
           setError(`Unknown user role: "${finalRole}". Please contact support.`);
           setLoading(false);
       }
 
     } catch (err) {
-      console.error('❌ Login error:', err);
+      console.error('Login error:', err);
       
-      // ✅ Better error messages
       if (err.code === 'ERR_NETWORK') {
         setError('Network error: Cannot connect to the server. Please check your internet connection.');
       } else if (err.response?.status === 401) {
