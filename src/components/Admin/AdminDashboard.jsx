@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, hasRole, getUserName, hasTeacherAllocations } from '../../utils/roleUtils';
 import Notifications from '../Common/Notifications';
@@ -36,7 +36,7 @@ function AdminDashboard() {
     const token = localStorage.getItem('token');
     const userData = getCurrentUser();
     
-    console.log('AdminDashboard - Token:', !!token);
+    console.log('AdminDashboard - Token exists:', !!token);
     console.log('AdminDashboard - User data:', userData);
     
     if (!token) {
@@ -52,7 +52,7 @@ function AdminDashboard() {
     }
     
     if (!hasRole('Admin')) {
-      console.log(`AdminDashboard - Role "${userData.role}" is not Admin, redirecting`);
+      console.log(`AdminDashboard - Role "${userData?.role}" is not Admin, redirecting`);
       navigate('/login');
       return;
     }

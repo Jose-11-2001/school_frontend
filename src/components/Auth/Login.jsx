@@ -18,16 +18,15 @@ function Login({ setUser }) {
     setError('');
 
     try {
-      console.log('Attempting login with:', { email, password: '***' });
+      console.log('1️⃣ Attempting login with:', { email, password: '***' });
       
       const response = await authAPI.login({ email, password });
+      console.log('2️⃣ Raw response:', response);
+      
       const data = response.data;
-
-      console.log('===== FULL LOGIN RESPONSE =====');
-      console.log('Response data:', JSON.stringify(data, null, 2));
-      console.log('Token:', data.token);
-      console.log('Role:', data.role);
-      console.log('===============================');
+      console.log('3️⃣ Response data:', JSON.stringify(data, null, 2));
+      console.log('4️⃣ Token:', data.token);
+      console.log('5️⃣ Role:', data.role);
 
       // Check if we have a token
       if (!data.token) {
@@ -36,38 +35,42 @@ function Login({ setUser }) {
 
       // Save token and user data
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify({
+      console.log('6️⃣ Token saved to localStorage');
+
+      const userData = {
         id: data.id,
         name: data.name,
         email: data.email,
-        role: data.role,
+        role: data.role || 'Student',
         mustChangePassword: data.mustChangePassword || false
-      }));
-
-      // Update user state
-      if (setUser) {
-        setUser({
-          id: data.id,
-          name: data.name,
-          email: data.email,
-          role: data.role,
-          mustChangePassword: data.mustChangePassword || false
-        });
-      }
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+      console.log('7️⃣ User data saved:', userData);
 
       // Verify token was saved
       const savedToken = localStorage.getItem('token');
-      console.log('Token saved?', savedToken ? 'Yes' : 'No');
+      console.log('8️⃣ Verified token saved?', savedToken ? 'Yes ✅' : 'No ❌');
+      
+      if (!savedToken) {
+        throw new Error('Token was not saved to localStorage');
+      }
+
+      // Update user state
+      if (setUser) {
+        console.log('9️⃣ Setting user in App state');
+        setUser(userData);
+      }
 
       // Check if user needs to change password
       if (data.mustChangePassword === true) {
+        console.log('🔟 Redirecting to change-password');
         navigate('/change-password');
         return;
       }
 
       // Navigate based on role
       const roleLower = (data.role || 'Student').toLowerCase();
-      console.log(`Navigating to dashboard for role: "${roleLower}"`);
+      console.log('1️⃣1️⃣ Role lowercase:', roleLower);
 
       const dashboardRoutes = {
         'admin': '/admin-dashboard',
@@ -80,8 +83,9 @@ function Login({ setUser }) {
 
       const route = dashboardRoutes[roleLower];
       if (route) {
-        console.log(`✅ Navigating to: ${route}`);
-        navigate(route);
+        console.log(`1️⃣2️⃣ ✅ Navigating to: ${route}`);
+        // Use window.location for immediate navigation
+        window.location.href = route;
       } else {
         console.error('Unknown role:', data.role);
         setError(`Unknown user role: "${data.role}". Please contact support.`);
@@ -89,7 +93,7 @@ function Login({ setUser }) {
       }
 
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('❌ Login error:', err);
       
       if (err.code === 'ERR_NETWORK') {
         setError('Network error: Cannot connect to the server. Please check your internet connection.');
@@ -99,6 +103,7 @@ function Login({ setUser }) {
         const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password. Please try again.';
         setError(errorMessage);
       }
+      setLoading(false);
     } finally {
       setLoading(false);
     }
