@@ -25,87 +25,67 @@ function Login({ setUser }) {
 
       console.log('===== FULL LOGIN RESPONSE =====');
       console.log('Response data:', JSON.stringify(data, null, 2));
+      console.log('Token:', data.token);
+      console.log('Role:', data.role);
       console.log('===============================');
-      console.log('token:', data.token);
-      console.log('name:', data.name);
-      console.log('email:', data.email);
-      console.log('role:', data.role);
-      console.log('mustChangePassword:', data.mustChangePassword);
 
-      const { token, id, name, email: userEmail, role, mustChangePassword } = data;
-
-      if (!token) {
+      // Check if we have a token
+      if (!data.token) {
         throw new Error('No token received from server');
       }
 
-      let finalRole = role?.trim() || 'Student';
-      if (!role) {
-        console.warn('ROLE IS MISSING! Setting to "Student" as default');
-        finalRole = 'Student';
-      }
+      // Save token and user data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify({
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        mustChangePassword: data.mustChangePassword || false
+      }));
 
-      console.log('Final role to save:', finalRole);
-
-      const userData = {
-        id,
-        name,
-        email: userEmail,
-        role: finalRole,
-        mustChangePassword: mustChangePassword || false
-      };
-
-      console.log('User data to save:', userData);
-
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-
-      const storedUser = JSON.parse(localStorage.getItem('user'));
-      console.log('=== DEBUG ROLE INFO ===');
-      console.log('Raw role from backend:', data.role);
-      console.log('Role after trim:', data.role?.trim());
-      console.log('Role in stored user:', storedUser.role);
-      console.log('Role in stored user (trimmed):', storedUser.role?.trim());
-      console.log('Role type:', typeof storedUser.role);
-      console.log('=== END DEBUG ===');
-
+      // Update user state
       if (setUser) {
-        console.log('Setting user in App state:', userData);
-        setUser(userData);
+        setUser({
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          mustChangePassword: data.mustChangePassword || false
+        });
       }
 
-      if (mustChangePassword === true) {
-        console.log('Redirecting to change-password');
+      // Verify token was saved
+      const savedToken = localStorage.getItem('token');
+      console.log('Token saved?', savedToken ? 'Yes' : 'No');
+
+      // Check if user needs to change password
+      if (data.mustChangePassword === true) {
         navigate('/change-password');
         return;
       }
 
-      const roleLower = finalRole.toLowerCase();
+      // Navigate based on role
+      const roleLower = (data.role || 'Student').toLowerCase();
       console.log(`Navigating to dashboard for role: "${roleLower}"`);
 
-      // ✅ FIXED: All paths are lowercase
-      switch(roleLower) {
-        case 'admin':
-          navigate('/admin-dashboard');
-          break;
-        case 'deputyheadteacher':
-          navigate('/deputy-dashboard');
-          break;
-        case 'teacher':
-          navigate('/teacher-dashboard');
-          break;
-        case 'formteacher':
-          navigate('/form-teacher-dashboard');
-          break;
-        case 'headofdepartment':
-          navigate('/hod-dashboard');
-          break;
-        case 'student':
-          navigate('/student-dashboard');
-          break;
-        default:
-          console.error('Unknown role:', finalRole);
-          setError(`Unknown user role: "${finalRole}". Please contact support.`);
-          setLoading(false);
+      const dashboardRoutes = {
+        'admin': '/admin-dashboard',
+        'deputyheadteacher': '/deputy-dashboard',
+        'teacher': '/teacher-dashboard',
+        'formteacher': '/form-teacher-dashboard',
+        'headofdepartment': '/hod-dashboard',
+        'student': '/student-dashboard'
+      };
+
+      const route = dashboardRoutes[roleLower];
+      if (route) {
+        console.log(`✅ Navigating to: ${route}`);
+        navigate(route);
+      } else {
+        console.error('Unknown role:', data.role);
+        setError(`Unknown user role: "${data.role}". Please contact support.`);
+        setLoading(false);
       }
 
     } catch (err) {

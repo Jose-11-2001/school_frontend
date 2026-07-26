@@ -35,10 +35,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     console.log('✅ API Response:', response.status, response.config.url);
+    console.log('✅ Response data:', response.data);  // Log the response data
     return response;
   },
   (error) => {
-    console.error('❌ Response error:', error.message);
+    console.error('❌ Response error:', error);
+    if (error.response) {
+      console.error('❌ Error data:', error.response.data);
+      console.error('❌ Error status:', error.response.status);
+    }
     
     if (error.code === 'ERR_NETWORK') {
       console.error('Network error - Cannot connect to server. Please check your internet connection.');
