@@ -15,14 +15,29 @@ const api = axios.create({
   timeout: 30000, // 30 second timeout
 });
 
-// Request interceptor
+// ============================================
+// REQUEST INTERCEPTOR - FULL DEBUG
+// ============================================
 api.interceptors.request.use(
   (config) => {
-    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    console.log('========================================');
+    console.log('🚀 API REQUEST');
+    console.log(`  Method: ${config.method?.toUpperCase()}`);
+    console.log(`  URL: ${config.baseURL}${config.url}`);
+    console.log(`  Headers:`, config.headers);
+    
     const token = localStorage.getItem('token');
     if (token) {
+      console.log(`  🔑 Token: ${token.substring(0, 20)}...${token.substring(token.length - 10)}`);
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.log('  🔑 No token found in localStorage');
     }
+    
+    if (config.data) {
+      console.log(`  📦 Data:`, config.data);
+    }
+    console.log('========================================');
     return config;
   },
   (error) => {
@@ -31,25 +46,37 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// ============================================
+// RESPONSE INTERCEPTOR - FULL DEBUG
+// ============================================
 api.interceptors.response.use(
   (response) => {
-    console.log('✅ API Response:', response.status, response.config.url);
-    console.log('✅ Response data:', response.data);  // Log the response data
+    console.log('========================================');
+    console.log('✅ API RESPONSE');
+    console.log(`  Status: ${response.status}`);
+    console.log(`  URL: ${response.config.url}`);
+    console.log(`  Data:`, response.data);
+    console.log('========================================');
     return response;
   },
   (error) => {
-    console.error('❌ Response error:', error);
-    if (error.response) {
-      console.error('❌ Error data:', error.response.data);
-      console.error('❌ Error status:', error.response.status);
-    }
+    console.error('========================================');
+    console.error('❌ API ERROR');
+    console.error(`  Message: ${error.message}`);
     
     if (error.code === 'ERR_NETWORK') {
-      console.error('Network error - Cannot connect to server. Please check your internet connection.');
+      console.error('  Network error - Cannot connect to server');
     }
     
+    if (error.response) {
+      console.error(`  Status: ${error.response.status}`);
+      console.error(`  Data:`, error.response.data);
+      console.error(`  Headers:`, error.response.headers);
+    }
+    console.error('========================================');
+    
     if (error.response?.status === 401) {
+      console.log('🔒 Unauthorized - Clearing token and redirecting to login');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       if (!window.location.pathname.includes('/login')) {
@@ -64,7 +91,10 @@ api.interceptors.response.use(
 // AUTH API
 // ============================================
 export const authAPI = {
-  login: (data) => api.post('/Auth/login', data),
+  login: (data) => {
+    console.log('📝 Login called with:', data);
+    return api.post('/Auth/login', data);
+  },
   changePassword: (data) => api.post('/Auth/change-password', data),
   register: (data) => api.post('/Auth/register', data),
   resetPassword: (userId) => api.post(`/Auth/reset-password/${userId}`),
