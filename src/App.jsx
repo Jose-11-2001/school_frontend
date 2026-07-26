@@ -16,16 +16,22 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem('token');
   const user = getCurrentUser();
   
+  console.log('🔒 ProtectedRoute Check:', { token: !!token, user, allowedRoles });
+  
   if (!token || !user) {
+    console.log('🔒 No token or user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   const hasAllowedRole = allowedRoles.some(role => hasRole(role));
+  console.log('🔒 Has allowed role?', hasAllowedRole);
   
   if (!hasAllowedRole) {
+    console.log('🔒 Invalid role, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
+  console.log('🔒 Access granted!');
   return children;
 };
 
@@ -36,9 +42,12 @@ function App() {
     const token = localStorage.getItem('token');
     const userData = getCurrentUser();
     if (token && userData) {
+      console.log('App - User found in localStorage:', userData);
       setUser(userData);
     }
   }, []);
+
+  console.log('App - Current user state:', user);
 
   return (
     <Router>

@@ -3,20 +3,17 @@ import axios from 'axios';
 // ===== USE THE DEPLOYED BACKEND URL =====
 const API_BASE_URL = 'https://school-yathu.onrender.com/api';
 
-// For local development, uncomment this:
-// const API_BASE_URL = 'http://localhost:5000/api';
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 30000, // 30 second timeout
+  timeout: 30000,
 });
 
 // ============================================
-// REQUEST INTERCEPTOR - FULL DEBUG
+// REQUEST INTERCEPTOR
 // ============================================
 api.interceptors.request.use(
   (config) => {
@@ -24,14 +21,13 @@ api.interceptors.request.use(
     console.log('🚀 API REQUEST');
     console.log(`  Method: ${config.method?.toUpperCase()}`);
     console.log(`  URL: ${config.baseURL}${config.url}`);
-    console.log(`  Headers:`, config.headers);
     
     const token = localStorage.getItem('token');
     if (token) {
       console.log(`  🔑 Token: ${token.substring(0, 20)}...${token.substring(token.length - 10)}`);
       config.headers.Authorization = `Bearer ${token}`;
     } else {
-      console.log('  🔑 No token found in localStorage');
+      console.log('  🔑 No token found');
     }
     
     if (config.data) {
@@ -47,7 +43,7 @@ api.interceptors.request.use(
 );
 
 // ============================================
-// RESPONSE INTERCEPTOR - FULL DEBUG
+// RESPONSE INTERCEPTOR
 // ============================================
 api.interceptors.response.use(
   (response) => {
@@ -71,12 +67,11 @@ api.interceptors.response.use(
     if (error.response) {
       console.error(`  Status: ${error.response.status}`);
       console.error(`  Data:`, error.response.data);
-      console.error(`  Headers:`, error.response.headers);
     }
     console.error('========================================');
     
     if (error.response?.status === 401) {
-      console.log('🔒 Unauthorized - Clearing token and redirecting to login');
+      console.log('🔒 Unauthorized - Redirecting to login');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       if (!window.location.pathname.includes('/login')) {
