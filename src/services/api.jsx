@@ -1,6 +1,10 @@
 import axios from 'axios';
 
+// ===== USE THE DEPLOYED BACKEND URL =====
 const API_BASE_URL = 'https://school-yathu.onrender.com/api';
+
+// For local development, uncomment this:
+// const API_BASE_URL = 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,24 +12,38 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  timeout: 30000, // 30 second timeout
 });
 
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
+    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('❌ Request error:', error);
+    return Promise.reject(error);
+  }
 );
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('✅ API Response:', response.status, response.config.url);
+    return response;
+  },
   (error) => {
+    console.error('❌ Response error:', error.message);
+    
+    if (error.code === 'ERR_NETWORK') {
+      console.error('Network error - Cannot connect to server. Please check your internet connection.');
+    }
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
