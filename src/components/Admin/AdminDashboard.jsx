@@ -23,6 +23,7 @@ import MyStudents from '../Teacher/MyStudents';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('teachers');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -33,33 +34,44 @@ function AdminDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = getCurrentUser();
-    
-    console.log('AdminDashboard - Token exists:', !!token);
-    console.log('AdminDashboard - User data:', userData);
-    
-    if (!token) {
-      console.log('AdminDashboard - No token, redirecting to login');
-      navigate('/login');
-      return;
-    }
-    
-    if (!userData) {
-      console.log('AdminDashboard - No user data, redirecting to login');
-      navigate('/login');
-      return;
-    }
-    
-    if (!hasRole('Admin')) {
-      console.log(`AdminDashboard - Role "${userData?.role}" is not Admin, redirecting`);
-      navigate('/login');
-      return;
-    }
-    
-    console.log('AdminDashboard - User is valid Admin!');
-    setUser(userData);
-    setHasTeacherAccess(hasTeacherAllocations());
+    // Small delay to ensure everything is loaded
+    const timer = setTimeout(() => {
+      const token = localStorage.getItem('token');
+      const userData = getCurrentUser();
+      
+      console.log('========================================');
+      console.log('🔐 AdminDashboard - Authentication Check');
+      console.log('  Token exists:', !!token);
+      console.log('  User data:', userData);
+      console.log('  User role:', userData?.role);
+      console.log('  hasRole("Admin"):', hasRole('Admin'));
+      console.log('========================================');
+      
+      if (!token) {
+        console.log('❌ No token found, redirecting to login');
+        navigate('/login');
+        return;
+      }
+      
+      if (!userData) {
+        console.log('❌ No user data found, redirecting to login');
+        navigate('/login');
+        return;
+      }
+      
+      if (!hasRole('Admin')) {
+        console.log(`❌ Role "${userData?.role}" is not Admin, redirecting`);
+        navigate('/login');
+        return;
+      }
+      
+      console.log('✅ AdminDashboard - User is valid Admin!');
+      setUser(userData);
+      setHasTeacherAccess(hasTeacherAllocations());
+      setIsLoading(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [navigate]);
 
   const handleLogout = () => {
@@ -85,6 +97,24 @@ function AdminDashboard() {
   const goToTeacherDashboard = () => {
     navigate('/teacher-dashboard');
   };
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center bg-white p-8 rounded-lg shadow-lg">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">Loading dashboard...</p>
+          <p className="text-sm text-gray-400 mt-1">Please wait</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is null after loading, redirect
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const menuItems = [
     { id: 'teachers', label: 'Teacher Management' },
