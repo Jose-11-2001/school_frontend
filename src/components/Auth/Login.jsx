@@ -84,8 +84,8 @@ function Login({ setUser }) {
       const route = dashboardRoutes[roleLower];
       if (route) {
         console.log(`1️⃣2️⃣ ✅ Navigating to: ${route}`);
-        // Use window.location for immediate navigation
-        window.location.href = route;
+        // ✅ FIXED: Use React Router navigation instead of window.location
+        navigate(route);
       } else {
         console.error('Unknown role:', data.role);
         setError(`Unknown user role: "${data.role}". Please contact support.`);
