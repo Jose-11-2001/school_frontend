@@ -1,20 +1,21 @@
-// src/utils/roleUtils.js
 
 export const getCurrentUser = () => {
   try {
-    const userData = localStorage.getItem('user');
-    if (!userData) return null;
-    return JSON.parse(userData);
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    return JSON.parse(userStr);
   } catch (error) {
     console.error('Error parsing user data:', error);
     return null;
   }
 };
 
-export const hasRole = (role) => {
+export const hasRole = (requiredRole) => {
   const user = getCurrentUser();
   if (!user || !user.role) return false;
-  return user.role.trim().toLowerCase() === role.toLowerCase();
+  
+  // Case-insensitive comparison with trim
+  return user.role.trim().toLowerCase() === requiredRole.toLowerCase();
 };
 
 export const getUserRole = () => {
@@ -24,7 +25,7 @@ export const getUserRole = () => {
 };
 
 export const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
+  return !!localStorage.getItem('token') && !!getCurrentUser();
 };
 
 export const getUserName = () => {
@@ -57,6 +58,7 @@ export const setTeacherAllocations = (hasAllocations) => {
 export const canSwitchToTeacherMode = () => {
   const user = getCurrentUser();
   if (!user) return false;
+  // Use case-insensitive comparison for roles
   const isAdminOrDeputy = hasRole('Admin') || hasRole('DeputyHeadTeacher');
   return isAdminOrDeputy && hasTeacherAllocations();
 };
