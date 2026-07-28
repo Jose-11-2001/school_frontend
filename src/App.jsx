@@ -23,13 +23,10 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Case-insensitive role check
-  const userRole = user.role || '';
-  const hasAllowedRole = allowedRoles.some(role => 
-    userRole.toLowerCase() === role.toLowerCase()
-  );
+  // Use hasRole for case-insensitive comparison
+  const hasAllowedRole = allowedRoles.some(role => hasRole(role));
   
-  console.log('🔒 User role:', userRole);
+  console.log('🔒 User role:', user?.role);
   console.log('🔒 Has allowed role?', hasAllowedRole);
   
   if (!hasAllowedRole) {
@@ -65,42 +62,42 @@ function App() {
         
         {/* Admin Routes */}
         <Route path="/admin-dashboard" element={
-          <ProtectedRoute allowedRoles={['admin']}>
+          <ProtectedRoute allowedRoles={['Admin']}>
             <AdminDashboard />
           </ProtectedRoute>
         } />
         
         {/* Deputy Head Teacher Routes */}
         <Route path="/deputy-dashboard" element={
-          <ProtectedRoute allowedRoles={['deputyheadteacher']}>
+          <ProtectedRoute allowedRoles={['DeputyHeadTeacher']}>
             <DeputyDashboard />
           </ProtectedRoute>
         } />
         
         {/* Teacher Routes */}
         <Route path="/teacher-dashboard" element={
-          <ProtectedRoute allowedRoles={['teacher', 'formteacher']}>
+          <ProtectedRoute allowedRoles={['Teacher', 'FormTeacher']}>
             <TeacherDashboard />
           </ProtectedRoute>
         } />
         
         {/* Student Routes */}
         <Route path="/student-dashboard" element={
-          <ProtectedRoute allowedRoles={['student']}>
+          <ProtectedRoute allowedRoles={['Student']}>
             <StudentDashboard />
           </ProtectedRoute>
         } />
         
         {/* Head of Department Routes */}
         <Route path="/hod-dashboard" element={
-          <ProtectedRoute allowedRoles={['headofdepartment']}>
+          <ProtectedRoute allowedRoles={['HeadOfDepartment']}>
             <HeadOfDepartmentDashboard />
           </ProtectedRoute>
         } />
         
         {/* Form Teacher Routes */}
         <Route path="/form-teacher-dashboard" element={
-          <ProtectedRoute allowedRoles={['formteacher']}>
+          <ProtectedRoute allowedRoles={['FormTeacher']}>
             <FormTeacherDashboard />
           </ProtectedRoute>
         } />
