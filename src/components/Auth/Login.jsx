@@ -131,6 +131,7 @@ function Login({ setUser }) {
           onClick={handleGoBack}
           className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 transition-colors"
           title="Go back"
+          aria-label="Go back"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -154,39 +155,50 @@ function Login({ setUser }) {
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-semibold mb-2">Email Address</label>
+            <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-2">
+              Email Address
+            </label>
             <input
+              id="email"
+              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your email"
               required
+              autoComplete="email"
             />
           </div>
 
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-semibold mb-2">Password</label>
+            <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">
+              Password
+            </label>
             <div className="relative">
               <input
+                id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your password"
                 required
+                autoComplete="current-password"
               />
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
