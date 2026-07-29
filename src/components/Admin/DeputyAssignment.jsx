@@ -22,13 +22,25 @@ function DeputyAssignment() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      // Fetch all teachers
-      const teachersRes = await adminAPI.getTeachers();
-      setTeachers(teachersRes.data);
+      const token = localStorage.getItem('token');
+      
+      // Fetch all teachers using direct fetch
+      const teachersRes = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (teachersRes.ok) {
+        const data = await teachersRes.json();
+        setTeachers(data);
+      }
       
       // Fetch current deputy status
-      const deputyRes = await adminAPI.get('/Admin/deputy-status');
-      setDeputy(deputyRes.data.deputy);
+      const deputyRes = await fetch('https://school-yathu.onrender.com/api/Admin/deputy-status', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (deputyRes.ok) {
+        const data = await deputyRes.json();
+        setDeputy(data.deputy);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Failed to load data');
@@ -60,35 +72,80 @@ function DeputyAssignment() {
 
     try {
       setLoading(true);
-      const response = await adminAPI.post('/Admin/assign-deputy', {
-        teacherId: parseInt(selectedTeacherId),
-        replaceExisting: !!deputy
-      });
+      const token = localStorage.getItem('token');
       
-      setMessage(response.data.message);
-      setError('');
-      fetchData(); // Refresh data
-      setSelectedTeacherId('');
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/assign-deputy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          teacherId: parseInt(selectedTeacherId),
+          replaceExisting: !!deputy
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setMessage(data.message || 'Deputy Head Teacher assigned successfully!');
+        setError('');
+        fetchData(); // Refresh data
+        setSelectedTeacherId('');
+      } else {
+        setError(data.message || 'Failed to assign deputy');
+        setMessage('');
+      }
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to assign deputy');
+      console.error('Error assigning deputy:', error);
+      setError('Network error. Please try again.');
       setMessage('');
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        setMessage('');
+        setError('');
+      }, 5000);
     }
   };
 
   const handleRemoveDeputy = async () => {
+    if (!confirm('Are you sure you want to remove the current Deputy Head Teacher?')) {
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await adminAPI.post('/Admin/remove-deputy');
-      setMessage(response.data.message);
-      setError('');
-      fetchData(); // Refresh data
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/remove-deputy', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setMessage(data.message || 'Deputy Head Teacher removed successfully!');
+        setError('');
+        fetchData(); // Refresh data
+      } else {
+        setError(data.message || 'Failed to remove deputy');
+        setMessage('');
+      }
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to remove deputy');
+      console.error('Error removing deputy:', error);
+      setError('Network error. Please try again.');
       setMessage('');
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        setMessage('');
+        setError('');
+      }, 5000);
     }
   };
 
@@ -98,7 +155,7 @@ function DeputyAssignment() {
       setError('No deputy head teacher assigned');
       return;
     }
-    if (!formData.task) {
+    if (!formData.task.trim()) {
       setError('Please enter a task');
       return;
     }
@@ -119,14 +176,16 @@ function DeputyAssignment() {
         })
       });
 
+      const data = await response.json();
+      
       if (response.ok) {
-        setMessage('Task assigned to deputy successfully!');
+        setMessage(data.message || 'Task assigned to deputy successfully!');
         setError('');
         setFormData({ task: '', description: '' });
         loadAssignments();
       } else {
-        const data = await response.json();
         setError(data.message || 'Failed to assign task');
+        setMessage('');
       }
     } catch (error) {
       console.error('Error assigning task:', error);
@@ -245,7 +304,7 @@ function DeputyAssignment() {
                 type="text"
                 value={formData.task}
                 onChange={(e) => setFormData({...formData, task: e.target.value})}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Task title"
                 required
               />
@@ -254,7 +313,7 @@ function DeputyAssignment() {
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Task description (optional)"
                 rows="2"
               />
