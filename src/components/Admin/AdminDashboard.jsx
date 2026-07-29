@@ -262,7 +262,6 @@ function AdminDashboard() {
               {activeTab === 'form-teacher' && <FormTeacherAssignment />}
               {activeTab === 'hod-assignment' && <HeadOfDepartmentAssignment />}
               {activeTab === 'classes' && <ClassManagement />}
-              {activeTab === 'allocation' && <SubjectAllocation />}
               {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
               {activeTab === 'student-registration' && <StudentRegistration onStudentAdded={handleStudentRegistered} />}
               {activeTab === 'subjects' && <SubjectsManagement />}

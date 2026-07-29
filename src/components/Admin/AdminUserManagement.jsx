@@ -23,10 +23,18 @@ function AdminUserManagement() {
   });
 
   useEffect(() => {
-    loadAllUsers();
-    loadTeachers();
-    loadStudents();
+    loadAllData();
   }, []);
+
+  const loadAllData = async () => {
+    setLoading(true);
+    await Promise.all([
+      loadAllUsers(),
+      loadTeachers(),
+      loadStudents()
+    ]);
+    setLoading(false);
+  };
 
   const loadAllUsers = async () => {
     try {
@@ -39,10 +47,45 @@ function AdminUserManagement() {
         setAllUsers(data);
       } else {
         console.error('Failed to load users:', response.status);
+        // Fallback: try to load from admin endpoints
+        await loadUsersFallback();
       }
     } catch (error) {
       console.error('Error loading users:', error);
-      setMessage('Error loading users');
+      await loadUsersFallback();
+    }
+  };
+
+  // Fallback method if Users/all endpoint fails
+  const loadUsersFallback = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      // Try to load teachers and students separately
+      const [teachersRes, studentsRes] = await Promise.all([
+        fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch('https://school-yathu.onrender.com/api/Admin/all-students', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+
+      let combinedUsers = [];
+
+      if (teachersRes.ok) {
+        const teachersData = await teachersRes.json();
+        combinedUsers = combinedUsers.concat(teachersData.map(t => ({ ...t, role: 'Teacher' })));
+      }
+
+      if (studentsRes.ok) {
+        const studentsData = await studentsRes.json();
+        combinedUsers = combinedUsers.concat(studentsData.map(s => ({ ...s, role: 'Student' })));
+      }
+
+      setAllUsers(combinedUsers);
+    } catch (error) {
+      console.error('Error in fallback load:', error);
+      setMessage('Failed to load users');
       setMessageType('error');
     }
   };
@@ -50,20 +93,20 @@ function AdminUserManagement() {
   const loadTeachers = async () => {
     try {
       const response = await adminAPI.getTeachers();
-      setTeachers(response.data);
+      setTeachers(response.data || []);
     } catch (error) {
       console.error('Error loading teachers:', error);
-    } finally {
-      setLoading(false);
+      setTeachers([]);
     }
   };
 
   const loadStudents = async () => {
     try {
       const response = await adminAPI.getAllStudents();
-      setStudents(response.data);
+      setStudents(response.data || []);
     } catch (error) {
       console.error('Error loading students:', error);
+      setStudents([]);
     }
   };
 
@@ -79,9 +122,7 @@ function AdminUserManagement() {
         if (response.ok) {
           setMessage(`${role} "${name}" deleted successfully!`);
           setMessageType('success');
-          loadAllUsers();
-          loadTeachers();
-          loadStudents();
+          loadAllData();
         } else {
           const data = await response.json();
           setMessage(`Error: ${data.message || 'Failed to delete user'}`);
@@ -128,9 +169,7 @@ function AdminUserManagement() {
         setMessageType('success');
         setShowEditModal(false);
         setEditingUser(null);
-        loadAllUsers();
-        loadTeachers();
-        loadStudents();
+        loadAllData();
       } else {
         const data = await response.json();
         setMessage(`Error: ${data.message || 'Failed to update user'}`);
@@ -151,9 +190,7 @@ function AdminUserManagement() {
       try {
         const response = await authAPI.resetPassword(id);
         alert(`Password reset for ${name}\n\nNew Password: ${response.data.newPassword}\n\nUser must change password on next login.`);
-        loadAllUsers();
-        loadTeachers();
-        loadStudents();
+        loadAllData();
       } catch (error) {
         console.error('Error:', error);
         alert(`Error: ${error.response?.data?.message || 'Failed to reset password'}`);
@@ -185,7 +222,6 @@ function AdminUserManagement() {
     return colors[role] || 'bg-gray-100 text-gray-800';
   };
 
-  // Filter users based on search and role
   const filteredUsers = allUsers.filter(user => {
     const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -193,17 +229,7 @@ function AdminUserManagement() {
     return matchesSearch && matchesRole;
   });
 
-  // Get unique roles for filter
   const uniqueRoles = [...new Set(allUsers.map(u => u.role))];
-
-  if (loading) return (
-    <div className="flex justify-center items-center py-12">
-      <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-gray-600">Loading users...</p>
-      </div>
-    </div>
-  );
 
   return (
     <div>
@@ -212,38 +238,45 @@ function AdminUserManagement() {
           <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
           <p className="text-sm text-gray-500 mt-1">Manage all users in the system</p>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              activeTab === 'all' 
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            All Users ({allUsers.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('teachers')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              activeTab === 'teachers' 
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Teachers ({teachers.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('students')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              activeTab === 'students' 
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Students ({students.length})
-          </button>
-        </div>
+        <button
+          onClick={loadAllData}
+          className="text-blue-500 hover:text-blue-700 text-sm"
+        >
+          🔄 Refresh
+        </button>
+      </div>
+
+      <div className="flex gap-2 flex-wrap mb-4">
+        <button
+          onClick={() => setActiveTab('all')}
+          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+            activeTab === 'all' 
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md' 
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          All Users ({allUsers.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('teachers')}
+          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+            activeTab === 'teachers' 
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md' 
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Teachers ({teachers.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('students')}
+          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+            activeTab === 'students' 
+              ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md' 
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Students ({students.length})
+        </button>
       </div>
 
       {message && (
@@ -368,7 +401,7 @@ function AdminUserManagement() {
         </div>
       )}
 
-      {/* Teachers Tab - Reuse existing teacher table */}
+      {/* Teachers Tab */}
       {activeTab === 'teachers' && (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex justify-between items-center">
@@ -437,7 +470,7 @@ function AdminUserManagement() {
         </div>
       )}
 
-      {/* Students Tab - Reuse existing student table */}
+      {/* Students Tab */}
       {activeTab === 'students' && (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex justify-between items-center">

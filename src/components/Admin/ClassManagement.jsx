@@ -3,7 +3,6 @@ import { adminAPI } from '../../services/api';
 
 function ClassManagement() {
   const [classes, setClasses] = useState([]);
-  const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -12,13 +11,11 @@ function ClassManagement() {
   const [formData, setFormData] = useState({
     name: '',
     stream: '',
-    teacherId: '',
     capacity: ''
   });
 
   useEffect(() => {
     loadClasses();
-    loadTeachers();
     loadStudents();
   }, []);
 
@@ -28,15 +25,8 @@ function ClassManagement() {
       setClasses(response.data);
     } catch (error) {
       console.error('Error loading classes:', error);
-    }
-  };
-
-  const loadTeachers = async () => {
-    try {
-      const response = await adminAPI.getTeachers();
-      setTeachers(response.data.filter(t => t.isActive !== false));
-    } catch (error) {
-      console.error('Error loading teachers:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,8 +36,6 @@ function ClassManagement() {
       setStudents(response.data);
     } catch (error) {
       console.error('Error loading students:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -66,17 +54,22 @@ function ClassManagement() {
 
   const handleAddClass = async (e) => {
     e.preventDefault();
+    if (!formData.name.trim()) {
+      setMessage('Class name is required');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
     try {
       await adminAPI.addClass({
         name: formData.name,
         stream: formData.stream,
-        teacherId: formData.teacherId ? parseInt(formData.teacherId) : null,
         capacity: formData.capacity ? parseInt(formData.capacity) : null
       });
       
       setMessage('Class added successfully!');
       setShowAddForm(false);
-      setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
+      setFormData({ name: '', stream: '', capacity: '' });
       loadClasses();
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
@@ -94,13 +87,12 @@ function ClassManagement() {
       await adminAPI.updateClass(editingClass.id, {
         name: formData.name,
         stream: formData.stream,
-        teacherId: formData.teacherId ? parseInt(formData.teacherId) : null,
         capacity: formData.capacity ? parseInt(formData.capacity) : null
       });
       
       setMessage('Class updated successfully!');
       setEditingClass(null);
-      setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
+      setFormData({ name: '', stream: '', capacity: '' });
       loadClasses();
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
@@ -132,20 +124,13 @@ function ClassManagement() {
     setFormData({
       name: cls.name,
       stream: cls.stream || '',
-      teacherId: cls.teacherId || '',
       capacity: cls.capacity || ''
     });
   };
 
   const cancelEdit = () => {
     setEditingClass(null);
-    setFormData({ name: '', stream: '', teacherId: '', capacity: '' });
-  };
-
-  const getTeacherName = (teacherId) => {
-    if (!teacherId) return 'Not Assigned';
-    const teacher = teachers.find(t => t.id === teacherId);
-    return teacher ? teacher.name : 'Not Assigned';
+    setFormData({ name: '', stream: '', capacity: '' });
   };
 
   if (loading) return (
@@ -162,7 +147,7 @@ function ClassManagement() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Class Management</h2>
-          <p className="text-sm text-gray-500 mt-1">Manage all classes, streams, and class teachers</p>
+          <p className="text-sm text-gray-500 mt-1">Manage all classes, streams, and capacity</p>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
@@ -174,7 +159,7 @@ function ClassManagement() {
 
       {message && (
         <div className={`p-3 rounded-lg mb-4 ${
-          message.includes('successfully') 
+          message.includes('successfully') || message.includes('added') || message.includes('updated')
             ? 'bg-green-50 text-green-700 border border-green-200' 
             : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
@@ -182,10 +167,11 @@ function ClassManagement() {
         </div>
       )}
 
+      {/* Add Class Form */}
       {showAddForm && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6 border border-blue-200 shadow-sm">
           <h3 className="text-xl font-semibold mb-4 text-gray-800">Add New Class</h3>
-          <form onSubmit={handleAddClass} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleAddClass} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-gray-700 text-sm font-semibold mb-1">Class Name *</label>
               <input
@@ -208,19 +194,6 @@ function ClassManagement() {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-semibold mb-1">Class Teacher</label>
-              <select
-                value={formData.teacherId}
-                onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Class Teacher</option>
-                {teachers.map(teacher => (
-                  <option key={teacher.id} value={teacher.id}>{teacher.name} ({teacher.email})</option>
-                ))}
-              </select>
-            </div>
-            <div>
               <label className="block text-gray-700 text-sm font-semibold mb-1">Capacity</label>
               <input
                 type="number"
@@ -230,7 +203,7 @@ function ClassManagement() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="md:col-span-2 flex gap-3">
+            <div className="md:col-span-3 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
                 Save Class
               </button>
@@ -242,10 +215,11 @@ function ClassManagement() {
         </div>
       )}
 
+      {/* Edit Class Form */}
       {editingClass && (
         <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg mb-6 border border-yellow-300 shadow-sm">
           <h3 className="text-xl font-semibold mb-4 text-gray-800">Edit Class: {editingClass.name}</h3>
-          <form onSubmit={handleUpdateClass} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleUpdateClass} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-gray-700 text-sm font-semibold mb-1">Class Name *</label>
               <input
@@ -266,19 +240,6 @@ function ClassManagement() {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-semibold mb-1">Class Teacher</label>
-              <select
-                value={formData.teacherId}
-                onChange={(e) => setFormData({...formData, teacherId: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Class Teacher</option>
-                {teachers.map(teacher => (
-                  <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
               <label className="block text-gray-700 text-sm font-semibold mb-1">Capacity</label>
               <input
                 type="number"
@@ -287,7 +248,7 @@ function ClassManagement() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="md:col-span-2 flex gap-3">
+            <div className="md:col-span-3 flex gap-3">
               <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
                 Update Class
               </button>
@@ -299,6 +260,7 @@ function ClassManagement() {
         </div>
       )}
 
+      {/* Classes Table */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -306,7 +268,6 @@ function ClassManagement() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stream</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class Teacher</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Students</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -316,7 +277,7 @@ function ClassManagement() {
             <tbody className="bg-white divide-y divide-gray-200">
               {classes.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                     No classes found. Click "Add New Class" to create your first class.
                   </td>
                 </tr>
@@ -330,13 +291,6 @@ function ClassManagement() {
                     <tr key={cls.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 font-medium text-gray-900">{cls.name}</td>
                       <td className="px-6 py-4 text-gray-600">{cls.stream || '-'}</td>
-                      <td className="px-6 py-4">
-                        {cls.teacherId ? (
-                          <span className="text-green-600 font-medium">{getTeacherName(cls.teacherId)}</span>
-                        ) : (
-                          <span className="text-orange-500">Not Assigned</span>
-                        )}
-                      </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <span className={`font-bold ${isOverCapacity ? 'text-red-600' : 'text-gray-900'}`}>
@@ -384,11 +338,14 @@ function ClassManagement() {
         </div>
       </div>
       
-      {teachers.length === 0 && (
-        <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-          <p className="text-yellow-800">No teachers available. Please add teachers first in Teacher Management tab.</p>
-        </div>
-      )}
+      {/* Info note about form teacher assignment */}
+      <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <p className="text-blue-700 text-sm">
+          <span className="font-semibold">Note:</span> Class teachers (Form Teachers) can be assigned in the 
+          <span className="font-semibold"> "Form Teacher Assignment"</span> tab. 
+          This page only manages class creation, streams, and capacity.
+        </p>
+      </div>
     </div>
   );
 }
