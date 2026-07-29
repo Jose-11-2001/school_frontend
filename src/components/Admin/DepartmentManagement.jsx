@@ -313,7 +313,7 @@ function DepartmentManagement() {
           <div className="mt-4 flex gap-2">
             <button
               onClick={handleAssignHOD}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
             >
               Assign Head of Department
             </button>
@@ -470,8 +470,8 @@ function DepartmentManagement() {
                 )}
               </div>
               <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between text-sm text-gray-600">
-                <span>👨‍🏫 Teachers: {dept.teacherCount}</span>
-                <span>📚 Subjects: {dept.subjectCount}</span>
+                <span>Teachers: {dept.teacherCount}</span>
+                <span>Subjects: {dept.subjectCount}</span>
               </div>
             </div>
           ))}
