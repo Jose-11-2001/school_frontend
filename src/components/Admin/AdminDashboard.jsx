@@ -118,7 +118,7 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* ===== MOBILE HEADER ===== */}
+      {/* ===== MOBILE HEADER - Simplified ===== */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-3 py-2 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1 rounded-lg hover:bg-blue-700">
@@ -130,9 +130,7 @@ function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Admin" />
-          <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs">
-            Logout
-          </button>
+          {/* Removed Admin and Welcome text - only notification icon stays */}
         </div>
       </div>
 
@@ -141,7 +139,7 @@ function AdminDashboard() {
         <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* ===== SIDEBAR - FIXED POSITION ===== */}
+      {/* ===== SIDEBAR ===== */}
       <div className={`
         fixed top-0 left-0 z-50
         transition-transform duration-300 ease-in-out
@@ -151,7 +149,7 @@ function AdminDashboard() {
         lg:translate-x-0
         flex flex-col
       `}>
-        {/* Sidebar Header - Fixed */}
+        {/* Sidebar Header */}
         <div className="flex-shrink-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button onClick={handleGoBack} className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0">
@@ -186,8 +184,14 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer - Fixed */}
-        <div className="flex-shrink-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
+        {/* Sidebar Footer - Includes Logout for mobile */}
+        <div className="flex-shrink-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700 space-y-2">
+          {/* User info - mobile only */}
+          <div className="lg:hidden px-2 py-1">
+            <p className="text-xs text-blue-200">Welcome, {getUserName()}</p>
+            <p className="text-xs text-blue-300 opacity-75">{user?.role || 'Admin'}</p>
+          </div>
+          
           {hasTeacherAccess && (
             <button
               onClick={goToTeacherDashboard}
@@ -196,6 +200,14 @@ function AdminDashboard() {
               Switch to Teacher Dashboard
             </button>
           )}
+          
+          {/* Logout button - visible on both mobile and desktop in sidebar */}
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+          >
+            Logout
+          </button>
         </div>
       </div>
 
@@ -204,6 +216,7 @@ function AdminDashboard() {
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
+            <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Admin</span>
             {hasTeacherAccess && (
               <span className="bg-green-600 px-3 py-1 rounded-full text-sm">Teacher</span>
             )}
@@ -221,9 +234,7 @@ function AdminDashboard() {
                 Teacher Dashboard
               </button>
             )}
-            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm">
-              Logout
-            </button>
+            {/* Removed Logout from desktop navbar - now in sidebar */}
           </div>
         </nav>
 
