@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
+import Notifications from '../Common/Notifications';
 import FormTeacherClasses from './FormTeacherClasses';
 import FormTeacherStudents from './FormTeacherStudents';
 import SubjectApprovals from './SubjectApprovals';
@@ -39,10 +40,10 @@ function FormTeacherDashboard() {
   };
 
   const menuItems = [
-    { id: 'classes', label: 'My Classes' },
-    { id: 'students', label: 'My Students' },
-    { id: 'approvals', label: 'Subject Approvals' },
-    { id: 'results', label: 'Class Results' },
+    { id: 'classes', label: '📚 My Classes' },
+    { id: 'students', label: '👨‍🎓 My Students' },
+    { id: 'approvals', label: '✅ Subject Approvals' },
+    { id: 'results', label: '📊 Class Results' },
   ];
 
   return (
@@ -62,7 +63,7 @@ function FormTeacherDashboard() {
           <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
-          <FormTeacherNotifications />
+          <Notifications role="FormTeacher" />
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
@@ -126,6 +127,10 @@ function FormTeacherDashboard() {
         </nav>
 
         <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
+          <div className="px-4 py-2 text-sm text-blue-200">
+            <p className="font-semibold">{user?.name}</p>
+            <p className="text-xs opacity-75">Form Teacher</p>
+          </div>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
@@ -139,9 +144,11 @@ function FormTeacherDashboard() {
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
-          <div className="flex items-center gap-4" />
+          <div className="flex items-center gap-4">
+            <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Form Teacher</span>
+          </div>
           <div className="flex items-center gap-6">
-            <FormTeacherNotifications />
+            <Notifications role="FormTeacher" />
             <div className="h-6 w-px bg-blue-600" />
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Welcome,</span>
