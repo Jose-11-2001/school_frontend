@@ -78,8 +78,6 @@ function Layout() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-3 lg:gap-6">
-              <Link to="/" className="text-sm hover:text-blue-200 transition-colors">Home</Link>
-              
               {isAuthenticated && user && (
                 <>
                   <Link to={getDashboardLink()} className="text-sm hover:text-blue-200 transition-colors">
