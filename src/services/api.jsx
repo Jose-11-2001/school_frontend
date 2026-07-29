@@ -11,7 +11,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 60000, // Increased to 60 seconds for cold starts
+  timeout: 90000, // Increased to 60 seconds for cold starts
 });
 
 // ============================================
