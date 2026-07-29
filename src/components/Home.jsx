@@ -14,40 +14,25 @@ function Home() {
       {/* Overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-60"></div>
       
-      {/* Content */}
-      <div className="relative z-20">
-        {/* Header with Login Button */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-end">
-            <button
-              onClick={handleLogin}
-              className="px-4 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
-            >
-              Login
-            </button>
-          </div>
-        </div>
-        
-        {/* Hero Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
-          <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight font-extrabold text-white">
-              <span className="block">Mkondezi Secondary School</span>
-              <span className="block text-blue-300 text-2xl sm:text-3xl md:text-4xl mt-2">Grading System</span>
-            </h1>
-            <p className="mt-3 max-w-md mx-auto text-sm sm:text-base text-gray-200 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-              Manage student marks, track performance, and generate reports effortlessly.
-              The complete solution for schools.
-            </p>
-            <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-              <div className="rounded-md shadow">
-                <button
-                  onClick={handleLogin}
-                  className="w-full flex items-center justify-center px-6 sm:px-8 py-3 border border-transparent text-sm sm:text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
-                >
-                  Get Started
-                </button>
-              </div>
+      {/* Hero Section */}
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight font-extrabold text-white">
+            <span className="block">Mkondezi Secondary School</span>
+            <span className="block text-blue-300 text-2xl sm:text-3xl md:text-4xl mt-2">Grading System</span>
+          </h1>
+          <p className="mt-3 max-w-md mx-auto text-sm sm:text-base text-gray-200 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+            Manage student marks, track performance, and generate reports effortlessly.
+            The complete solution for schools.
+          </p>
+          <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+            <div className="rounded-md shadow">
+              <button
+                onClick={handleLogin}
+                className="w-full flex items-center justify-center px-6 sm:px-8 py-3 border border-transparent text-sm sm:text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
+              >
+                Get Started
+              </button>
             </div>
           </div>
         </div>
@@ -128,13 +113,6 @@ function Home() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="relative z-10 bg-gray-900 text-white py-6 sm:py-8 bg-opacity-95">
-        <div className="max-w-7xl mx-auto px-4 text-center text-xs sm:text-sm">
-          <span>&copy; {new Date().getFullYear()} Mkondezi Secondary School. All rights reserved.</span>
-        </div>
-      </footer>
     </div>
   );
 }

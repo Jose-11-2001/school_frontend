@@ -130,6 +130,12 @@ function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Admin" />
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs transition-colors"
+          >
+            Logout
+          </button>
         </div>
       </div>
 
@@ -195,13 +201,6 @@ function AdminDashboard() {
               Switch to Teacher Dashboard
             </button>
           )}
-          
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
-          >
-            Logout
-          </button>
         </div>
       </div>
 
@@ -227,6 +226,12 @@ function AdminDashboard() {
                 Teacher Dashboard
               </button>
             )}
+            <button
+              onClick={handleLogout}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm transition-colors"
+            >
+              Logout
+            </button>
           </div>
         </nav>
 
