@@ -34,13 +34,12 @@ function AdminDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Small delay to ensure everything is loaded
     const timer = setTimeout(() => {
       const token = localStorage.getItem('token');
       const userData = getCurrentUser();
       
       console.log('========================================');
-      console.log('🔐 AdminDashboard - Authentication Check');
+      console.log(' AdminDashboard - Authentication Check');
       console.log('  Token exists:', !!token);
       console.log('  User data:', userData);
       console.log('  User role:', userData?.role);
@@ -48,24 +47,24 @@ function AdminDashboard() {
       console.log('========================================');
       
       if (!token) {
-        console.log('❌ No token found, redirecting to login');
+        console.log(' No token found, redirecting to login');
         navigate('/login');
         return;
       }
       
       if (!userData) {
-        console.log('❌ No user data found, redirecting to login');
+        console.log(' No user data found, redirecting to login');
         navigate('/login');
         return;
       }
       
       if (!hasRole('Admin')) {
-        console.log(`❌ Role "${userData?.role}" is not Admin, redirecting`);
+        console.log(` Role "${userData?.role}" is not Admin, redirecting`);
         navigate('/login');
         return;
       }
       
-      console.log('✅ AdminDashboard - User is valid Admin!');
+      console.log('AdminDashboard - User is valid Admin!');
       setUser(userData);
       setHasTeacherAccess(hasTeacherAllocations());
       setIsLoading(false);
@@ -98,7 +97,6 @@ function AdminDashboard() {
     navigate('/teacher-dashboard');
   };
 
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -111,7 +109,6 @@ function AdminDashboard() {
     );
   }
 
-  // If user is null after loading, redirect
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -133,7 +130,6 @@ function AdminDashboard() {
     { id: 'rankings', label: 'View Rankings' },
   ];
 
-  // Teacher-specific tabs (available when admin has teacher allocations)
   const teacherMenuItems = [
     { id: 'my-students', label: 'My Students' },
     { id: 'my-subjects', label: 'My Subjects' },
@@ -146,9 +142,9 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Mobile Hamburger Menu */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-3">
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-3 py-2 flex justify-between items-center">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="p-1 rounded-lg hover:bg-blue-700"
@@ -158,21 +154,12 @@ function AdminDashboard() {
             </svg>
           </button>
           <h1 className="text-sm font-bold">Admin Portal</h1>
-          <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Admin" />
-          {hasTeacherAccess && (
-            <button
-              onClick={goToTeacherDashboard}
-              className="bg-green-500 text-white px-2 py-1 rounded-lg hover:bg-green-600 text-xs"
-            >
-              Teacher Mode
-            </button>
-          )}
           <button
             onClick={handleLogout}
-            className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs transition-colors"
           >
             Logout
           </button>
@@ -211,9 +198,6 @@ function AdminDashboard() {
             <div>
               <h1 className="text-xl font-bold">Admin Portal</h1>
               <p className="text-xs text-blue-200">Secondary School</p>
-              {hasTeacherAccess && (
-                <span className="text-xs bg-green-500 px-2 py-0.5 rounded-full">+ Teacher</span>
-              )}
             </div>
           </div>
         </div>
@@ -250,9 +234,9 @@ function AdminDashboard() {
           )}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
+            className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
           >
-            <span className="text-white font-bold">Logout</span>
+            Logout
           </button>
         </div>
       </div>
@@ -262,13 +246,9 @@ function AdminDashboard() {
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
-            <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">
-              Admin
-            </span>
+            <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Admin</span>
             {hasTeacherAccess && (
-              <span className="bg-green-600 px-3 py-1 rounded-full text-sm">
-                Teacher
-              </span>
+              <span className="bg-green-600 px-3 py-1 rounded-full text-sm">Teacher</span>
             )}
           </div>
           
@@ -287,6 +267,12 @@ function AdminDashboard() {
                 Teacher Dashboard
               </button>
             )}
+            <button
+              onClick={handleLogout}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm transition-colors"
+            >
+              Logout
+            </button>
           </div>
         </nav>
 

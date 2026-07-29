@@ -87,7 +87,7 @@ function FormTeacherAssignment() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold">👨‍🏫 Form Teacher Assignment</h2>
+          <h2 className="text-2xl font-bold">Form Teacher Assignment</h2>
           <p className="text-sm text-gray-500">Assign form teachers to classes</p>
         </div>
         <button onClick={loadData} className="text-blue-500 hover:text-blue-700">

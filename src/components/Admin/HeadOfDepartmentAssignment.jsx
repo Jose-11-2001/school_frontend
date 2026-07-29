@@ -87,7 +87,7 @@ function HeadOfDepartmentAssignment() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold">👔 Head of Department Assignment</h2>
+          <h2 className="text-2xl font-bold">Head of Department Assignment</h2>
           <p className="text-sm text-gray-500">Assign Heads of Departments</p>
         </div>
         <button onClick={loadData} className="text-blue-500 hover:text-blue-700">

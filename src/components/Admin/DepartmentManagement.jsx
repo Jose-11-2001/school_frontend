@@ -79,7 +79,7 @@ function DepartmentManagement() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold">🏛️ Department Management</h2>
+          <h2 className="text-2xl font-bold">Department Management</h2>
           <p className="text-sm text-gray-500">Create and manage school departments</p>
         </div>
         <button
@@ -165,8 +165,8 @@ function DepartmentManagement() {
                 </span>
               </div>
               <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between text-sm text-gray-600">
-                <span>👨‍🏫 Teachers: {dept.teacherCount}</span>
-                <span>📚 Subjects: {dept.subjectCount}</span>
+                <span>Teachers: {dept.teacherCount}</span>
+                <span>Subjects: {dept.subjectCount}</span>
               </div>
             </div>
           ))}
