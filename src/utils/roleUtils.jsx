@@ -13,7 +13,15 @@ export const getCurrentUser = () => {
 
 export const hasRole = (requiredRole) => {
   const user = getCurrentUser();
-  if (!user || !user.role) return false;
+  if (!user) {
+    console.warn('hasRole: No user found');
+    return false;
+  }
+  
+  if (!user.role) {
+    console.warn('hasRole: User has no role property');
+    return false;
+  }
   
   // Case-insensitive comparison with trim
   return user.role.trim().toLowerCase() === requiredRole.toLowerCase();

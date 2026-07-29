@@ -31,10 +31,12 @@ function Layout() {
     setMobileMenuOpen(false);
   };
 
+  // ===== UPDATED: getDashboardLink with dashboardRole support =====
   const getDashboardLink = () => {
     if (!user) return '/login';
     
-    const role = user.role?.toLowerCase() || 'student';
+    // Use dashboardRole if available, otherwise fallback to role
+    const role = (user.dashboardRole || user.role)?.toLowerCase() || 'student';
     const routes = {
       'admin': '/admin-dashboard',
       'deputyheadteacher': '/deputy-dashboard',
