@@ -11,6 +11,7 @@ import Rankings from '../Rankings';
 import AdminSubjectAllocation from './AdminSubjectAllocation';
 import StudentRegistration from './StudentRegistration';
 import SubjectAllocation from './SubjectAllocation';
+import SubjectAssignment from './SubjectAssignment';
 import SubjectsManagement from './SubjectsManagement';
 import DepartmentManagement from './DepartmentManagement';
 import FormTeacherAssignment from './FormTeacherAssignment';
@@ -99,7 +100,8 @@ function AdminDashboard() {
     { id: 'students', label: 'Student List' },
     { id: 'users', label: 'Manage Users' },
     { id: 'classes', label: 'Class Management' },
-    { id: 'allocation', label: 'Subject Allocation (Teachers)' },
+    { id: 'subject-assignment', label: 'Subject Assignment (Teachers)' },
+    { id: 'allocation', label: 'Subject Allocation (Class)' },
     { id: 'student-subjects', label: 'Student Subject Allocation' },
     { id: 'subjects', label: 'Manage Subjects' },
     { id: 'approval', label: 'Results Approval' },
@@ -130,7 +132,6 @@ function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Admin" />
-          {/* Logout removed from mobile header - moved to sidebar */}
         </div>
       </div>
 
@@ -262,6 +263,7 @@ function AdminDashboard() {
               {activeTab === 'form-teacher' && <FormTeacherAssignment />}
               {activeTab === 'hod-assignment' && <HeadOfDepartmentAssignment />}
               {activeTab === 'classes' && <ClassManagement />}
+              {activeTab === 'subject-assignment' && <SubjectAssignment />}
               {activeTab === 'allocation' && <SubjectAllocation />}
               {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
               {activeTab === 'student-registration' && <StudentRegistration onStudentAdded={handleStudentRegistered} />}
