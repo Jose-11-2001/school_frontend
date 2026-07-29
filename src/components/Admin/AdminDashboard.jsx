@@ -117,8 +117,8 @@ function AdminDashboard() {
     : menuItems;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Mobile Header */}
+    <div className="min-h-screen bg-gray-100">
+      {/* ===== MOBILE HEADER ===== */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-3 py-2 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1 rounded-lg hover:bg-blue-700">
@@ -141,18 +141,18 @@ function AdminDashboard() {
         <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Sidebar - FIXED SCROLLING */}
+      {/* ===== SIDEBAR - FIXED POSITION ===== */}
       <div className={`
         fixed top-0 left-0 z-50
         transition-transform duration-300 ease-in-out
         w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl
-        h-screen
+        h-screen overflow-hidden
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:relative
+        lg:translate-x-0
         flex flex-col
       `}>
-        {/* Sidebar Header - Fixed at top */}
-        <div className="flex-shrink-0 bg-gradient-to-b from-blue-800 to-blue-900">
+        {/* Sidebar Header - Fixed */}
+        <div className="flex-shrink-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button onClick={handleGoBack} className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -166,8 +166,8 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Sidebar Navigation - Scrollable middle section */}
-        <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-800">
+        {/* Sidebar Navigation - Scrollable */}
+        <nav className="flex-1 overflow-y-auto py-2">
           {allMenuItems.map((item) => (
             <button
               key={item.id}
@@ -175,7 +175,7 @@ function AdminDashboard() {
                 setActiveTab(item.id);
                 setMobileOpen(false);
               }}
-              className={`w-full text-left flex items-center gap-3 px-4 py-3 transition-colors ${
+              className={`w-full text-left flex items-center gap-3 px-4 py-2.5 transition-colors ${
                 activeTab === item.id
                   ? 'bg-blue-700 border-r-4 border-white text-white'
                   : 'hover:bg-blue-700 text-blue-100'
@@ -186,7 +186,7 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer - Fixed at bottom */}
+        {/* Sidebar Footer - Fixed */}
         <div className="flex-shrink-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
           {hasTeacherAccess && (
             <button
@@ -199,12 +199,11 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
+      {/* ===== MAIN CONTENT ===== */}
+      <div className="lg:ml-64 min-h-screen">
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
-            <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Admin</span>
             {hasTeacherAccess && (
               <span className="bg-green-600 px-3 py-1 rounded-full text-sm">Teacher</span>
             )}
@@ -229,7 +228,7 @@ function AdminDashboard() {
         </nav>
 
         {/* Content Area */}
-        <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
+        <div className="pt-16 lg:pt-16 px-4 lg:px-6 py-4 lg:py-6">
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 lg:p-6">
               {/* Mobile Tab Selector */}
