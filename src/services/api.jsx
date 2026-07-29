@@ -3,13 +3,15 @@ import axios from 'axios';
 // ===== USE THE DEPLOYED BACKEND URL =====
 const API_BASE_URL = 'https://school-yathu.onrender.com/api';
 
+console.log('🌐 API Base URL:', API_BASE_URL);
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 60000,
+  timeout: 60000, // Increased to 60 seconds for cold starts
 });
 
 // ============================================
@@ -20,7 +22,8 @@ api.interceptors.request.use(
     console.log('========================================');
     console.log('🚀 API REQUEST');
     console.log(`  Method: ${config.method?.toUpperCase()}`);
-    console.log(`  URL: ${config.baseURL}${config.url}`);
+    console.log(`  Full URL: ${config.baseURL}${config.url}`);
+    console.log(`  Timeout: ${config.timeout}ms`);
     
     const token = localStorage.getItem('token');
     if (token) {
@@ -60,8 +63,12 @@ api.interceptors.response.use(
     console.error('❌ API ERROR');
     console.error(`  Message: ${error.message}`);
     
-    if (error.code === 'ERR_NETWORK') {
-      console.error('  Network error - Cannot connect to server');
+    if (error.code === 'ECONNABORTED') {
+      console.error('  ⏰ REQUEST TIMEOUT - Server took too long to respond');
+      console.error('  This is likely a cold start issue on Render.com');
+    } else if (error.code === 'ERR_NETWORK') {
+      console.error('  🌐 Network error - Cannot connect to server');
+      console.error(`  Check if the server is running at: ${error.config?.baseURL}`);
     }
     
     if (error.response) {
@@ -106,7 +113,7 @@ api.interceptors.response.use(
 // ============================================
 export const authAPI = {
   login: (data) => {
-    console.log('📝 Login called with:', data);
+    console.log('📝 Login called with email:', data.email);
     return api.post('/Auth/login', data);
   },
   changePassword: (data) => api.post('/Auth/change-password', data),
