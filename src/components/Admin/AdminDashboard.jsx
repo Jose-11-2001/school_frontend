@@ -100,7 +100,6 @@ function AdminDashboard() {
     { id: 'users', label: 'Manage Users' },
     { id: 'classes', label: 'Class Management' },
     { id: 'allocation', label: 'Subject Allocation (Teachers)' },
-    { id: 'student-subjects', label: 'Student Subject Allocation' },
     { id: 'subjects', label: 'Manage Subjects' },
     { id: 'approval', label: 'Results Approval' },
     { id: 'rankings', label: 'View Rankings' },
