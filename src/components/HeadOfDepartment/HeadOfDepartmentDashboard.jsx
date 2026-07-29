@@ -142,15 +142,15 @@ function HeadOfDepartmentDashboard() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* ===== SIDEBAR - BLUE BACKGROUND ===== */}
       <div className={`
         fixed lg:fixed z-50
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         transition-transform duration-300 ease-in-out
-        w-64 bg-gradient-to-b from-bluee-800 to-blue-900 text-white shadow-xl
+        w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl
         h-screen overflow-y-auto
       `}>
-        <div className="sticky top-0 bg-gradient-to-b from-bllue-800 to-blue-900 z-10">
+        <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button
               onClick={handleGoBack}
@@ -163,7 +163,7 @@ function HeadOfDepartmentDashboard() {
             </button>
             <div>
               <h1 className="text-xl font-bold">HOD Portal</h1>
-              <p className="text-xs text-purple-200">{department?.name || 'Department'}</p>
+              <p className="text-xs text-blue-200">{department?.name || 'Department'}</p>
             </div>
           </div>
         </div>
@@ -192,6 +192,12 @@ function HeadOfDepartmentDashboard() {
             <p className="font-semibold">{user?.name}</p>
             <p className="text-xs opacity-75">Head of Department</p>
           </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors mt-2"
+          >
+            <span className="text-white font-bold">Logout</span>
+          </button>
         </div>
       </div>
 
