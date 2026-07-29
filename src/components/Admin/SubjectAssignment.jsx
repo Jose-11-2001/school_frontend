@@ -20,27 +20,30 @@ function SubjectAssignment() {
   const loadTeachers = async () => {
     try {
       const response = await adminAPI.getTeachers();
-      setTeachers(response.data);
+      setTeachers(response.data || []);
     } catch (error) {
       console.error('Error loading teachers:', error);
+      setTeachers([]);
     }
   };
 
   const loadSubjects = async () => {
     try {
       const response = await subjectAPI.getAll();
-      setSubjects(response.data);
+      setSubjects(response.data || []);
     } catch (error) {
       console.error('Error loading subjects:', error);
+      setSubjects([]);
     }
   };
 
   const loadAssignments = async () => {
     try {
       const response = await teacherSubjectsAPI.getAllAssignments();
-      setAssignments(response.data);
+      setAssignments(response.data || []);
     } catch (error) {
       console.error('Error loading assignments:', error);
+      setAssignments([]);
     }
   };
 
@@ -59,7 +62,7 @@ function SubjectAssignment() {
         subjectId: parseInt(selectedSubject)
       });
 
-      setMessage(`Subject assigned successfully!`);
+      setMessage('Subject assigned successfully!');
       setMessageType('success');
       loadAssignments();
       setSelectedTeacher('');
@@ -67,7 +70,7 @@ function SubjectAssignment() {
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error.response?.data?.message || 'Failed to assign subject';
-      setMessage(`Error: ${errorMessage}`);
+      setMessage(` Error: ${errorMessage}`);
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -86,7 +89,7 @@ function SubjectAssignment() {
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error.response?.data?.message || 'Failed to remove assignment';
-      setMessage(`Error: ${errorMessage}`);
+      setMessage(`❌ Error: ${errorMessage}`);
       setMessageType('error');
     }
     setTimeout(() => setMessage(''), 3000);
@@ -140,7 +143,7 @@ function SubjectAssignment() {
               <option value="">-- Select Subject --</option>
               {subjects.map((subject) => (
                 <option key={subject.id} value={subject.id}>
-                  {subject.name}
+                  {subject.name} {subject.code && `(${subject.code})`}
                 </option>
               ))}
             </select>
@@ -164,7 +167,7 @@ function SubjectAssignment() {
               Assigning...
             </span>
           ) : (
-            'Assign Subject to Teacher'
+            '📌 Assign Subject to Teacher'
           )}
         </button>
         

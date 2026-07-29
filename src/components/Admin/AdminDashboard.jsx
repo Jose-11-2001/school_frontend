@@ -100,6 +100,7 @@ function AdminDashboard() {
     { id: 'users', label: 'Manage Users' },
     { id: 'classes', label: 'Class Management' },
     { id: 'allocation', label: 'Subject Allocation (Teachers)' },
+    { id: 'student-subjects', label: 'Student Subject Allocation' },
     { id: 'subjects', label: 'Manage Subjects' },
     { id: 'approval', label: 'Results Approval' },
     { id: 'rankings', label: 'View Rankings' },
@@ -261,6 +262,7 @@ function AdminDashboard() {
               {activeTab === 'form-teacher' && <FormTeacherAssignment />}
               {activeTab === 'hod-assignment' && <HeadOfDepartmentAssignment />}
               {activeTab === 'classes' && <ClassManagement />}
+              {activeTab === 'allocation' && <SubjectAllocation />}
               {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
               {activeTab === 'student-registration' && <StudentRegistration onStudentAdded={handleStudentRegistered} />}
               {activeTab === 'subjects' && <SubjectsManagement />}

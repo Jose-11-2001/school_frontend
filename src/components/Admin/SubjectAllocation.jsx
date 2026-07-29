@@ -32,7 +32,7 @@ function SubjectAllocation() {
         return;
       }
 
-      console.log('Loading data from API...');
+      console.log('🔄 Loading data from API...');
 
       // Load classes from AdminController
       const classesRes = await fetch('https://school-yathu.onrender.com/api/Admin/classes', {
@@ -41,29 +41,28 @@ function SubjectAllocation() {
       
       if (classesRes.ok) {
         const classesData = await classesRes.json();
-        console.log('Classes loaded:', classesData);
+        console.log('✅ Classes loaded:', classesData);
         setClasses(classesData);
       } else {
-        console.error('Failed to load classes:', classesRes.status);
+        console.error('❌ Failed to load classes:', classesRes.status);
       }
       
-      // Load ALL users who can teach (Teacher, HeadOfDepartment, DeputyHeadTeacher, FormTeacher)
+      // Load ALL users who can teach
       const usersRes = await fetch('https://school-yathu.onrender.com/api/Users/all', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (usersRes.ok) {
         const usersData = await usersRes.json();
-        console.log('All users loaded:', usersData);
+        console.log('✅ All users loaded:', usersData);
         
-        // Filter users who can teach
         const teachingRoles = ['Teacher', 'HeadOfDepartment', 'DeputyHeadTeacher', 'FormTeacher'];
         const teachingStaff = usersData.filter(u => teachingRoles.includes(u.role) && u.isActive);
         
-        console.log('Teaching staff filtered:', teachingStaff);
+        console.log('👨‍🏫 Teaching staff filtered:', teachingStaff);
         setTeachers(teachingStaff);
       } else {
-        console.error('Failed to load users:', usersRes.status);
+        console.error('❌ Failed to load users:', usersRes.status);
         // Fallback: try loading teachers only
         const teachersRes = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -81,16 +80,16 @@ function SubjectAllocation() {
       
       if (subjectsRes.ok) {
         const subjectsData = await subjectsRes.json();
-        console.log('Subjects loaded:', subjectsData);
+        console.log('✅ Subjects loaded:', subjectsData);
         setSubjects(subjectsData);
       } else {
-        console.error('Failed to load subjects:', subjectsRes.status);
+        console.error('❌ Failed to load subjects:', subjectsRes.status);
       }
       
       setDataLoaded(true);
       
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('❌ Error loading data:', error);
       setMessage('Error loading data. Please try again.');
       setMessageType('error');
     } finally {
@@ -107,7 +106,7 @@ function SubjectAllocation() {
     
     try {
       const token = localStorage.getItem('token');
-      console.log('Loading allocations for class:', classId);
+      console.log('📋 Loading allocations for class:', classId);
       
       const response = await fetch(`https://school-yathu.onrender.com/api/Admin/class-allocations/${classId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -115,28 +114,29 @@ function SubjectAllocation() {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Allocations loaded:', data);
+        console.log('✅ Allocations loaded:', data);
         setAllocations(data);
       } else {
-        console.error('Failed to load allocations:', response.status);
+        console.error('❌ Failed to load allocations:', response.status);
         setAllocations([]);
       }
     } catch (error) {
-      console.error('Error loading allocations:', error);
+      console.error('❌ Error loading allocations:', error);
       setAllocations([]);
     }
   };
 
   const handleClassChange = (e) => {
     const classId = e.target.value;
-    console.log('Class selected:', classId);
+    console.log('📚 Class selected:', classId);
     setFormData({ ...formData, classId });
     if (classId) {
       loadAllocations(classId);
+    } else {
+      setAllocations([]);
     }
   };
 
-  // Allocate teacher using AdminController
   const handleAllocate = async (e) => {
     e.preventDefault();
     if (!formData.classId || !formData.subjectId || !formData.teacherId) {
@@ -150,7 +150,7 @@ function SubjectAllocation() {
     try {
       const token = localStorage.getItem('token');
       
-      console.log('Allocating teacher:', formData);
+      console.log('📌 Allocating teacher:', formData);
       
       const response = await fetch('https://school-yathu.onrender.com/api/Admin/allocate-teacher', {
         method: 'POST',
@@ -167,16 +167,16 @@ function SubjectAllocation() {
       
       const data = await response.json();
       if (response.ok) {
-        setMessage(`Teacher allocated successfully!`);
+        setMessage(`✅ Teacher allocated successfully!`);
         setMessageType('success');
         setFormData({ ...formData, subjectId: '', teacherId: '' });
         loadAllocations(formData.classId);
       } else {
-        setMessage(data.message || 'Allocation failed');
+        setMessage(`❌ ${data.message || 'Allocation failed'}`);
         setMessageType('error');
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('❌ Error:', error);
       setMessage('Error allocating teacher. Please try again.');
       setMessageType('error');
     } finally {
@@ -185,14 +185,13 @@ function SubjectAllocation() {
     }
   };
 
-  // Remove allocation using AdminController
   const handleRemoveAllocation = async (id, subjectName) => {
     if (!confirm(`Remove allocation for "${subjectName}"?`)) return;
     
     try {
       const token = localStorage.getItem('token');
       
-      console.log('Removing allocation:', id);
+      console.log('🗑️ Removing allocation:', id);
       
       const response = await fetch(`https://school-yathu.onrender.com/api/Admin/allocations/${id}`, {
         method: 'DELETE',
@@ -200,16 +199,16 @@ function SubjectAllocation() {
       });
       
       if (response.ok) {
-        setMessage(`Allocation removed successfully`);
+        setMessage(`✅ Allocation removed successfully`);
         setMessageType('success');
         loadAllocations(formData.classId);
       } else {
         const data = await response.json();
-        setMessage(data.message || 'Failed to remove');
+        setMessage(`❌ ${data.message || 'Failed to remove'}`);
         setMessageType('error');
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('❌ Error:', error);
       setMessage('Error removing allocation');
       setMessageType('error');
     }
@@ -238,7 +237,6 @@ function SubjectAllocation() {
     return colors[role] || 'bg-gray-100 text-gray-800';
   };
 
-  // Show loading state
   if (loading && !dataLoaded) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -250,14 +248,13 @@ function SubjectAllocation() {
     );
   }
 
-  // Check if we have any data
   const hasData = classes.length > 0 || teachers.length > 0 || subjects.length > 0;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Allocate Teachers to Subjects</h2>
+          <h2 className="text-2xl font-bold text-gray-800">📚 Allocate Teachers to Subjects</h2>
           <p className="text-sm text-gray-500 mt-1">
             Assign teachers (including HODs, Deputies, and Form Teachers) to subjects for each class
           </p>
@@ -284,7 +281,7 @@ function SubjectAllocation() {
       
       {!hasData && !loading && (
         <div className="p-6 bg-yellow-50 rounded-lg border border-yellow-200 text-center">
-
+          <div className="text-4xl mb-3">📋</div>
           <h3 className="text-lg font-semibold text-yellow-800">No Data Available</h3>
           <p className="text-yellow-700 mt-2">
             Please add the following before allocating teachers:
@@ -307,7 +304,7 @@ function SubjectAllocation() {
         <>
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-              <h3 className="text-lg font-semibold text-gray-800">New Allocation</h3>
+              <h3 className="text-lg font-semibold text-gray-800">📌 New Allocation</h3>
             </div>
             <div className="p-6">
               <form onSubmit={handleAllocate} className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -322,7 +319,8 @@ function SubjectAllocation() {
                     <option value="">-- Select Class --</option>
                     {classes.map(cls => (
                       <option key={cls.id} value={cls.id}>
-                        {cls.name} {cls.stream || ''}
+                        {cls.name} {cls.stream || ''} 
+                        {cls.studentCount !== undefined && ` (${cls.studentCount} students)`}
                       </option>
                     ))}
                   </select>
@@ -342,7 +340,9 @@ function SubjectAllocation() {
                   >
                     <option value="">-- Select Subject --</option>
                     {subjects.map(sub => (
-                      <option key={sub.id} value={sub.id}>{sub.name}</option>
+                      <option key={sub.id} value={sub.id}>
+                        {sub.name} {sub.code && `(${sub.code})`}
+                      </option>
                     ))}
                   </select>
                   {subjects.length === 0 && (
@@ -390,7 +390,7 @@ function SubjectAllocation() {
                       Allocating...
                     </span>
                   ) : (
-                    'Allocate Teacher'
+                    ' Allocate Teacher'
                   )}
                 </button>
               </form>
@@ -408,6 +408,7 @@ function SubjectAllocation() {
               
               {allocations.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
+                
                   <p>No allocations yet. Use the form above to allocate teachers to subjects.</p>
                 </div>
               ) : (

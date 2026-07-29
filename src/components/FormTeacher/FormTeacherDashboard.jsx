@@ -4,7 +4,7 @@ import { getCurrentUser, hasRole, getUserName } from '../../utils/roleUtils';
 import Notifications from '../Common/Notifications';
 import FormTeacherClasses from './FormTeacherClasses';
 import FormTeacherStudents from './FormTeacherStudents';
-import SubjectApprovals from './SubjectApprovals';
+import StudentSubjectAllocation from './StudentSubjectAllocation';
 import ClassResults from './ClassResults';
 
 function FormTeacherDashboard() {
@@ -16,7 +16,6 @@ function FormTeacherDashboard() {
   useEffect(() => {
     const userData = getCurrentUser();
     
-    // ✅ Use hasRole for case-insensitive check
     if (!userData || !hasRole('FormTeacher')) {
       navigate('/login');
       return;
@@ -42,7 +41,7 @@ function FormTeacherDashboard() {
   const menuItems = [
     { id: 'classes', label: '📚 My Classes' },
     { id: 'students', label: '👨‍🎓 My Students' },
-    { id: 'approvals', label: '✅ Subject Approvals' },
+    { id: 'subject-allocation', label: '📖 Allocate Subjects' },
     { id: 'results', label: '📊 Class Results' },
   ];
 
@@ -142,7 +141,6 @@ function FormTeacherDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
-        {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
             <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Form Teacher</span>
@@ -161,7 +159,7 @@ function FormTeacherDashboard() {
           <div className="bg-white rounded-lg shadow p-4 lg:p-6">
             {activeTab === 'classes' && <FormTeacherClasses />}
             {activeTab === 'students' && <FormTeacherStudents />}
-            {activeTab === 'approvals' && <SubjectApprovals />}
+            {activeTab === 'subject-allocation' && <StudentSubjectAllocation />}
             {activeTab === 'results' && <ClassResults />}
           </div>
         </div>
