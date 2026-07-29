@@ -70,12 +70,31 @@ api.interceptors.response.use(
     }
     console.error('========================================');
     
+    // Handle 401 Unauthorized
     if (error.response?.status === 401) {
-      console.log('🔒 Unauthorized - Redirecting to login');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      if (!window.location.pathname.includes('/login')) {
+      const isLoginPage = window.location.pathname.includes('/login');
+      const isLoginRequest = error.config?.url?.includes('/Auth/login');
+      const isHomePage = window.location.pathname === '/';
+      
+      console.log('🔒 401 Error Details:', {
+        isLoginPage,
+        isHomePage,
+        isLoginRequest,
+        url: error.config?.url,
+        pathname: window.location.pathname
+      });
+      
+      // Only redirect if:
+      // 1. Not on login page
+      // 2. Not on home page
+      // 3. Not a login request
+      if (!isLoginPage && !isHomePage && !isLoginRequest) {
+        console.log('🔒 Unauthorized - Redirecting to login');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         window.location.href = '/login';
+      } else {
+        console.log('🔒 401 error but not redirecting (login page, home page, or login request)');
       }
     }
     return Promise.reject(error);

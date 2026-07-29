@@ -18,25 +18,17 @@ function Login({ setUser }) {
     setError('');
 
     try {
-      console.log('1️⃣ Attempting login with:', { email, password: '***' });
-      
       const response = await authAPI.login({ email, password });
-      console.log('2️⃣ Raw response:', response);
-      
       const data = response.data;
-      console.log('3️⃣ Response data:', JSON.stringify(data, null, 2));
-      console.log('4️⃣ Token:', data.token);
-      console.log('5️⃣ Role:', data.role);
 
-      // Check if we have a token
       if (!data.token) {
         throw new Error('No token received from server');
       }
 
-      // Save token and user data
+      // Save token
       localStorage.setItem('token', data.token);
-      console.log('6️⃣ Token saved to localStorage');
 
+      // Save user data
       const userData = {
         id: data.id,
         name: data.name,
@@ -45,33 +37,20 @@ function Login({ setUser }) {
         mustChangePassword: data.mustChangePassword || false
       };
       localStorage.setItem('user', JSON.stringify(userData));
-      console.log('7️⃣ User data saved:', userData);
 
-      // Verify token was saved
-      const savedToken = localStorage.getItem('token');
-      console.log('8️⃣ Verified token saved?', savedToken ? 'Yes ✅' : 'No ❌');
-      
-      if (!savedToken) {
-        throw new Error('Token was not saved to localStorage');
-      }
-
-      // Update user state
+      // Update parent state
       if (setUser) {
-        console.log('9️⃣ Setting user in App state');
         setUser(userData);
       }
 
       // Check if user needs to change password
       if (data.mustChangePassword === true) {
-        console.log('🔟 Redirecting to change-password');
         navigate('/change-password');
         return;
       }
 
       // Navigate based on role
       const roleLower = (data.role || 'Student').toLowerCase();
-      console.log('1️⃣1️⃣ Role lowercase:', roleLower);
-
       const dashboardRoutes = {
         'admin': '/admin-dashboard',
         'deputyheadteacher': '/deputy-dashboard',
@@ -83,18 +62,13 @@ function Login({ setUser }) {
 
       const route = dashboardRoutes[roleLower];
       if (route) {
-        console.log(`1️⃣2️⃣ ✅ Navigating to: ${route}`);
-        // ✅ FIXED: Use React Router navigation instead of window.location
         navigate(route);
       } else {
-        console.error('Unknown role:', data.role);
         setError(`Unknown user role: "${data.role}". Please contact support.`);
         setLoading(false);
       }
 
     } catch (err) {
-      console.error('❌ Login error:', err);
-      
       if (err.code === 'ERR_NETWORK') {
         setError('Network error: Cannot connect to the server. Please check your internet connection.');
       } else if (err.response?.status === 401) {

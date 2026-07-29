@@ -58,7 +58,6 @@ export const setTeacherAllocations = (hasAllocations) => {
 export const canSwitchToTeacherMode = () => {
   const user = getCurrentUser();
   if (!user) return false;
-  // Use case-insensitive comparison for roles
   const isAdminOrDeputy = hasRole('Admin') || hasRole('DeputyHeadTeacher');
   return isAdminOrDeputy && hasTeacherAllocations();
 };
