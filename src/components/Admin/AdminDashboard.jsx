@@ -240,7 +240,6 @@ function AdminDashboard() {
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
-            <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Admin</span>
             {hasTeacherAccess && (
               <span className="bg-green-600 px-3 py-1 rounded-full text-sm">Teacher</span>
             )}
