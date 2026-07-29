@@ -192,12 +192,6 @@ function HeadOfDepartmentDashboard() {
             <p className="font-semibold">{user?.name}</p>
             <p className="text-xs opacity-75">Head of Department</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors mt-2"
-          >
-            <span className="text-white font-bold">Logout</span>
-          </button>
         </div>
       </div>
 
