@@ -39,10 +39,10 @@ function FormTeacherDashboard() {
   };
 
   const menuItems = [
-    { id: 'classes', label: '📚 My Classes' },
-    { id: 'students', label: '👨‍🎓 My Students' },
-    { id: 'approvals', label: '✅ Subject Approvals' },
-    { id: 'results', label: '📊 Class Results' },
+    { id: 'classes', label: 'My Classes' },
+    { id: 'students', label: 'My Students' },
+    { id: 'approvals', label: 'Subject Approvals' },
+    { id: 'results', label: 'Class Results' },
   ];
 
   return (

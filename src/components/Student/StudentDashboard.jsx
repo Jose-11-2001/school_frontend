@@ -577,12 +577,6 @@ function StudentDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Student" />
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
-          >
-            Logout
-          </button>
         </div>
       </div>
 

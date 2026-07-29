@@ -312,5 +312,13 @@ export const formTeacherAPI = {
     api.get(`/FormTeacher/class-results-summary?year=${year}&term=${encodeURIComponent(term)}`),
   submitResults: (data) => api.post('/FormTeacher/submit-results', data),
 };
+// Add to api.js
+export const usersAPI = {
+  getAll: () => api.get('/Users/all'),
+  getByRole: (role) => api.get(`/Users/by-role/${role}`),
+  update: (id, data) => api.put(`/Users/${id}`, data),
+  delete: (id) => api.delete(`/Users/${id}`),
+  get: (id) => api.get(`/Users/${id}`),
+};
 
 export default api;

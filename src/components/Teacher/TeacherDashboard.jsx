@@ -45,17 +45,17 @@ function TeacherDashboard() {
   const isFormTeacher = user?.isFormTeacher || false;
 
   const menuItems = [
-    { id: 'students', label: '👨‍🎓 My Students' },
-    { id: 'my-subjects', label: '📚 My Subjects' },
-    { id: 'marks', label: '✏️ Enter Marks' },
-    { id: 'rankings', label: '🏆 Rankings' },
+    { id: 'students', label: ' My Students' },
+    { id: 'my-subjects', label: ' My Subjects' },
+    { id: 'marks', label: ' Enter Marks' },
+    { id: 'rankings', label: ' Rankings' },
   ];
 
   if (isFormTeacher) {
     menuItems.push(
-      { id: 'form-classes', label: '🏫 My Form Classes' },
-      { id: 'subject-approvals', label: '✅ Subject Approvals' },
-      { id: 'class-results', label: '📊 Class Results' }
+      { id: 'form-classes', label: ' My Form Classes' },
+      { id: 'subject-approvals', label: ' Subject Approvals' },
+      { id: 'class-results', label: ' Class Results' }
     );
   }
 
@@ -77,12 +77,7 @@ function TeacherDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Teacher" />
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
-          >
-            Logout
-          </button>
+
         </div>
       </div>
 
