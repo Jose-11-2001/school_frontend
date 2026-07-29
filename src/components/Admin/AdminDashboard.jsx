@@ -20,12 +20,12 @@ import StudentDetailsModal from './StudentDetailsModal';
 import TeacherMarksEntry from '../Teacher/TeacherMarksEntry';
 import MySubjects from '../Teacher/MySubjects';
 import MyStudents from '../Teacher/MyStudents';
+import { Navigate } from 'react-router-dom';
 
 function AdminDashboard() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('teachers');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [refreshStudents, setRefreshStudents] = useState(false);
   const [hasTeacherAccess, setHasTeacherAccess] = useState(false);
@@ -38,33 +38,11 @@ function AdminDashboard() {
       const token = localStorage.getItem('token');
       const userData = getCurrentUser();
       
-      console.log('========================================');
-      console.log(' AdminDashboard - Authentication Check');
-      console.log('  Token exists:', !!token);
-      console.log('  User data:', userData);
-      console.log('  User role:', userData?.role);
-      console.log('  hasRole("Admin"):', hasRole('Admin'));
-      console.log('========================================');
-      
-      if (!token) {
-        console.log(' No token found, redirecting to login');
+      if (!token || !userData || !hasRole('Admin')) {
         navigate('/login');
         return;
       }
       
-      if (!userData) {
-        console.log(' No user data found, redirecting to login');
-        navigate('/login');
-        return;
-      }
-      
-      if (!hasRole('Admin')) {
-        console.log(` Role "${userData?.role}" is not Admin, redirecting`);
-        navigate('/login');
-        return;
-      }
-      
-      console.log('AdminDashboard - User is valid Admin!');
       setUser(userData);
       setHasTeacherAccess(hasTeacherAllocations());
       setIsLoading(false);
@@ -74,7 +52,6 @@ function AdminDashboard() {
   }, [navigate]);
 
   const handleLogout = () => {
-    console.log('Logging out...');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
@@ -103,7 +80,6 @@ function AdminDashboard() {
         <div className="text-center bg-white p-8 rounded-lg shadow-lg">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-900 mx-auto"></div>
           <p className="mt-4 text-gray-600 font-medium">Loading dashboard...</p>
-          <p className="text-sm text-gray-400 mt-1">Please wait</p>
         </div>
       </div>
     );
@@ -145,10 +121,7 @@ function AdminDashboard() {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-3 py-2 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-1 rounded-lg hover:bg-blue-700"
-          >
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1 rounded-lg hover:bg-blue-700">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
@@ -157,10 +130,7 @@ function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Admin" />
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs transition-colors"
-          >
+          <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs">
             Logout
           </button>
         </div>
@@ -168,29 +138,23 @@ function AdminDashboard() {
 
       {/* Mobile Sidebar Overlay */}
       {mobileOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setMobileOpen(false)}
-        />
+        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - FIXED SCROLLING */}
       <div className={`
-        fixed lg:fixed z-50
-        ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        fixed top-0 left-0 z-50
         transition-transform duration-300 ease-in-out
         w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl
-        h-screen overflow-y-auto
-        ${!mobileOpen && 'lg:block'}
+        h-screen
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:relative
+        flex flex-col
       `}>
-        {/* Sidebar Header */}
-        <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
+        {/* Sidebar Header - Fixed at top */}
+        <div className="flex-shrink-0 bg-gradient-to-b from-blue-800 to-blue-900">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
-            <button
-              onClick={handleGoBack}
-              className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0"
-              title="Go back"
-            >
+            <button onClick={handleGoBack} className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
@@ -202,8 +166,8 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Sidebar Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4">
+        {/* Sidebar Navigation - Scrollable middle section */}
+        <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-800">
           {allMenuItems.map((item) => (
             <button
               key={item.id}
@@ -211,7 +175,7 @@ function AdminDashboard() {
                 setActiveTab(item.id);
                 setMobileOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${
+              className={`w-full text-left flex items-center gap-3 px-4 py-3 transition-colors ${
                 activeTab === item.id
                   ? 'bg-blue-700 border-r-4 border-white text-white'
                   : 'hover:bg-blue-700 text-blue-100'
@@ -222,8 +186,8 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer - Removed Logout button, only keep Teacher Dashboard switch */}
-        <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
+        {/* Sidebar Footer - Fixed at bottom */}
+        <div className="flex-shrink-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
           {hasTeacherAccess && (
             <button
               onClick={goToTeacherDashboard}
@@ -240,6 +204,7 @@ function AdminDashboard() {
         {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
+            <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Admin</span>
             {hasTeacherAccess && (
               <span className="bg-green-600 px-3 py-1 rounded-full text-sm">Teacher</span>
             )}
@@ -253,17 +218,11 @@ function AdminDashboard() {
               <span className="text-sm font-bold">{getUserName()}</span>
             </div>
             {hasTeacherAccess && (
-              <button
-                onClick={goToTeacherDashboard}
-                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm transition-colors"
-              >
+              <button onClick={goToTeacherDashboard} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm">
                 Teacher Dashboard
               </button>
             )}
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm transition-colors"
-            >
+            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm">
               Logout
             </button>
           </div>
@@ -273,6 +232,19 @@ function AdminDashboard() {
         <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 lg:p-6">
+              {/* Mobile Tab Selector */}
+              <div className="lg:hidden mb-4">
+                <select
+                  value={activeTab}
+                  onChange={(e) => setActiveTab(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                >
+                  {allMenuItems.map((item) => (
+                    <option key={item.id} value={item.id}>{item.label}</option>
+                  ))}
+                </select>
+              </div>
+
               {activeTab === 'teachers' && <TeacherManagement />}
               {activeTab === 'departments' && <DepartmentManagement />}
               {activeTab === 'form-teacher' && <FormTeacherAssignment />}
@@ -281,20 +253,15 @@ function AdminDashboard() {
               {activeTab === 'classes' && <ClassManagement />}
               {activeTab === 'allocation' && <SubjectAllocation />}
               {activeTab === 'student-subjects' && <AdminSubjectAllocation />}
-              {activeTab === 'student-registration' && (
-                <StudentRegistration onStudentAdded={handleStudentRegistered} />
-              )}
+              {activeTab === 'student-registration' && <StudentRegistration onStudentAdded={handleStudentRegistered} />}
               {activeTab === 'subjects' && <SubjectsManagement />}
               {activeTab === 'students' && (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <h3 className="text-lg font-semibold text-blue-800">Student Management</h3>
                     <p className="text-sm text-blue-600">View and manage all registered students</p>
                   </div>
-                  <StudentList 
-                    refreshTrigger={refreshStudents} 
-                    onStudentClick={handleStudentClick}
-                  />
+                  <StudentList refreshTrigger={refreshStudents} onStudentClick={handleStudentClick} />
                 </div>
               )}
               {activeTab === 'users' && <AdminUserManagement />}
