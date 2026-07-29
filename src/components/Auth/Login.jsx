@@ -31,18 +31,24 @@ function Login({ setUser }) {
       // Determine which role to use for dashboard redirection
       const roleForDashboard = data.dashboardRole || data.role || 'Student';
 
+      // Save user data with both role and dashboardRole
       const userData = {
         id: data.id,
         name: data.name,
         email: data.email,
         role: data.role || 'Student',
-        dashboardRole: roleForDashboard,
+        dashboardRole: roleForDashboard, // This could be 'FormTeacher' when user is Teacher but assigned as FormTeacher
         mustChangePassword: data.mustChangePassword || false,
         isHeadOfDepartment: data.isHeadOfDepartment || false,
         isFormTeacher: data.isFormTeacher || false,
         isDeputyHeadTeacher: data.isDeputyHeadTeacher || false
       };
       localStorage.setItem('user', JSON.stringify(userData));
+
+      // Log the user data for debugging
+      console.log('🔐 Login - User Data Saved:', userData);
+      console.log('🔐 Login - Role:', userData.role);
+      console.log('🔐 Login - Dashboard Role:', userData.dashboardRole);
 
       if (setUser) {
         setUser(userData);
@@ -66,13 +72,17 @@ function Login({ setUser }) {
 
       const route = dashboardRoutes[roleLower];
       if (route) {
+        console.log(`🔐 Login - Navigating to: ${route} (Dashboard Role: ${roleForDashboard})`);
         navigate(route);
       } else {
+        console.error(`🔐 Login - Unknown role: ${roleForDashboard}`);
         setError(`Unknown user role: "${roleForDashboard}". Please contact support.`);
         setLoading(false);
       }
 
     } catch (err) {
+      console.error('❌ Login error:', err);
+      
       if (err.code === 'ERR_NETWORK') {
         setError('Network error: Cannot connect to the server. Please check your internet connection.');
       } else if (err.response?.status === 401) {

@@ -13,18 +13,14 @@ export const getCurrentUser = () => {
 
 export const hasRole = (requiredRole) => {
   const user = getCurrentUser();
-  if (!user) {
-    console.warn('hasRole: No user found');
-    return false;
-  }
+  if (!user) return false;
   
-  if (!user.role) {
-    console.warn('hasRole: User has no role property');
-    return false;
-  }
+  // Check both role and dashboardRole (case-insensitive)
+  const rolesToCheck = [user.role, user.dashboardRole].filter(Boolean);
   
-  // Case-insensitive comparison with trim
-  return user.role.trim().toLowerCase() === requiredRole.toLowerCase();
+  return rolesToCheck.some(role => 
+    role.trim().toLowerCase() === requiredRole.toLowerCase()
+  );
 };
 
 // Check dashboard role (for redirection)
@@ -90,4 +86,11 @@ export const isFormTeacher = () => {
   const user = getCurrentUser();
   if (!user) return false;
   return user.isFormTeacher === true || hasRole('FormTeacher');
+};
+
+// Check if user is a Deputy Head Teacher
+export const isDeputyHeadTeacher = () => {
+  const user = getCurrentUser();
+  if (!user) return false;
+  return user.isDeputyHeadTeacher === true || hasRole('DeputyHeadTeacher');
 };
