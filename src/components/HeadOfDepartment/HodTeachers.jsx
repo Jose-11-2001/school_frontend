@@ -86,7 +86,7 @@ function HodTeachers() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold">👨‍🏫 Department Teachers</h2>
+          <h2 className="text-2xl font-bold">Department Teachers</h2>
           <p className="text-sm text-gray-500">Manage teachers and their subject assignments</p>
         </div>
         <button
