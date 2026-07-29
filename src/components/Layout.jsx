@@ -197,7 +197,6 @@ function Layout() {
             <div>
               <h4 className="text-white font-semibold text-sm sm:text-base mb-2">Quick Links</h4>
               <ul className="space-y-1 text-xs sm:text-sm">
-                <li><Link to="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
                 {isAuthenticated && (
                   <li><Link to={getDashboardLink()} className="text-gray-400 hover:text-white transition-colors">Dashboard</Link></li>
                 )}
