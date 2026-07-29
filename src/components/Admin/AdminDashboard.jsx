@@ -92,9 +92,9 @@ function AdminDashboard() {
   const menuItems = [
     { id: 'teachers', label: 'Teacher Management' },
     { id: 'departments', label: 'Department Management' },
+    { id: 'deputy-assignment', label: 'Deputy Head Teacher' },
     { id: 'form-teacher', label: 'Form Teacher Assignment' },
     { id: 'hod-assignment', label: 'Head of Department' },
-    { id: 'deputy-assignment', label: 'Deputy Head Tasks' },
     { id: 'student-registration', label: 'Register Students' },
     { id: 'students', label: 'Student List' },
     { id: 'users', label: 'Manage Users' },
@@ -118,7 +118,7 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* ===== MOBILE HEADER - Simplified ===== */}
+      {/* ===== MOBILE HEADER ===== */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-3 py-2 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1 rounded-lg hover:bg-blue-700">
@@ -130,7 +130,6 @@ function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Admin" />
-          {/* Removed Admin and Welcome text - only notification icon stays */}
         </div>
       </div>
 
@@ -149,7 +148,6 @@ function AdminDashboard() {
         lg:translate-x-0
         flex flex-col
       `}>
-        {/* Sidebar Header */}
         <div className="flex-shrink-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button onClick={handleGoBack} className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0">
@@ -164,7 +162,6 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Sidebar Navigation - Scrollable */}
         <nav className="flex-1 overflow-y-auto py-2">
           {allMenuItems.map((item) => (
             <button
@@ -184,9 +181,7 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer - Includes Logout for mobile */}
         <div className="flex-shrink-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700 space-y-2">
-          {/* User info - mobile only */}
           <div className="lg:hidden px-2 py-1">
             <p className="text-xs text-blue-200">Welcome, {getUserName()}</p>
             <p className="text-xs text-blue-300 opacity-75">{user?.role || 'Admin'}</p>
@@ -201,7 +196,6 @@ function AdminDashboard() {
             </button>
           )}
           
-          {/* Logout button - visible on both mobile and desktop in sidebar */}
           <button
             onClick={handleLogout}
             className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
@@ -213,7 +207,6 @@ function AdminDashboard() {
 
       {/* ===== MAIN CONTENT ===== */}
       <div className="lg:ml-64 min-h-screen">
-        {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
             <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Admin</span>
@@ -234,15 +227,12 @@ function AdminDashboard() {
                 Teacher Dashboard
               </button>
             )}
-            {/* Removed Logout from desktop navbar - now in sidebar */}
           </div>
         </nav>
 
-        {/* Content Area */}
         <div className="pt-16 lg:pt-16 px-4 lg:px-6 py-4 lg:py-6">
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 lg:p-6">
-              {/* Mobile Tab Selector */}
               <div className="lg:hidden mb-4">
                 <select
                   value={activeTab}
@@ -257,9 +247,9 @@ function AdminDashboard() {
 
               {activeTab === 'teachers' && <TeacherManagement />}
               {activeTab === 'departments' && <DepartmentManagement />}
+              {activeTab === 'deputy-assignment' && <DeputyAssignment />}
               {activeTab === 'form-teacher' && <FormTeacherAssignment />}
               {activeTab === 'hod-assignment' && <HeadOfDepartmentAssignment />}
-              {activeTab === 'deputy-assignment' && <DeputyAssignment />}
               {activeTab === 'classes' && <ClassManagement />}
               {activeTab === 'allocation' && <SubjectAllocation />}
               {activeTab === 'student-subjects' && <AdminSubjectAllocation />}

@@ -10,7 +10,7 @@ import StudentDashboard from './components/Student/StudentDashboard';
 import HeadOfDepartmentDashboard from './components/HeadOfDepartment/HeadOfDepartmentDashboard';
 import FormTeacherDashboard from './components/FormTeacher/FormTeacherDashboard';
 import DeputyDashboard from './components/Deputy/DeputyDashboard';
-import { getCurrentUser, hasRole } from './utils/roleUtils';
+import { getCurrentUser, hasRole, getDashboardRole } from './utils/roleUtils';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -27,6 +27,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // Check if user has any of the allowed roles (case-insensitive)
   const hasAllowedRole = allowedRoles.some(role => hasRole(role));
   
   if (!hasAllowedRole) {
@@ -74,7 +75,7 @@ function App() {
           
           {/* Teacher Routes */}
           <Route path="teacher-dashboard" element={
-            <ProtectedRoute allowedRoles={['Teacher', 'FormTeacher']}>
+            <ProtectedRoute allowedRoles={['Teacher', 'FormTeacher', 'HeadOfDepartment']}>
               <TeacherDashboard />
             </ProtectedRoute>
           } />

@@ -28,29 +28,33 @@ function Login({ setUser }) {
       // Save token
       localStorage.setItem('token', data.token);
 
-      // Save user data
+      // Determine which role to use for dashboard redirection
+      const roleForDashboard = data.dashboardRole || data.role || 'Student';
+
       const userData = {
         id: data.id,
         name: data.name,
         email: data.email,
         role: data.role || 'Student',
-        mustChangePassword: data.mustChangePassword || false
+        dashboardRole: roleForDashboard,
+        mustChangePassword: data.mustChangePassword || false,
+        isHeadOfDepartment: data.isHeadOfDepartment || false,
+        isFormTeacher: data.isFormTeacher || false,
+        isDeputyHeadTeacher: data.isDeputyHeadTeacher || false
       };
       localStorage.setItem('user', JSON.stringify(userData));
 
-      // Update parent state
       if (setUser) {
         setUser(userData);
       }
 
-      // Check if user needs to change password
       if (data.mustChangePassword === true) {
         navigate('/change-password');
         return;
       }
 
-      // Navigate based on role
-      const roleLower = (data.role || 'Student').toLowerCase();
+      // Navigate based on dashboardRole - includes all roles
+      const roleLower = roleForDashboard.toLowerCase();
       const dashboardRoutes = {
         'admin': '/admin-dashboard',
         'deputyheadteacher': '/deputy-dashboard',
@@ -64,7 +68,7 @@ function Login({ setUser }) {
       if (route) {
         navigate(route);
       } else {
-        setError(`Unknown user role: "${data.role}". Please contact support.`);
+        setError(`Unknown user role: "${roleForDashboard}". Please contact support.`);
         setLoading(false);
       }
 
@@ -93,27 +97,24 @@ function Login({ setUser }) {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-      }}
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat p-4"
+      style={{ backgroundImage: `url(${backgroundImage})` }}
     >
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
-      <div className="relative z-10 bg-white p-8 rounded-xl shadow-2xl w-96">
+      <div className="relative z-10 bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-md mx-4">
         <button
           onClick={handleGoBack}
-          className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 transition-colors"
-          title="Go back"
+          className="absolute top-3 left-3 sm:top-4 sm:left-4 text-gray-500 hover:text-gray-700 transition-colors"
           aria-label="Go back"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 sm:w-6 sm:h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
         </button>
 
-        <div className="text-center mb-8">
-          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg bg-white">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 overflow-hidden shadow-lg bg-white">
             <img
               src={schoolLogo}
               alt="School Logo"
@@ -124,19 +125,19 @@ function Login({ setUser }) {
               }}
             />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">Mkondezi Secondary School</h2>
-          <p className="text-gray-600 mt-2">Grading System</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Mkondezi Secondary School</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Grading System</p>
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded mb-3 sm:mb-4 text-sm" role="alert">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-2">
+          <div className="mb-3 sm:mb-4">
+            <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-1 sm:mb-2">
               Email Address
             </label>
             <input
@@ -145,15 +146,15 @@ function Login({ setUser }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
               placeholder="Enter your email"
               required
               autoComplete="email"
             />
           </div>
 
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">
+          <div className="mb-4 sm:mb-6">
+            <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-1 sm:mb-2">
               Password
             </label>
             <div className="relative">
@@ -163,7 +164,7 @@ function Login({ setUser }) {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 placeholder="Enter your password"
                 required
                 autoComplete="current-password"
@@ -175,12 +176,12 @@ function Login({ setUser }) {
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                   </svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
                   </svg>
                 )}
@@ -191,11 +192,11 @@ function Login({ setUser }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-blue-900 text-white py-2 sm:py-2.5 rounded-lg font-semibold hover:bg-blue-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>

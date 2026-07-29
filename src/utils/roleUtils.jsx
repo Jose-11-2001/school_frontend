@@ -1,3 +1,4 @@
+// src/utils/roleUtils.js
 
 export const getCurrentUser = () => {
   try {
@@ -16,6 +17,13 @@ export const hasRole = (requiredRole) => {
   
   // Case-insensitive comparison with trim
   return user.role.trim().toLowerCase() === requiredRole.toLowerCase();
+};
+
+// Check dashboard role (for redirection)
+export const getDashboardRole = () => {
+  const user = getCurrentUser();
+  if (!user) return null;
+  return user.dashboardRole || user.role || 'Student';
 };
 
 export const getUserRole = () => {
@@ -60,4 +68,18 @@ export const canSwitchToTeacherMode = () => {
   if (!user) return false;
   const isAdminOrDeputy = hasRole('Admin') || hasRole('DeputyHeadTeacher');
   return isAdminOrDeputy && hasTeacherAllocations();
+};
+
+// Check if user is a Head of Department
+export const isHeadOfDepartment = () => {
+  const user = getCurrentUser();
+  if (!user) return false;
+  return user.isHeadOfDepartment === true || hasRole('HeadOfDepartment');
+};
+
+// Check if user is a Form Teacher
+export const isFormTeacher = () => {
+  const user = getCurrentUser();
+  if (!user) return false;
+  return user.isFormTeacher === true || hasRole('FormTeacher');
 };
