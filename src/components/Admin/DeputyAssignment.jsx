@@ -149,6 +149,74 @@ function DeputyAssignment() {
     }
   };
 
+  // NEW: Handle updating/replacing the deputy
+  const handleUpdateDeputy = async () => {
+    if (!selectedTeacherId) {
+      setError('Please select a teacher to replace the current deputy');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to replace ${deputy?.name} with the selected teacher?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      // First remove the current deputy
+      const removeResponse = await fetch('https://school-yathu.onrender.com/api/Admin/remove-deputy', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!removeResponse.ok) {
+        const data = await removeResponse.json();
+        setError(data.message || 'Failed to remove current deputy');
+        setMessage('');
+        setLoading(false);
+        return;
+      }
+
+      // Then assign the new deputy
+      const assignResponse = await fetch('https://school-yathu.onrender.com/api/Admin/assign-deputy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          teacherId: parseInt(selectedTeacherId),
+          replaceExisting: false
+        })
+      });
+
+      const data = await assignResponse.json();
+      
+      if (assignResponse.ok) {
+        setMessage(data.message || 'Deputy Head Teacher updated successfully!');
+        setError('');
+        fetchData(); // Refresh data
+        setSelectedTeacherId('');
+      } else {
+        setError(data.message || 'Failed to assign new deputy');
+        setMessage('');
+      }
+    } catch (error) {
+      console.error('Error updating deputy:', error);
+      setError('Network error. Please try again.');
+      setMessage('');
+    } finally {
+      setLoading(false);
+      setTimeout(() => {
+        setMessage('');
+        setError('');
+      }, 5000);
+    }
+  };
+
   const handleAssignTask = async (e) => {
     e.preventDefault();
     if (!deputy) {
@@ -220,7 +288,7 @@ function DeputyAssignment() {
     <div>
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-800">Deputy Head Teacher Management</h2>
-        <p className="text-sm text-gray-500">Assign deputy head teacher and manage tasks</p>
+        <p className="text-sm text-gray-500">Assign, update, and manage deputy head teacher tasks</p>
       </div>
 
       {/* Messages */}
@@ -246,21 +314,25 @@ function DeputyAssignment() {
                 <span className="text-gray-500 ml-2">({deputy.email})</span>
               </p>
             </div>
-            <button
-              onClick={handleRemoveDeputy}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm transition-colors"
-            >
-              Remove Deputy
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleRemoveDeputy}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm transition-colors"
+              >
+                Remove Deputy
+              </button>
+            </div>
           </div>
         ) : (
           <p className="text-sm text-gray-500">No Deputy Head Teacher assigned</p>
         )}
       </div>
 
-      {/* Assign New Deputy */}
+      {/* Assign or Update Deputy */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-        <h3 className="font-semibold text-gray-800 mb-3">Assign New Deputy Head Teacher</h3>
+        <h3 className="font-semibold text-gray-800 mb-3">
+          {deputy ? 'Update / Replace Deputy Head Teacher' : 'Assign New Deputy Head Teacher'}
+        </h3>
         
         <div className="flex flex-col sm:flex-row gap-3">
           <select
@@ -278,19 +350,34 @@ function DeputyAssignment() {
               ))}
           </select>
           
-          <button
-            onClick={handleAssignDeputy}
-            disabled={!selectedTeacherId || loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            Assign as Deputy
-          </button>
+          <div className="flex gap-2">
+            {deputy ? (
+              <button
+                onClick={handleUpdateDeputy}
+                disabled={!selectedTeacherId || loading}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg text-sm transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                Update Deputy
+              </button>
+            ) : (
+              <button
+                onClick={handleAssignDeputy}
+                disabled={!selectedTeacherId || loading}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                Assign as Deputy
+              </button>
+            )}
+          </div>
         </div>
         
         {deputy && (
-          <p className="text-xs text-yellow-600 mt-2">
-            Note: Assigning a new deputy will replace the current deputy
-          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-xs text-yellow-600">⚠️</span>
+            <p className="text-xs text-yellow-600">
+              Select a new teacher to replace the current deputy. The current deputy will be demoted back to teacher.
+            </p>
+          </div>
         )}
       </div>
 
