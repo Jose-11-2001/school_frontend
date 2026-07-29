@@ -131,12 +131,6 @@ function DeputyDashboard() {
               Teacher Mode
             </button>
           )}
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
-          >
-            Logout
-          </button>
         </div>
       </div>
 

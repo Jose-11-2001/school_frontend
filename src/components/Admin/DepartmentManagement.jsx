@@ -2,38 +2,51 @@ import React, { useState, useEffect } from 'react';
 
 function DepartmentManagement() {
   const [departments, setDepartments] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showAssignHODForm, setShowAssignHODForm] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState(null);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
+  const [selectedTeacherId, setSelectedTeacherId] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: ''
   });
 
   useEffect(() => {
-    loadDepartments();
+    loadData();
   }, []);
 
-  const loadDepartments = async () => {
+  const loadData = async () => {
     setLoading(true);
     setError('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://school-yathu.onrender.com/api/Admin/departments', {
+      
+      // Load departments
+      const deptResponse = await fetch('https://school-yathu.onrender.com/api/Admin/departments', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (response.ok) {
-        const data = await response.json();
+      if (deptResponse.ok) {
+        const data = await deptResponse.json();
         setDepartments(data);
-      } else {
-        setError('Failed to load departments');
+      }
+
+      // Load teachers
+      const teachersResponse = await fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (teachersResponse.ok) {
+        const data = await teachersResponse.json();
+        setTeachers(data);
       }
     } catch (error) {
-      console.error('Error loading departments:', error);
-      setError('Network error');
+      console.error('Error loading data:', error);
+      setError('Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -61,7 +74,7 @@ function DepartmentManagement() {
         setSuccess('Department created successfully!');
         setShowAddForm(false);
         setFormData({ name: '', description: '' });
-        loadDepartments();
+        loadData();
         setTimeout(() => setSuccess(''), 3000);
       } else {
         const data = await response.json();
@@ -105,7 +118,7 @@ function DepartmentManagement() {
         setShowEditForm(false);
         setEditingDepartment(null);
         setFormData({ name: '', description: '' });
-        loadDepartments();
+        loadData();
         setTimeout(() => setSuccess(''), 3000);
       } else {
         const data = await response.json();
@@ -133,7 +146,7 @@ function DepartmentManagement() {
 
       if (response.ok) {
         setSuccess(`Department "${name}" deleted successfully!`);
-        loadDepartments();
+        loadData();
         setTimeout(() => setSuccess(''), 3000);
       } else {
         const data = await response.json();
@@ -145,6 +158,77 @@ function DepartmentManagement() {
     }
   };
 
+  // NEW: Handle assigning Head of Department
+  const handleAssignHOD = async () => {
+    if (!selectedDepartmentId || !selectedTeacherId) {
+      setError('Please select both a department and a teacher');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/assign-head-of-department', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          departmentId: parseInt(selectedDepartmentId),
+          teacherId: parseInt(selectedTeacherId)
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(data.message || 'Head of Department assigned successfully!');
+        setShowAssignHODForm(false);
+        setSelectedDepartmentId('');
+        setSelectedTeacherId('');
+        loadData();
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(data.message || 'Failed to assign Head of Department');
+      }
+    } catch (error) {
+      console.error('Error assigning HOD:', error);
+      setError('Network error');
+    }
+  };
+
+  // NEW: Handle removing Head of Department
+  const handleRemoveHOD = async (departmentId, departmentName, headName) => {
+    if (!confirm(`Are you sure you want to remove "${headName}" as Head of ${departmentName}?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/remove-head-of-department', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(departmentId)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(data.message || 'Head of Department removed successfully!');
+        loadData();
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(data.message || 'Failed to remove Head of Department');
+      }
+    } catch (error) {
+      console.error('Error removing HOD:', error);
+      setError('Network error');
+    }
+  };
+
   const closeEditForm = () => {
     setShowEditForm(false);
     setEditingDepartment(null);
@@ -152,7 +236,7 @@ function DepartmentManagement() {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading departments...</div>;
+    return <div className="text-center py-8">Loading data...</div>;
   }
 
   return (
@@ -162,12 +246,20 @@ function DepartmentManagement() {
           <h2 className="text-2xl font-bold">Department Management</h2>
           <p className="text-sm text-gray-500">Create, edit, and manage school departments</p>
         </div>
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          + Add Department
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowAssignHODForm(!showAssignHODForm)}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+          >
+            Assign Head of Department
+          </button>
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            + Add Department
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -179,6 +271,59 @@ function DepartmentManagement() {
       {success && (
         <div className="p-4 rounded-lg bg-green-50 text-green-700 border border-green-200 mb-4">
           {success}
+        </div>
+      )}
+
+      {/* Assign Head of Department Form */}
+      {showAssignHODForm && (
+        <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+          <h3 className="font-semibold mb-3">Assign Head of Department</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Select Department *</label>
+              <select
+                value={selectedDepartmentId}
+                onChange={(e) => setSelectedDepartmentId(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">-- Select Department --</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name} {dept.headName !== 'Not Assigned' ? `(Current: ${dept.headName})` : '(No Head Assigned)'}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Select Teacher *</label>
+              <select
+                value={selectedTeacherId}
+                onChange={(e) => setSelectedTeacherId(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">-- Select Teacher --</option>
+                {teachers.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.name} - {teacher.departmentName || 'No Department'}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={handleAssignHOD}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+            >
+              Assign Head of Department
+            </button>
+            <button
+              onClick={() => setShowAssignHODForm(false)}
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
@@ -245,7 +390,6 @@ function DepartmentManagement() {
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Science Department"
                   required
                 />
               </div>
@@ -255,7 +399,6 @@ function DepartmentManagement() {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Department description..."
                   rows="2"
                 />
               </div>
@@ -292,7 +435,7 @@ function DepartmentManagement() {
                     <p className="text-sm text-gray-500 mt-1">{dept.description}</p>
                   )}
                 </div>
-                <div className="flex items-center gap-2 ml-2">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleEditDepartment(dept)}
                     className="text-blue-600 hover:text-blue-800 p-1"
@@ -313,14 +456,22 @@ function DepartmentManagement() {
                   </button>
                 </div>
               </div>
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex items-center gap-2 flex-wrap">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${dept.headName !== 'Not Assigned' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                   Head: {dept.headName || 'Not Assigned'}
                 </span>
+                {dept.headName !== 'Not Assigned' && (
+                  <button
+                    onClick={() => handleRemoveHOD(dept.id, dept.name, dept.headName)}
+                    className="text-xs text-red-600 hover:text-red-800"
+                  >
+                    Remove HOD
+                  </button>
+                )}
               </div>
               <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between text-sm text-gray-600">
-                <span>Teachers: {dept.teacherCount}</span>
-                <span>Subjects: {dept.subjectCount}</span>
+                <span>👨‍🏫 Teachers: {dept.teacherCount}</span>
+                <span>📚 Subjects: {dept.subjectCount}</span>
               </div>
             </div>
           ))}
