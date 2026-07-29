@@ -130,12 +130,7 @@ function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Admin" />
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs transition-colors"
-          >
-            Logout
-          </button>
+          {/* Logout removed from mobile header - moved to sidebar */}
         </div>
       </div>
 
@@ -187,6 +182,7 @@ function AdminDashboard() {
           ))}
         </nav>
 
+        {/* Sidebar Footer - Logout at bottom for mobile */}
         <div className="flex-shrink-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700 space-y-2">
           <div className="lg:hidden px-2 py-1">
             <p className="text-xs text-blue-200">Welcome, {getUserName()}</p>
@@ -201,11 +197,20 @@ function AdminDashboard() {
               Switch to Teacher Dashboard
             </button>
           )}
+          
+          {/* Logout button - visible on mobile only in sidebar */}
+          <button
+            onClick={handleLogout}
+            className="w-full lg:hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+          >
+            Logout
+          </button>
         </div>
       </div>
 
       {/* ===== MAIN CONTENT ===== */}
       <div className="lg:ml-64 min-h-screen">
+        {/* Desktop Navbar */}
         <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
           <div className="flex items-center gap-4">
             <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Admin</span>
@@ -226,6 +231,7 @@ function AdminDashboard() {
                 Teacher Dashboard
               </button>
             )}
+            {/* Logout button - visible on desktop only in navbar */}
             <button
               onClick={handleLogout}
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm transition-colors"

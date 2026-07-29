@@ -130,15 +130,7 @@ function Layout() {
 
         {/* ===== MOBILE MENU ===== */}
         <div className={`md:hidden ${mobileMenuOpen ? 'max-h-96' : 'max-h-0'} overflow-hidden transition-all duration-300 ease-in-out bg-blue-900`}>
-          <div className="px-4 py-3 space-y-2 border-t border-blue-700">
-            <Link 
-              to="/" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-            >
-              Home
-            </Link>
-            
+          <div className="px-4 py-3 space-y-2 border-t border-blue-700"> 
             {isAuthenticated && user && (
               <>
                 <Link 
