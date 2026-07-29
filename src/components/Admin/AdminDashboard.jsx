@@ -222,22 +222,16 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer */}
+        {/* Sidebar Footer - Removed Logout button, only keep Teacher Dashboard switch */}
         <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
           {hasTeacherAccess && (
             <button
               onClick={goToTeacherDashboard}
-              className="w-full mb-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+              className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
             >
               Switch to Teacher Dashboard
             </button>
           )}
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
-          >
-            Logout
-          </button>
         </div>
       </div>
 
