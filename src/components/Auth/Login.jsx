@@ -28,27 +28,27 @@ function Login({ setUser }) {
       // Save token
       localStorage.setItem('token', data.token);
 
-      // Determine which role to use for dashboard redirection
-      const roleForDashboard = data.dashboardRole || data.role || 'Student';
-
-      // Save user data with both role and dashboardRole
+      // Save user data with all roles
       const userData = {
         id: data.id,
         name: data.name,
         email: data.email,
-        role: data.role || 'Student',
-        dashboardRole: roleForDashboard, // This could be 'FormTeacher' when user is Teacher but assigned as FormTeacher
+        role: data.role || 'Student',                    // Primary role
+        dashboardRole: data.dashboardRole || data.role || 'Student',
+        allRoles: data.allRoles || [data.role || 'Student'],  // All roles
+        secondaryRoles: data.secondaryRoles || [],        // Secondary roles
         mustChangePassword: data.mustChangePassword || false,
         isHeadOfDepartment: data.isHeadOfDepartment || false,
         isFormTeacher: data.isFormTeacher || false,
         isDeputyHeadTeacher: data.isDeputyHeadTeacher || false
       };
+      
       localStorage.setItem('user', JSON.stringify(userData));
 
-      // Log the user data for debugging
       console.log('🔐 Login - User Data Saved:', userData);
       console.log('🔐 Login - Role:', userData.role);
       console.log('🔐 Login - Dashboard Role:', userData.dashboardRole);
+      console.log('🔐 Login - All Roles:', userData.allRoles);
 
       if (setUser) {
         setUser(userData);
@@ -60,7 +60,7 @@ function Login({ setUser }) {
       }
 
       // Navigate based on dashboardRole - includes all roles
-      const roleLower = roleForDashboard.toLowerCase();
+      const roleLower = (userData.dashboardRole || userData.role || 'Student').toLowerCase();
       const dashboardRoutes = {
         'admin': '/admin-dashboard',
         'deputyheadteacher': '/deputy-dashboard',
@@ -72,11 +72,11 @@ function Login({ setUser }) {
 
       const route = dashboardRoutes[roleLower];
       if (route) {
-        console.log(`🔐 Login - Navigating to: ${route} (Dashboard Role: ${roleForDashboard})`);
+        console.log(`🔐 Login - Navigating to: ${route} (Dashboard Role: ${userData.dashboardRole})`);
         navigate(route);
       } else {
-        console.error(`🔐 Login - Unknown role: ${roleForDashboard}`);
-        setError(`Unknown user role: "${roleForDashboard}". Please contact support.`);
+        console.error(`🔐 Login - Unknown role: ${userData.dashboardRole}`);
+        setError(`Unknown user role: "${userData.dashboardRole}". Please contact support.`);
         setLoading(false);
       }
 

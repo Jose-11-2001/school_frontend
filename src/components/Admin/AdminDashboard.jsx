@@ -100,10 +100,11 @@ function AdminDashboard() {
     { id: 'students', label: 'Student List' },
     { id: 'users', label: 'Manage Users' },
     { id: 'classes', label: 'Class Management' },
-    { id: 'subject-assignment', label: 'Subject Assignment (Teachers)' },
-    { id: 'allocation', label: 'Subject Allocation (Class)' },
+    { id: 'subject-assignment', label: 'Subject Assignment' },//teachers
+    { id: 'allocation', label: 'Subject Allocation' },// class
     { id: 'student-subjects', label: 'Student Subject Allocation' },
     { id: 'subjects', label: 'Manage Subjects' },
+    { id: 'secondary-roles', label: 'Secondary Roles' }, 
     { id: 'approval', label: 'Results Approval' },
     { id: 'rankings', label: 'View Rankings' },
   ];
