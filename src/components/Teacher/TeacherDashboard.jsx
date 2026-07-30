@@ -7,7 +7,6 @@ import MySubjects from './MySubjects';
 import Rankings from '../Rankings';
 import MyStudents from './MyStudents';
 import FormTeacherClasses from '../FormTeacher/FormTeacherClasses';
-import SubjectApprovals from '../FormTeacher/SubjectApprovals';
 import ClassResults from '../FormTeacher/ClassResults';
 
 function TeacherDashboard() {
