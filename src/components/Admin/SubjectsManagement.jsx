@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { subjectAPI } from '../../services/api';
+import { subjectAPI, adminAPI } from '../../services/api';
 
-function SubjectsManagement({ departments = [] }) {
+function SubjectsManagement() {
   const [subjects, setSubjects] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [departmentId, setDepartmentId] = useState('');
@@ -10,18 +11,29 @@ function SubjectsManagement({ departments = [] }) {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
-  const loadSubjects = async () => {
+  const loadData = async () => {
+    setLoading(true);
     try {
-      const response = await subjectAPI.getAll();
-      // Ensure subjects include department info
-      setSubjects(response.data || []);
+      // Load subjects with department info
+      const subjectsRes = await subjectAPI.getAll();
+      console.log('📚 Subjects loaded:', subjectsRes.data);
+      setSubjects(subjectsRes.data || []);
+
+      // Load departments for dropdown
+      const deptRes = await adminAPI.getDepartments();
+      console.log('🏢 Departments loaded:', deptRes.data);
+      setDepartments(deptRes.data || []);
     } catch (error) {
-      console.error('Error loading subjects:', error);
+      console.error('Error loading data:', error);
+      setMessage('Failed to load data');
+      setMessageType('error');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadSubjects();
+    loadData();
   }, []);
 
   const handleAddSubject = async (e) => {
@@ -29,8 +41,8 @@ function SubjectsManagement({ departments = [] }) {
     setLoading(true);
     setMessage('');
     
-    if (!name.trim() || !code.trim() || !departmentId) {
-      setMessage('Please enter name, code, and select a department');
+    if (!name.trim() || !code.trim()) {
+      setMessage('Please enter both name and code');
       setMessageType('error');
       setLoading(false);
       setTimeout(() => setMessage(''), 3000);
@@ -38,18 +50,22 @@ function SubjectsManagement({ departments = [] }) {
     }
     
     try {
-      const response = await subjectAPI.create({
+      const subjectData = {
         name: name.trim(),
         code: code.trim().toUpperCase(),
-        departmentId: parseInt(departmentId) // Associate with department
-      });
+        departmentId: departmentId ? parseInt(departmentId) : null
+      };
+
+      console.log('📤 Creating subject with data:', subjectData);
+
+      const response = await subjectAPI.create(subjectData);
       
       setMessage(`Subject "${response.data.name}" added successfully!`);
       setMessageType('success');
       setName('');
       setCode('');
       setDepartmentId('');
-      loadSubjects();
+      loadData(); // Reload data to show new subject with department info
     } catch (error) {
       console.error('Error adding subject:', error);
       const errorMessage = error.response?.data?.message || 'Failed to add subject';
@@ -59,6 +75,37 @@ function SubjectsManagement({ departments = [] }) {
       setLoading(false);
       setTimeout(() => setMessage(''), 3000);
     }
+  };
+
+  const handleDeleteSubject = async (id, name) => {
+    if (!confirm(`Are you sure you want to delete "${name}"?\n\nThis will also remove all allocations for this subject.`)) {
+      return;
+    }
+
+    try {
+      await subjectAPI.delete(id);
+      setMessage(`Subject "${name}" deleted successfully!`);
+      setMessageType('success');
+      loadData();
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error deleting subject:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to delete subject';
+      setMessage(`Error: ${errorMessage}`);
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const getDepartmentName = (subject) => {
+    if (subject.department) {
+      return subject.department.name;
+    }
+    if (subject.departmentId && departments.length > 0) {
+      const dept = departments.find(d => d.id === subject.departmentId);
+      return dept ? dept.name : 'Not Assigned';
+    }
+    return 'Not Assigned';
   };
 
   return (
@@ -109,7 +156,6 @@ function SubjectsManagement({ departments = [] }) {
             value={departmentId}
             onChange={(e) => setDepartmentId(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
           >
             <option value="">-- Select Department --</option>
             {departments.map(dept => (
@@ -146,12 +192,13 @@ function SubjectsManagement({ departments = [] }) {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {subjects.length === 0 ? (
               <tr>
-                <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
                   No subjects found. Add your first subject above.
                 </td>
               </tr>
@@ -166,7 +213,15 @@ function SubjectsManagement({ departments = [] }) {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {subject.department?.name || 'Not Assigned'}
+                    {subject.department?.name || getDepartmentName(subject) || 'Not Assigned'}
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <button
+                      onClick={() => handleDeleteSubject(subject.id, subject.name)}
+                      className="text-red-600 hover:text-red-800 transition-colors"
+                    >
+                      🗑️ Delete
+                    </button>
                   </td>
                 </tr>
               ))
