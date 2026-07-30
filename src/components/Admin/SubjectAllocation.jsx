@@ -44,7 +44,7 @@ function SubjectAllocation() {
         console.log('✅ Classes loaded:', classesData);
         setClasses(classesData);
       } else {
-        console.error(' Failed to load classes:', classesRes.status);
+        console.error('❌ Failed to load classes:', classesRes.status);
       }
       
       // Load ALL users who can teach
@@ -59,7 +59,7 @@ function SubjectAllocation() {
         const teachingRoles = ['Teacher', 'HeadOfDepartment', 'DeputyHeadTeacher', 'FormTeacher'];
         const teachingStaff = usersData.filter(u => teachingRoles.includes(u.role) && u.isActive);
         
-        console.log(' Teaching staff filtered:', teachingStaff);
+        console.log('📋 Teaching staff filtered:', teachingStaff);
         setTeachers(teachingStaff);
       } else {
         console.error('❌ Failed to load users:', usersRes.status);
@@ -73,7 +73,7 @@ function SubjectAllocation() {
         }
       }
       
-      // Load subjects from AdminController
+      // Load subjects from AdminController with department info
       const subjectsRes = await fetch('https://school-yathu.onrender.com/api/Admin/subjects', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -106,7 +106,7 @@ function SubjectAllocation() {
     
     try {
       const token = localStorage.getItem('token');
-      console.log(' Loading allocations for class:', classId);
+      console.log('🔄 Loading allocations for class:', classId);
       
       const response = await fetch(`https://school-yathu.onrender.com/api/Admin/class-allocations/${classId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -128,7 +128,7 @@ function SubjectAllocation() {
 
   const handleClassChange = (e) => {
     const classId = e.target.value;
-    console.log('Class selected:', classId);
+    console.log('📌 Class selected:', classId);
     setFormData({ ...formData, classId });
     if (classId) {
       loadAllocations(classId);
@@ -152,6 +152,23 @@ function SubjectAllocation() {
       
       console.log('📌 Allocating teacher:', formData);
       
+      // Get the subject to check its department
+      const selectedSubject = subjects.find(s => s.id === parseInt(formData.subjectId));
+      const selectedTeacher = teachers.find(t => t.id === parseInt(formData.teacherId));
+
+      // Department validation - Check if teacher is in the right department
+      if (selectedSubject?.departmentId && selectedTeacher?.departmentId) {
+        if (selectedSubject.departmentId !== selectedTeacher.departmentId) {
+          const deptName = selectedSubject.department?.name || 'subject\'s';
+          setMessage(`⚠️ ${selectedTeacher.name} is not in the ${deptName} department. 
+            Please assign a teacher from the correct department.`);
+          setMessageType('warning');
+          setLoading(false);
+          setTimeout(() => setMessage(''), 5000);
+          return;
+        }
+      }
+
       const response = await fetch('https://school-yathu.onrender.com/api/Admin/allocate-teacher', {
         method: 'POST',
         headers: {
@@ -171,6 +188,8 @@ function SubjectAllocation() {
         setMessageType('success');
         setFormData({ ...formData, subjectId: '', teacherId: '' });
         loadAllocations(formData.classId);
+        // Refresh data to update teacher's allocations
+        loadData();
       } else {
         setMessage(`❌ ${data.message || 'Allocation failed'}`);
         setMessageType('error');
@@ -202,6 +221,8 @@ function SubjectAllocation() {
         setMessage(`✅ Allocation removed successfully`);
         setMessageType('success');
         loadAllocations(formData.classId);
+        // Refresh data to update teacher's allocations
+        loadData();
       } else {
         const data = await response.json();
         setMessage(`❌ ${data.message || 'Failed to remove'}`);
@@ -235,6 +256,22 @@ function SubjectAllocation() {
       'Student': 'bg-yellow-100 text-yellow-800'
     };
     return colors[role] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Filter teachers by department if subject is selected
+  const getFilteredTeachers = () => {
+    if (!formData.subjectId) return teachers;
+    
+    const selectedSubject = subjects.find(s => s.id === parseInt(formData.subjectId));
+    if (!selectedSubject || !selectedSubject.departmentId) return teachers;
+    
+    return teachers.filter(t => t.departmentId === selectedSubject.departmentId);
+  };
+
+  // Get department name for a subject
+  const getSubjectDepartment = (subjectId) => {
+    const subject = subjects.find(s => s.id === subjectId);
+    return subject?.department?.name || null;
   };
 
   if (loading && !dataLoaded) {
@@ -305,6 +342,7 @@ function SubjectAllocation() {
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
               <h3 className="text-lg font-semibold text-gray-800">📌 New Allocation</h3>
+              <p className="text-sm text-gray-500">Assign teachers to subjects by class</p>
             </div>
             <div className="p-6">
               <form onSubmit={handleAllocate} className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -334,7 +372,9 @@ function SubjectAllocation() {
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={formData.subjectId}
-                    onChange={(e) => setFormData({...formData, subjectId: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, subjectId: e.target.value, teacherId: ''});
+                    }}
                     required
                     disabled={!formData.classId || subjects.length === 0}
                   >
@@ -342,11 +382,17 @@ function SubjectAllocation() {
                     {subjects.map(sub => (
                       <option key={sub.id} value={sub.id}>
                         {sub.name} {sub.code && `(${sub.code})`}
+                        {sub.department && ` - ${sub.department.name}`}
                       </option>
                     ))}
                   </select>
                   {subjects.length === 0 && (
                     <p className="text-xs text-yellow-600 mt-1">No subjects available</p>
+                  )}
+                  {formData.subjectId && getSubjectDepartment(parseInt(formData.subjectId)) && (
+                    <p className="text-xs text-blue-600 mt-1">
+                      Department: {getSubjectDepartment(parseInt(formData.subjectId))}
+                    </p>
                   )}
                 </div>
                 
@@ -360,7 +406,7 @@ function SubjectAllocation() {
                     disabled={!formData.classId || teachers.length === 0}
                   >
                     <option value="">-- Select Teacher --</option>
-                    {teachers.map(teacher => (
+                    {getFilteredTeachers().map(teacher => (
                       <option key={teacher.id} value={teacher.id}>
                         {teacher.name} 
                         {teacher.role && teacher.role !== 'Teacher' && (
@@ -368,11 +414,21 @@ function SubjectAllocation() {
                             {teacher.role}
                           </span>
                         )}
+                        {teacher.department && (
+                          <span className="ml-2 text-xs text-gray-500">
+                            ({teacher.department.name})
+                          </span>
+                        )}
                       </option>
                     ))}
                   </select>
                   {teachers.length === 0 && (
                     <p className="text-xs text-yellow-600 mt-1">No teachers available</p>
+                  )}
+                  {formData.subjectId && getFilteredTeachers().length === 0 && teachers.length > 0 && (
+                    <p className="text-xs text-yellow-600 mt-1">
+                      No teachers available in this department
+                    </p>
                   )}
                 </div>
                 
@@ -408,7 +464,6 @@ function SubjectAllocation() {
               
               {allocations.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
-                
                   <p>No allocations yet. Use the form above to allocate teachers to subjects.</p>
                 </div>
               ) : (
@@ -418,28 +473,37 @@ function SubjectAllocation() {
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teacher</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {allocations.map((alloc) => (
-                        <tr key={alloc.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{alloc.subjectName || getSubjectName(alloc.subjectId)}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              {alloc.teacherName || getTeacherName(alloc.teacherId)}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-sm">
-                            <button
-                              onClick={() => handleRemoveAllocation(alloc.id, alloc.subjectName || getSubjectName(alloc.subjectId))}
-                              className="text-red-600 hover:text-red-800 transition-colors flex items-center gap-1"
-                            >
-                              Remove
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                      {allocations.map((alloc) => {
+                        const subject = subjects.find(s => s.id === alloc.subjectId);
+                        return (
+                          <tr key={alloc.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                              {alloc.subjectName || getSubjectName(alloc.subjectId)}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              <span className="flex items-center gap-1">
+                                {alloc.teacherName || getTeacherName(alloc.teacherId)}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              {subject?.department?.name || 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 text-sm">
+                              <button
+                                onClick={() => handleRemoveAllocation(alloc.id, alloc.subjectName || getSubjectName(alloc.subjectId))}
+                                className="text-red-600 hover:text-red-800 transition-colors flex items-center gap-1"
+                              >
+                                Remove
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

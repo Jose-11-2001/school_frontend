@@ -312,6 +312,31 @@ export const formTeacherAPI = {
     api.get(`/FormTeacher/class-results-summary?year=${year}&term=${encodeURIComponent(term)}`),
   submitResults: (data) => api.post('/FormTeacher/submit-results', data),
 };
+// In your api.js or service file
+
+export const subjectAPI = {
+  create: (subjectData) => {
+    return api.post('/Admin/subjects', subjectData);
+  },
+  getAll: () => {
+    return api.get('/Admin/subjects');
+  },
+  getByDepartment: (departmentId) => {
+    return api.get(`/Admin/subjects/department/${departmentId}`);
+  }
+};
+
+export const departmentAPI = {
+  create: (data) => api.post('/Admin/departments', data),
+  getAll: () => api.get('/Admin/departments'),
+  getById: (id) => api.get(`/Admin/departments/${id}`),
+  assignHead: (departmentId, teacherId) => 
+    api.post(`/Admin/departments/${departmentId}/head`, { teacherId }),
+  getTeachers: (departmentId) => 
+    api.get(`/Admin/departments/${departmentId}/teachers`),
+  getSubjects: (departmentId) => 
+    api.get(`/Admin/departments/${departmentId}/subjects`)
+};
 // Add to api.js
 export const usersAPI = {
   getAll: () => api.get('/Users/all'),

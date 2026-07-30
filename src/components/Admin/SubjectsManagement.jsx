@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { subjectAPI } from '../../services/api';
 
-function SubjectsManagement() {
+function SubjectsManagement({ departments = [] }) {
   const [subjects, setSubjects] = useState([]);
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [departmentId, setDepartmentId] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
@@ -12,7 +13,8 @@ function SubjectsManagement() {
   const loadSubjects = async () => {
     try {
       const response = await subjectAPI.getAll();
-      setSubjects(response.data);
+      // Ensure subjects include department info
+      setSubjects(response.data || []);
     } catch (error) {
       console.error('Error loading subjects:', error);
     }
@@ -27,8 +29,8 @@ function SubjectsManagement() {
     setLoading(true);
     setMessage('');
     
-    if (!name.trim() || !code.trim()) {
-      setMessage('Please enter both name and code');
+    if (!name.trim() || !code.trim() || !departmentId) {
+      setMessage('Please enter name, code, and select a department');
       setMessageType('error');
       setLoading(false);
       setTimeout(() => setMessage(''), 3000);
@@ -38,13 +40,15 @@ function SubjectsManagement() {
     try {
       const response = await subjectAPI.create({
         name: name.trim(),
-        code: code.trim().toUpperCase()
+        code: code.trim().toUpperCase(),
+        departmentId: parseInt(departmentId) // Associate with department
       });
       
       setMessage(`Subject "${response.data.name}" added successfully!`);
       setMessageType('success');
       setName('');
       setCode('');
+      setDepartmentId('');
       loadSubjects();
     } catch (error) {
       console.error('Error adding subject:', error);
@@ -100,6 +104,21 @@ function SubjectsManagement() {
             required
           />
         </div>
+        <div className="flex-1 min-w-[180px]">
+          <select
+            value={departmentId}
+            onChange={(e) => setDepartmentId(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">-- Select Department --</option>
+            {departments.map(dept => (
+              <option key={dept.id} value={dept.id}>
+                {dept.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <button
           type="submit"
           disabled={loading}
@@ -126,12 +145,13 @@ function SubjectsManagement() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {subjects.length === 0 ? (
               <tr>
-                <td colSpan="3" className="px-6 py-8 text-center text-gray-500">
+                <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
                   No subjects found. Add your first subject above.
                 </td>
               </tr>
@@ -144,6 +164,9 @@ function SubjectsManagement() {
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-mono">
                       {subject.code}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {subject.department?.name || 'Not Assigned'}
                   </td>
                 </tr>
               ))
