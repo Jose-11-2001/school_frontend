@@ -16,12 +16,12 @@ function StudentDashboard() {
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
   const [activeTab, setActiveTab] = useState('my-subjects');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [studentId, setStudentId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const userData = getCurrentUser();
     
-    // ✅ Use hasRole for case-insensitive check
     if (!userData || !hasRole('Student')) {
       navigate('/login');
       return;
@@ -32,102 +32,132 @@ function StudentDashboard() {
   }, [navigate]);
 
   useEffect(() => {
-    if (studentData) {
+    if (studentId) {
       if (activeTab === 'my-subjects') {
         loadStudentSubjects();
       } else if (activeTab === 'results') {
         fetchStudentResults();
-      } else if (activeTab === 'subject-selection') {
-        // Subject selection is handled in its own component
       }
     }
-  }, [studentData, activeTab, selectedYear, selectedTerm]);
+  }, [studentId, activeTab, selectedYear, selectedTerm]);
 
   const loadStudentData = async (userData) => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`https://school-yathu-api.onrender.com/api/Student/student-by-email?email=${encodeURIComponent(userData.email)}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setStudentData(data);
-      } else {
-        const altResponse = await fetch(`https://school-yathu-api.onrender.com/api/Student/student-by-name?name=${encodeURIComponent(userData.name)}`, {
+      // First try to get student by ID (if available in user data)
+      let student = null;
+      
+      if (userData.id) {
+        // Try to get student by user ID
+        const response = await fetch(`https://school-yathu.onrender.com/api/Student/${userData.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (altResponse.ok) {
-          const data = await altResponse.json();
-          setStudentData(data);
-        } else {
-          setStudentData({
-            admissionNumber: userData.email?.split('@')[0] || 'N/A',
-            fullName: userData.name,
-            class: userData.class || 'N/A',
-            stream: userData.stream || 'N/A'
-          });
+        
+        if (response.ok) {
+          student = await response.json();
         }
+      }
+      
+      // If not found by ID, try by email
+      if (!student) {
+        const emailResponse = await fetch(`https://school-yathu.onrender.com/api/Student/student-by-email?email=${encodeURIComponent(userData.email)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (emailResponse.ok) {
+          student = await emailResponse.json();
+        }
+      }
+      
+      // If still not found, try by name
+      if (!student) {
+        const nameResponse = await fetch(`https://school-yathu.onrender.com/api/Student/student-by-name?name=${encodeURIComponent(userData.name)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (nameResponse.ok) {
+          student = await nameResponse.json();
+        }
+      }
+      
+      // If student found, set the data
+      if (student) {
+        console.log('✅ Student data loaded:', student);
+        setStudentData(student);
+        setStudentId(student.id);
+      } else {
+        console.warn('⚠️ No student data found, using fallback');
+        // Fallback data
+        setStudentData({
+          id: userData.id || 0,
+          admissionNumber: userData.admissionNumber || 'N/A',
+          fullName: userData.name || 'N/A',
+          class: userData.class || 'N/A',
+          stream: userData.stream || 'N/A'
+        });
       }
     } catch (error) {
       console.error('Error loading student data:', error);
+      // Fallback data
       setStudentData({
-        admissionNumber: userData.email?.split('@')[0] || 'N/A',
-        fullName: userData.name,
+        id: userData.id || 0,
+        admissionNumber: userData.admissionNumber || 'N/A',
+        fullName: userData.name || 'N/A',
         class: userData.class || 'N/A',
         stream: userData.stream || 'N/A'
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const loadStudentSubjects = async () => {
-    if (!studentData) return;
+    if (!studentId) return;
     
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch(
-        `https://school-yathu-api.onrender.com/api/StudentRegistration/student-subjects?class=${encodeURIComponent(studentData.class)}&stream=${encodeURIComponent(studentData.stream)}`,
-        {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }
-      );
+      // Try to get subjects by student ID
+      const response = await fetch(`https://school-yathu.onrender.com/api/Student/${studentId}/subjects`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
       if (response.ok) {
         const data = await response.json();
-        setSubjects(data.subjects || []);
+        setSubjects(data.subjects || data || []);
       } else {
-        const altResponse = await fetch(
-          `https://school-yathu-api.onrender.com/api/AdminSubjectAllocation/class-subjects?class=${encodeURIComponent(studentData.class)}&stream=${encodeURIComponent(studentData.stream)}`,
-          {
-            headers: { 'Authorization': `Bearer ${token}` }
-          }
-        );
+        // Try alternative endpoint
+        const altResponse = await fetch(`https://school-yathu.onrender.com/api/StudentSubject/my-subjects`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
         if (altResponse.ok) {
           const data = await altResponse.json();
-          setSubjects(data.subjects || []);
+          setSubjects(data || []);
         } else {
-          setSubjects(user.subjects || []);
+          setSubjects([]);
         }
       }
     } catch (error) {
       console.error('Error loading subjects:', error);
+      setSubjects([]);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchStudentResults = async () => {
-    if (!studentData) return;
+    if (!studentData?.admissionNumber) return;
     
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       
       const response = await fetch(
-        `https://school-yathu-api.onrender.com/api/Results/student-results?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
+        `https://school-yathu.onrender.com/api/Student/student-results?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
         {
           headers: { 'Authorization': `Bearer ${token}` }
         }
@@ -135,23 +165,15 @@ function StudentDashboard() {
 
       if (response.ok) {
         const data = await response.json();
-        setMarks(data.results || []);
+        setMarks(data.marks || data.results || []);
         setRanking(data.ranking || null);
       } else {
-        const altResponse = await fetch(
-          `https://school-yathu-api.onrender.com/api/StudentMarks/student-marks?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
-          {
-            headers: { 'Authorization': `Bearer ${token}` }
-          }
-        );
-        if (altResponse.ok) {
-          const data = await altResponse.json();
-          setMarks(data.marks || []);
-          setRanking(data.ranking || null);
-        }
+        setMarks([]);
+        setRanking(null);
       }
     } catch (error) {
       console.error('Error fetching results:', error);
+      setMarks([]);
     } finally {
       setLoading(false);
     }
@@ -636,12 +658,6 @@ function StudentDashboard() {
           <div className="px-4 py-2 text-sm text-blue-200">
             <p className="font-semibold">{user?.name}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors mt-2"
-          >
-            <span className="font-bold text-white">Logout</span>
-          </button>
         </div>
       </div>
 
