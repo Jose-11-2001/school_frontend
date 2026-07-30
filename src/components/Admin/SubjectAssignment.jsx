@@ -167,7 +167,7 @@ function SubjectAssignment() {
               Assigning...
             </span>
           ) : (
-            '📌 Assign Subject to Teacher'
+            ' Assign Subject to Teacher'
           )}
         </button>
         

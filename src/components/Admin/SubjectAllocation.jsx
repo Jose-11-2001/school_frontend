@@ -44,7 +44,7 @@ function SubjectAllocation() {
         console.log('✅ Classes loaded:', classesData);
         setClasses(classesData);
       } else {
-        console.error('❌ Failed to load classes:', classesRes.status);
+        console.error(' Failed to load classes:', classesRes.status);
       }
       
       // Load ALL users who can teach
@@ -59,7 +59,7 @@ function SubjectAllocation() {
         const teachingRoles = ['Teacher', 'HeadOfDepartment', 'DeputyHeadTeacher', 'FormTeacher'];
         const teachingStaff = usersData.filter(u => teachingRoles.includes(u.role) && u.isActive);
         
-        console.log('👨‍🏫 Teaching staff filtered:', teachingStaff);
+        console.log(' Teaching staff filtered:', teachingStaff);
         setTeachers(teachingStaff);
       } else {
         console.error('❌ Failed to load users:', usersRes.status);
@@ -106,7 +106,7 @@ function SubjectAllocation() {
     
     try {
       const token = localStorage.getItem('token');
-      console.log('📋 Loading allocations for class:', classId);
+      console.log(' Loading allocations for class:', classId);
       
       const response = await fetch(`https://school-yathu.onrender.com/api/Admin/class-allocations/${classId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -128,7 +128,7 @@ function SubjectAllocation() {
 
   const handleClassChange = (e) => {
     const classId = e.target.value;
-    console.log('📚 Class selected:', classId);
+    console.log('Class selected:', classId);
     setFormData({ ...formData, classId });
     if (classId) {
       loadAllocations(classId);
