@@ -156,15 +156,6 @@ function DeputyDashboard() {
             </button>
           ))}
         </nav>
-
-        <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
-          >
-            <span className="text-white font-bold">Logout</span>
-          </button>
-        </div>
       </div>
 
       {/* Main Content */}
