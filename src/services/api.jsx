@@ -161,6 +161,21 @@ export const adminAPI = {
 };
 
 // ============================================
+// DEPARTMENT API
+// ============================================
+export const departmentAPI = {
+  create: (data) => api.post('/Admin/departments', data),
+  getAll: () => api.get('/Admin/departments'),
+  getById: (id) => api.get(`/Admin/departments/${id}`),
+  assignHead: (departmentId, teacherId) => 
+    api.post(`/Admin/departments/${departmentId}/head`, { teacherId }),
+  getTeachers: (departmentId) => 
+    api.get(`/Admin/departments/${departmentId}/teachers`),
+  getSubjects: (departmentId) => 
+    api.get(`/Admin/departments/${departmentId}/subjects`)
+};
+
+// ============================================
 // STUDENT API
 // ============================================
 export const studentAPI = {
@@ -200,8 +215,11 @@ export const contactsAPI = {
 // SUBJECTS API
 // ============================================
 export const subjectAPI = {
-  getAll: () => api.get('/Subjects'),
-  create: (data) => api.post('/Subjects', data),
+  getAll: () => api.get('/Admin/subjects'),
+  create: (subjectData) => api.post('/Admin/subjects', subjectData),
+  getByDepartment: (departmentId) => api.get(`/Admin/subjects/department/${departmentId}`),
+  update: (id, data) => api.put(`/Admin/subjects/${id}`, data),
+  delete: (id) => api.delete(`/Admin/subjects/${id}`),
 };
 
 // ============================================
@@ -214,9 +232,10 @@ export const notificationsAPI = {
   getHeadOfDepartmentNotifications: () => api.get('/Notifications/head-of-department'),
   getFormTeacherNotifications: () => api.get('/Notifications/form-teacher'),
   getUnreadCount: () => api.get('/Notifications/unread-count'),
-  markAsRead: (id) => api.put(`/Notifications/${id}/read`),
-  markAllAsRead: () => api.put('/Notifications/read-all'),
+  markAsRead: (id) => api.put(`/Notifications/mark-read/${id}`),
+  markAllAsRead: () => api.put('/Notifications/mark-all-read'),
   send: (data) => api.post('/Notifications/send', data),
+  broadcast: (data) => api.post('/Notifications/broadcast', data),
 };
 
 // ============================================
@@ -250,6 +269,11 @@ export const studentSubjectAPI = {
   register: (subjectId) => api.post('/StudentSubject/register', { subjectId }),
   getMySubjects: () => api.get('/StudentSubject/my-subjects'),
   getTeacherStudents: () => api.get('/StudentSubject/teacher-students'),
+  getAllAllocations: () => api.get('/StudentSubject/all'),
+  bulkRegister: (data) => api.post('/StudentSubject/bulk-register', data),
+  removeAllocation: (id) => api.delete(`/StudentSubject/${id}`),
+  getStudentAllocations: (studentId) => api.get(`/StudentSubject/student/${studentId}`),
+  getClassSubjects: (classId) => api.get(`/StudentSubject/class-subjects/${classId}`),
 };
 
 // ============================================
@@ -312,38 +336,40 @@ export const formTeacherAPI = {
     api.get(`/FormTeacher/class-results-summary?year=${year}&term=${encodeURIComponent(term)}`),
   submitResults: (data) => api.post('/FormTeacher/submit-results', data),
 };
-// In your api.js or service file
 
-export const subjectAPI = {
-  create: (subjectData) => {
-    return api.post('/Admin/subjects', subjectData);
-  },
-  getAll: () => {
-    return api.get('/Admin/subjects');
-  },
-  getByDepartment: (departmentId) => {
-    return api.get(`/Admin/subjects/department/${departmentId}`);
-  }
-};
-
-export const departmentAPI = {
-  create: (data) => api.post('/Admin/departments', data),
-  getAll: () => api.get('/Admin/departments'),
-  getById: (id) => api.get(`/Admin/departments/${id}`),
-  assignHead: (departmentId, teacherId) => 
-    api.post(`/Admin/departments/${departmentId}/head`, { teacherId }),
-  getTeachers: (departmentId) => 
-    api.get(`/Admin/departments/${departmentId}/teachers`),
-  getSubjects: (departmentId) => 
-    api.get(`/Admin/departments/${departmentId}/subjects`)
-};
-// Add to api.js
+// ============================================
+// USERS API
+// ============================================
 export const usersAPI = {
   getAll: () => api.get('/Users/all'),
   getByRole: (role) => api.get(`/Users/by-role/${role}`),
   update: (id, data) => api.put(`/Users/${id}`, data),
   delete: (id) => api.delete(`/Users/${id}`),
   get: (id) => api.get(`/Users/${id}`),
+  getRoles: () => api.get('/Users/roles'),
+  assignSecondaryRoles: (data) => api.post('/Users/assign-secondary-roles', data),
+};
+
+// ============================================
+// ADMIN SUBJECT ALLOCATION API (for student allocations)
+// ============================================
+export const adminSubjectAllocationAPI = {
+  getAvailableSubjects: () => api.get('/AdminSubjectAllocation/available-subjects'),
+  getTeachers: () => api.get('/AdminSubjectAllocation/teachers'),
+  getClasses: () => api.get('/AdminSubjectAllocation/classes'),
+  getStudentsByClass: (className, stream) => 
+    api.get(`/AdminSubjectAllocation/students-by-class/${encodeURIComponent(className)}/${encodeURIComponent(stream)}`),
+  getStudentAllocations: (classId, year) => 
+    api.get(`/AdminSubjectAllocation/student-allocations${classId ? `?classId=${classId}` : ''}${year ? `&year=${year}` : ''}`),
+  getStudentSubjects: (studentId, year) => 
+    api.get(`/AdminSubjectAllocation/student-subjects/${studentId}${year ? `?year=${year}` : ''}`),
+  allocateSubjectsToStudent: (data) => api.post('/AdminSubjectAllocation/allocate-subjects-to-student', data),
+  bulkAllocateToClass: (data) => api.post('/AdminSubjectAllocation/bulk-allocate-to-class', data),
+  removeAllocation: (allocationId) => api.delete(`/AdminSubjectAllocation/remove-allocation/${allocationId}`),
+  getAvailableSubjectsForStudent: (studentId, year) => 
+    api.get(`/AdminSubjectAllocation/available-subjects-for-student/${studentId}${year ? `?year=${year}` : ''}`),
+  allocateTeacherToSubject: (data) => api.post('/AdminSubjectAllocation/allocate-teacher-to-subject', data),
+  getAllocationSummary: () => api.get('/AdminSubjectAllocation/summary'),
 };
 
 export default api;
