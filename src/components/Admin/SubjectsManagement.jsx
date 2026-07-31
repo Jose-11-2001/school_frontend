@@ -16,12 +16,12 @@ function SubjectsManagement() {
     try {
       // Load subjects with department info
       const subjectsRes = await subjectAPI.getAll();
-      console.log('📚 Subjects loaded:', subjectsRes.data);
+      console.log('Subjects loaded:', subjectsRes.data);
       setSubjects(subjectsRes.data || []);
 
       // Load departments for dropdown
       const deptRes = await adminAPI.getDepartments();
-      console.log('🏢 Departments loaded:', deptRes.data);
+      console.log('Departments loaded:', deptRes.data);
       setDepartments(deptRes.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -56,7 +56,7 @@ function SubjectsManagement() {
         departmentId: departmentId ? parseInt(departmentId) : null
       };
 
-      console.log('📤 Creating subject with data:', subjectData);
+      console.log('Creating subject with data:', subjectData);
 
       const response = await subjectAPI.create(subjectData);
       
@@ -220,7 +220,7 @@ function SubjectsManagement() {
                       onClick={() => handleDeleteSubject(subject.id, subject.name)}
                       className="text-red-600 hover:text-red-800 transition-colors"
                     >
-                      🗑️ Delete
+                      Delete
                     </button>
                   </td>
                 </tr>
