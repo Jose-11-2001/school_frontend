@@ -100,11 +100,10 @@ function AdminDashboard() {
     { id: 'students', label: 'Student List' },
     { id: 'users', label: 'Manage Users' },
     { id: 'classes', label: 'Class Management' },
-    // Add these to menuItems
     { id: 'school-rankings', label: 'School Rankings' },
     { id: 'department-rankings', label: 'Department Rankings' },
-    { id: 'subject-assignment', label: 'Subject Assignment' },//teachers
-    { id: 'allocation', label: 'Subject Allocation' },// class
+    { id: 'subject-assignment', label: 'Subject Assignment' },
+    { id: 'allocation', label: 'Subject Allocation' },
     { id: 'student-subjects', label: 'Student Subject Allocation' },
     { id: 'subjects', label: 'Manage Subjects' },
     { id: 'secondary-roles', label: 'Secondary Roles' }, 
@@ -144,16 +143,17 @@ function AdminDashboard() {
         <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* ===== SIDEBAR ===== */}
+      {/* ===== SIDEBAR - NOW SCROLLABLE ===== */}
       <div className={`
         fixed top-0 left-0 z-50
         transition-transform duration-300 ease-in-out
         w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl
-        h-screen overflow-hidden
+        h-screen
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
         flex flex-col
       `}>
+        {/* Header - Fixed at top */}
         <div className="flex-shrink-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
             <button onClick={handleGoBack} className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0">
@@ -168,7 +168,8 @@ function AdminDashboard() {
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-2">
+        {/* Navigation - SCROLLABLE */}
+        <nav className="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-800">
           {allMenuItems.map((item) => (
             <button
               key={item.id}
@@ -187,7 +188,7 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Sidebar Footer - Logout at bottom for mobile */}
+        {/* Footer - Fixed at bottom */}
         <div className="flex-shrink-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700 space-y-2">
           <div className="lg:hidden px-2 py-1">
             <p className="text-xs text-blue-200">Welcome, {getUserName()}</p>
