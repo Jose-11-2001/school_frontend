@@ -25,7 +25,7 @@ function SubjectsManagement() {
       setDepartments(deptRes.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
-      setMessage('Failed to load data');
+      setMessage('❌ Failed to load data');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -42,17 +42,31 @@ function SubjectsManagement() {
     setMessage('');
     
     if (!name.trim() || !code.trim()) {
-      setMessage('Please enter both name and code');
+      setMessage('❌ Please enter both name and code');
       setMessageType('error');
       setLoading(false);
       setTimeout(() => setMessage(''), 3000);
       return;
     }
     
+    // Check for duplicate code locally first
+    const codeUpper = code.trim().toUpperCase();
+    const existingSubject = subjects.find(
+      s => s.code?.toUpperCase() === codeUpper
+    );
+    
+    if (existingSubject) {
+      setMessage(`❌ Subject code '${codeUpper}' already exists for '${existingSubject.name}'. Please use a different code.`);
+      setMessageType('error');
+      setLoading(false);
+      setTimeout(() => setMessage(''), 5000);
+      return;
+    }
+
     try {
       const subjectData = {
         name: name.trim(),
-        code: code.trim().toUpperCase(),
+        code: codeUpper,
         departmentId: departmentId ? parseInt(departmentId) : null
       };
 
@@ -60,41 +74,60 @@ function SubjectsManagement() {
 
       const response = await subjectAPI.create(subjectData);
       
-      setMessage(`Subject "${response.data.name}" added successfully!`);
+      setMessage(`✅ Subject "${response.data.name}" added successfully!`);
       setMessageType('success');
       setName('');
       setCode('');
       setDepartmentId('');
-      loadData(); // Reload data to show new subject with department info
+      await loadData(); // Reload data to show new subject
     } catch (error) {
       console.error('Error adding subject:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to add subject';
-      setMessage(`Error: ${errorMessage}`);
+      
+      // Extract detailed error message
+      let errorMessage = 'Failed to add subject';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        errorMessage = Object.values(errors).flat().join(', ');
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Check for duplicate key error
+      if (errorMessage.toLowerCase().includes('duplicate') || 
+          errorMessage.toLowerCase().includes('already exists') ||
+          errorMessage.toLowerCase().includes('unique constraint')) {
+        setMessage(`❌ Subject code '${codeUpper}' already exists. Please use a different code.`);
+      } else {
+        setMessage(`❌ Error: ${errorMessage}`);
+      }
+      
       setMessageType('error');
     } finally {
       setLoading(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 5000);
     }
   };
 
-  const handleDeleteSubject = async (id, name) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?\n\nThis will also remove all allocations for this subject.`)) {
+  const handleDeleteSubject = async (id, subjectName) => {
+    if (!confirm(`Are you sure you want to delete "${subjectName}"?\n\nThis will also remove all allocations for this subject.`)) {
       return;
     }
 
     try {
       await subjectAPI.delete(id);
-      setMessage(`Subject "${name}" deleted successfully!`);
+      setMessage(`✅ Subject "${subjectName}" deleted successfully!`);
       setMessageType('success');
-      loadData();
-      setTimeout(() => setMessage(''), 3000);
+      await loadData();
     } catch (error) {
       console.error('Error deleting subject:', error);
       const errorMessage = error.response?.data?.message || 'Failed to delete subject';
-      setMessage(`Error: ${errorMessage}`);
+      setMessage(`❌ Error: ${errorMessage}`);
       setMessageType('error');
-      setTimeout(() => setMessage(''), 3000);
     }
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const getDepartmentName = (subject) => {
@@ -112,7 +145,7 @@ function SubjectsManagement() {
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Manage Subjects</h2>
+          <h2 className="text-2xl font-bold text-gray-800">📚 Manage Subjects</h2>
           <p className="text-sm text-gray-500 mt-1">Add and manage all subjects in the system</p>
         </div>
         <div className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-full">
@@ -121,7 +154,7 @@ function SubjectsManagement() {
       </div>
       
       {message && (
-        <div className={`p-3 rounded-lg mb-4 ${
+        <div className={`p-3 rounded-lg mb-4 whitespace-pre-line ${
           messageType === 'success' 
             ? 'bg-green-50 text-green-700 border border-green-200' 
             : 'bg-red-50 text-red-700 border border-red-200'
@@ -150,6 +183,7 @@ function SubjectsManagement() {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+          <p className="text-xs text-gray-400 mt-1">Code must be unique</p>
         </div>
         <div className="flex-1 min-w-[180px]">
           <select
