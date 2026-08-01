@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/common/Layout';
-import Home from './components/common/Home';
+import Layout from './components/Common/Layout';
+import Home from './components/Common/Home';
 import Login from './components/Auth/Login';
 import ChangePassword from './components/Auth/ChangePassword';
 import AdminDashboard from './components/Admin/AdminDashboard';
