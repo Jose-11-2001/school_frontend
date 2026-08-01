@@ -143,7 +143,7 @@ function AdminDashboard() {
         <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* ===== SIDEBAR - FIXED SCROLLABLE ===== */}
+      {/* ===== SIDEBAR - USING CUSTOM CLASSES ===== */}
       <div className={`
         fixed top-0 left-0 z-50
         transition-transform duration-300 ease-in-out
@@ -152,7 +152,7 @@ function AdminDashboard() {
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
         flex flex-col
-        overflow-hidden
+        sidebar-container
       `}>
         {/* Header - Fixed at top */}
         <div className="flex-shrink-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
@@ -170,23 +170,25 @@ function AdminDashboard() {
         </div>
 
         {/* Navigation - SCROLLABLE */}
-        <div className="flex-1 overflow-y-auto py-2 sidebar-scroll">
-          {allMenuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setActiveTab(item.id);
-                setMobileOpen(false);
-              }}
-              className={`w-full text-left flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                activeTab === item.id
-                  ? 'bg-blue-700 border-r-4 border-white text-white'
-                  : 'hover:bg-blue-700 text-blue-100'
-              }`}
-            >
-              <span className="text-sm font-medium">{item.label}</span>
-            </button>
-          ))}
+        <div className="flex-1 sidebar-scroll" style={{ overflowY: 'auto', overflowX: 'hidden' }}>
+          <div className="py-2">
+            {allMenuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setMobileOpen(false);
+                }}
+                className={`w-full text-left flex items-center gap-3 px-4 py-2.5 transition-colors ${
+                  activeTab === item.id
+                    ? 'bg-blue-700 border-r-4 border-white text-white'
+                    : 'hover:bg-blue-700 text-blue-100'
+                }`}
+              >
+                <span className="text-sm font-medium">{item.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Footer - Fixed at bottom */}
