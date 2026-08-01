@@ -5,8 +5,10 @@ import HodDashboard from './HodDashboard';
 import HodTeachers from './HodTeachers';
 import HodSubjects from './HodSubjects';
 import HodStudentResults from './HodStudentResults';
+import Timetable from '../Common/Timetable';
+import ReportGenerator from '../Common/ReportGenerator';
 
-// Temporary Notification component - replace with your actual component
+// Notification component
 const HodNotifications = () => {
   const [count, setCount] = useState(0);
   useEffect(() => {
@@ -52,13 +54,7 @@ function HeadOfDepartmentDashboard() {
   useEffect(() => {
     const userData = getCurrentUser();
     
-    console.log('HOD Dashboard - User Data:', userData);
-    console.log('HOD Dashboard - User Role:', userData?.role);
-    console.log('HOD Dashboard - hasRole HeadOfDepartment:', hasRole('HeadOfDepartment'));
-    
-    // ✅ Use hasRole for case-insensitive check
     if (!userData || !hasRole('HeadOfDepartment')) {
-      console.log('HOD Dashboard - Not authorized, redirecting to login');
       navigate('/login');
       return;
     }
@@ -76,8 +72,6 @@ function HeadOfDepartmentDashboard() {
       if (response.ok) {
         const data = await response.json();
         setDepartment(data);
-      } else {
-        console.error('Failed to load department:', response.status);
       }
     } catch (error) {
       console.error('Error loading department:', error);
@@ -105,6 +99,9 @@ function HeadOfDepartmentDashboard() {
     { id: 'teachers', label: 'Department Teachers' },
     { id: 'subjects', label: 'Department Subjects' },
     { id: 'results', label: 'Student Results' },
+    { id: 'timetable', label: 'Timetable' },
+    { id: 'reports', label: 'Generate Reports' },
+    { id: 'subject-rankings', label: 'Subject Rankings' },
   ];
 
   return (
@@ -112,10 +109,7 @@ function HeadOfDepartmentDashboard() {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <button
-            onClick={toggleMobileSidebar}
-            className="p-1 rounded-lg hover:bg-blue-700"
-          >
+          <button onClick={toggleMobileSidebar} className="p-1 rounded-lg hover:bg-blue-700">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
@@ -125,10 +119,7 @@ function HeadOfDepartmentDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <HodNotifications />
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm"
-          >
+          <button onClick={handleLogout} className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm">
             Logout
           </button>
         </div>
@@ -136,13 +127,10 @@ function HeadOfDepartmentDashboard() {
 
       {/* Mobile Sidebar Overlay */}
       {mobileOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={toggleMobileSidebar}
-        />
+        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileSidebar} />
       )}
 
-      {/* ===== SIDEBAR - BLUE BACKGROUND ===== */}
+      {/* Sidebar */}
       <div className={`
         fixed lg:fixed z-50
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -152,11 +140,7 @@ function HeadOfDepartmentDashboard() {
       `}>
         <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
           <div className="flex items-center gap-4 p-4 border-b border-blue-700">
-            <button
-              onClick={handleGoBack}
-              className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0"
-              title="Go back"
-            >
+            <button onClick={handleGoBack} className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
@@ -226,6 +210,8 @@ function HeadOfDepartmentDashboard() {
                 {activeTab === 'teachers' && <HodTeachers />}
                 {activeTab === 'subjects' && <HodSubjects />}
                 {activeTab === 'results' && <HodStudentResults />}
+                {activeTab === 'timetable' && <Timetable role="HeadOfDepartment" userId={user?.id} />}
+                {activeTab === 'reports' && <ReportGenerator role="HeadOfDepartment" departmentId={department?.id} />}
               </>
             )}
           </div>

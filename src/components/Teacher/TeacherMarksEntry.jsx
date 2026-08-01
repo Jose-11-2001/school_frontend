@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { generateGradePDF, getLetterGrade, getPoints, getPointsGrade } from './PDFGenerator';
+import { generateGradePDF, getLetterGrade, getPoints, getPointsGrade } from '../A/PDFGenerator';
 
 function TeacherMarksEntry() {
   const [students, setStudents] = useState([]);

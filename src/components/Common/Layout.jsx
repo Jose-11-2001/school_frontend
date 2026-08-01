@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { getCurrentUser, getUserName } from '../utils/roleUtils';
+import { getCurrentUser, getUserName } from '../../utils/roleUtils';
 
 function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

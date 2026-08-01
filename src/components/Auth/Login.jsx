@@ -136,7 +136,7 @@ function Login({ setUser }) {
             />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Mkondezi Secondary School</h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Grading System</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">School Management and Grading System</p>
         </div>
 
         {error && (

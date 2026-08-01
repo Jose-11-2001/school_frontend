@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { adminAPI, studentAPI } from '../services/api';
+import { adminAPI, studentAPI } from '../../services/api';
 
 function Rankings() {
   const [className, setClassName] = useState('');

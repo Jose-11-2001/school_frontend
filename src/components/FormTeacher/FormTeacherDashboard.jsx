@@ -6,6 +6,8 @@ import FormTeacherClasses from './FormTeacherClasses';
 import FormTeacherStudents from './FormTeacherStudents';
 import StudentSubjectAllocation from './StudentSubjectAllocation';
 import ClassResults from './ClassResults';
+import SubjectApprovals from './SubjectApprovals';
+import FormTeacherReports from './FormTeacherReports';
 
 function FormTeacherDashboard() {
   const [user, setUser] = useState(null);
@@ -39,10 +41,13 @@ function FormTeacherDashboard() {
   };
 
   const menuItems = [
-    { id: 'classes', label: '📚 My Classes' },
-    { id: 'students', label: '👨‍🎓 My Students' },
-    { id: 'subject-allocation', label: '📖 Allocate Subjects' },
-    { id: 'results', label: '📊 Class Results' },
+    { id: 'classes', label: 'My Classes' },
+    { id: 'students', label: 'My Students' },
+    { id: 'subject-allocation', label: 'Allocate Subjects' },
+    { id: 'subject-approvals', label: 'Subject Approvals' },
+    { id: 'results', label: 'Class Results' },
+    { id: 'reports', label: 'Reports' },
+    { id: 'class-rankings', label: 'Class Rankings' },
   ];
 
   return (
@@ -160,7 +165,9 @@ function FormTeacherDashboard() {
             {activeTab === 'classes' && <FormTeacherClasses />}
             {activeTab === 'students' && <FormTeacherStudents />}
             {activeTab === 'subject-allocation' && <StudentSubjectAllocation />}
+            {activeTab === 'subject-approvals' && <SubjectApprovals />}
             {activeTab === 'results' && <ClassResults />}
+            {activeTab === 'reports' && <FormTeacherReports />}
           </div>
         </div>
       </div>

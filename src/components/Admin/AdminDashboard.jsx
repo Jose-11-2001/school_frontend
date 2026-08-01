@@ -7,8 +7,8 @@ import ClassManagement from './ClassManagement';
 import ResultsApproval from './ResultsApproval';
 import StudentList from './StudentList';
 import AdminUserManagement from './AdminUserManagement';
-import Rankings from '../Rankings';
-import AdminSubjectAllocation from './AdminSubjectAllocation';
+import Rankings from '../Common/Rankings';
+import AdminSubjectAllocation from '../A/AdminSubjectAllocation';
 import StudentRegistration from './StudentRegistration';
 import SubjectAllocation from './SubjectAllocation';
 import SubjectAssignment from './SubjectAssignment';
@@ -100,6 +100,9 @@ function AdminDashboard() {
     { id: 'students', label: 'Student List' },
     { id: 'users', label: 'Manage Users' },
     { id: 'classes', label: 'Class Management' },
+    // Add these to menuItems
+    { id: 'school-rankings', label: 'School Rankings' },
+    { id: 'department-rankings', label: 'Department Rankings' },
     { id: 'subject-assignment', label: 'Subject Assignment' },//teachers
     { id: 'allocation', label: 'Subject Allocation' },// class
     { id: 'student-subjects', label: 'Student Subject Allocation' },
