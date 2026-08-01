@@ -152,6 +152,7 @@ function AdminDashboard() {
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
         flex flex-col
+        overflow-hidden
       `}>
         {/* Header - Fixed at top */}
         <div className="flex-shrink-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
@@ -169,7 +170,7 @@ function AdminDashboard() {
         </div>
 
         {/* Navigation - SCROLLABLE */}
-        <div className="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-800" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+        <div className="flex-1 overflow-y-auto py-2 sidebar-scroll">
           {allMenuItems.map((item) => (
             <button
               key={item.id}
