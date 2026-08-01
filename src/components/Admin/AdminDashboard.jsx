@@ -143,7 +143,7 @@ function AdminDashboard() {
         <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* ===== SIDEBAR - NOW SCROLLABLE ===== */}
+      {/* ===== SIDEBAR - FIXED SCROLLABLE ===== */}
       <div className={`
         fixed top-0 left-0 z-50
         transition-transform duration-300 ease-in-out
@@ -169,7 +169,7 @@ function AdminDashboard() {
         </div>
 
         {/* Navigation - SCROLLABLE */}
-        <nav className="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-800">
+        <div className="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-blue-800" style={{ maxHeight: 'calc(100vh - 180px)' }}>
           {allMenuItems.map((item) => (
             <button
               key={item.id}
@@ -186,7 +186,7 @@ function AdminDashboard() {
               <span className="text-sm font-medium">{item.label}</span>
             </button>
           ))}
-        </nav>
+        </div>
 
         {/* Footer - Fixed at bottom */}
         <div className="flex-shrink-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700 space-y-2">
