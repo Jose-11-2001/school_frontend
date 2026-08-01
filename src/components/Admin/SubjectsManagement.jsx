@@ -145,7 +145,7 @@ function SubjectsManagement() {
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">📚 Manage Subjects</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Manage Subjects</h2>
           <p className="text-sm text-gray-500 mt-1">Add and manage all subjects in the system</p>
         </div>
         <div className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-full">
