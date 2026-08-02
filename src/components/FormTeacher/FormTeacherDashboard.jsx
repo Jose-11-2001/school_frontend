@@ -8,8 +8,11 @@ import StudentSubjectAllocation from './StudentSubjectAllocation';
 import ClassResults from './ClassResults';
 import SubjectApprovals from './SubjectApprovals';
 import FormTeacherReports from './FormTeacherReports';
+import ClassRankings from './ClassRankings';
 
 function FormTeacherDashboard() {
+  console.log('📱 FormTeacherDashboard rendered');
+  
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('classes');
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -17,6 +20,8 @@ function FormTeacherDashboard() {
 
   useEffect(() => {
     const userData = getCurrentUser();
+    console.log('📱 UserData:', userData);
+    console.log('📱 hasRole FormTeacher:', hasRole('FormTeacher'));
     
     if (!userData || !hasRole('FormTeacher')) {
       navigate('/login');
@@ -41,13 +46,13 @@ function FormTeacherDashboard() {
   };
 
   const menuItems = [
-    { id: 'classes', label: 'My Classes' },
-    { id: 'students', label: 'My Students' },
-    { id: 'subject-allocation', label: 'Allocate Subjects' },
-    { id: 'subject-approvals', label: 'Subject Approvals' },
-    { id: 'results', label: 'Class Results' },
-    { id: 'reports', label: 'Reports' },
-    { id: 'class-rankings', label: 'Class Rankings' },
+    { id: 'classes', label: '📚 My Classes' },
+    { id: 'students', label: '👨‍🎓 My Students' },
+    { id: 'subject-allocation', label: '📖 Allocate Subjects' },
+    { id: 'subject-approvals', label: '✅ Subject Approvals' },
+    { id: 'results', label: '📊 Class Results' },
+    { id: 'reports', label: '📋 Reports' },
+    { id: 'class-rankings', label: '🏆 Class Rankings' },
   ];
 
   return (
@@ -132,7 +137,7 @@ function FormTeacherDashboard() {
 
         <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
           <div className="px-4 py-2 text-sm text-blue-200">
-            <p className="font-semibold">{user?.name}</p>
+            <p className="font-semibold">{user?.name || 'User'}</p>
             <p className="text-xs opacity-75">Form Teacher</p>
           </div>
           <button
@@ -168,6 +173,7 @@ function FormTeacherDashboard() {
             {activeTab === 'subject-approvals' && <SubjectApprovals />}
             {activeTab === 'results' && <ClassResults />}
             {activeTab === 'reports' && <FormTeacherReports />}
+            {activeTab === 'class-rankings' && <ClassRankings />}
           </div>
         </div>
       </div>
