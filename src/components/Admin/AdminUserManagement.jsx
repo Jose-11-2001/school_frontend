@@ -47,7 +47,6 @@ function AdminUserManagement() {
         setAllUsers(data);
       } else {
         console.error('Failed to load users:', response.status);
-        // Fallback: try to load from admin endpoints
         await loadUsersFallback();
       }
     } catch (error) {
@@ -56,11 +55,9 @@ function AdminUserManagement() {
     }
   };
 
-  // Fallback method if Users/all endpoint fails
   const loadUsersFallback = async () => {
     try {
       const token = localStorage.getItem('token');
-      // Try to load teachers and students separately
       const [teachersRes, studentsRes] = await Promise.all([
         fetch('https://school-yathu.onrender.com/api/Admin/teachers', {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -111,30 +108,32 @@ function AdminUserManagement() {
   };
 
   const handleDeleteUser = async (id, name, role) => {
-    if (confirm(`Are you sure you want to delete ${role} "${name}"?\n\nThis action cannot be undone.`)) {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`https://school-yathu.onrender.com/api/Users/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-          setMessage(`${role} "${name}" deleted successfully!`);
-          setMessageType('success');
-          loadAllData();
-        } else {
-          const data = await response.json();
-          setMessage(`Error: ${data.message || 'Failed to delete user'}`);
-          setMessageType('error');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        setMessage('Failed to delete user');
+    if (!confirm(`Are you sure you want to delete ${role} "${name}"?\n\nThis action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`https://school-yathu.onrender.com/api/Users/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        setMessage(`✅ ${role} "${name}" deleted successfully!`);
+        setMessageType('success');
+        loadAllData();
+      } else {
+        const data = await response.json();
+        setMessage(`❌ Error: ${data.message || 'Failed to delete user'}`);
         setMessageType('error');
       }
-      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error:', error);
+      setMessage('❌ Failed to delete user');
+      setMessageType('error');
     }
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const handleEditUser = (user) => {
@@ -165,19 +164,19 @@ function AdminUserManagement() {
       });
 
       if (response.ok) {
-        setMessage(`User "${editFormData.name}" updated successfully!`);
+        setMessage(`✅ User "${editFormData.name}" updated successfully!`);
         setMessageType('success');
         setShowEditModal(false);
         setEditingUser(null);
         loadAllData();
       } else {
         const data = await response.json();
-        setMessage(`Error: ${data.message || 'Failed to update user'}`);
+        setMessage(`❌ Error: ${data.message || 'Failed to update user'}`);
         setMessageType('error');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('Failed to update user');
+      setMessage('❌ Failed to update user');
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -186,15 +185,31 @@ function AdminUserManagement() {
   };
 
   const handleResetPassword = async (id, name, role) => {
-    if (confirm(`Reset password for ${role} "${name}"?\n\nThey will need to change it on next login.`)) {
-      try {
-        const response = await authAPI.resetPassword(id);
-        alert(`Password reset for ${name}\n\nNew Password: ${response.data.newPassword}\n\nUser must change password on next login.`);
+    if (!confirm(`Reset password for ${role} "${name}"?\n\nThey will need to change it on next login.`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`https://school-yathu.onrender.com/api/Auth/reset-password/${id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`✅ Password reset for ${name}\n\nNew Password: ${data.newPassword}\n\nUser must change password on next login.`);
         loadAllData();
-      } catch (error) {
-        console.error('Error:', error);
-        alert(`Error: ${error.response?.data?.message || 'Failed to reset password'}`);
+      } else {
+        const data = await response.json();
+        alert(`❌ Error: ${data.message || 'Failed to reset password'}`);
       }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('❌ Failed to reset password');
     }
   };
 
@@ -236,7 +251,7 @@ function AdminUserManagement() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
-          <p className="text-sm text-gray-500 mt-1">Manage all users in the system</p>
+          <p className="text-sm text-gray-500 mt-1">Manage all users in the system - Edit, Delete, Reset Password</p>
         </div>
         <button
           onClick={loadAllData}
@@ -313,6 +328,17 @@ function AdminUserManagement() {
               ))}
             </select>
           </div>
+          {(searchTerm || roleFilter) && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setRoleFilter('');
+              }}
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
       </div>
 
@@ -363,7 +389,7 @@ function AdminUserManagement() {
                       <td className="px-6 py-4 text-sm text-gray-600">{user.phoneNumber || '-'}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{user.employeeId || '-'}</td>
                       <td className="px-6 py-4 text-sm space-x-2">
-                        {user.role !== 'Admin' && (
+                        {user.role !== 'Admin' ? (
                           <>
                             <button
                               onClick={() => handleEditUser(user)}
@@ -387,8 +413,7 @@ function AdminUserManagement() {
                               Delete
                             </button>
                           </>
-                        )}
-                        {user.role === 'Admin' && (
+                        ) : (
                           <span className="text-xs text-gray-400">Protected</span>
                         )}
                       </td>
@@ -418,12 +443,12 @@ function AdminUserManagement() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -487,12 +512,12 @@ function AdminUserManagement() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admission No</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stream</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Admission No</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stream</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -611,7 +636,7 @@ function AdminUserManagement() {
                     disabled={loading}
                     className="flex-1 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                   >
-                    {loading ? 'Updating...' : 'Update'}
+                    {loading ? 'Updating...' : 'Update User'}
                   </button>
                   <button
                     type="button"
