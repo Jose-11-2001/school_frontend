@@ -33,10 +33,10 @@ function Login({ setUser }) {
         id: data.id,
         name: data.name,
         email: data.email,
-        role: data.role || 'Student',                    // Primary role
+        role: data.role || 'Student',
         dashboardRole: data.dashboardRole || data.role || 'Student',
-        allRoles: data.allRoles || [data.role || 'Student'],  // All roles
-        secondaryRoles: data.secondaryRoles || [],        // Secondary roles
+        allRoles: data.allRoles || [data.role || 'Student'],
+        secondaryRoles: data.secondaryRoles || [],
         mustChangePassword: data.mustChangePassword || false,
         isHeadOfDepartment: data.isHeadOfDepartment || false,
         isFormTeacher: data.isFormTeacher || false,
@@ -59,26 +59,43 @@ function Login({ setUser }) {
         return;
       }
 
-      // Navigate based on dashboardRole - includes all roles
+      // Navigate based on dashboardRole - using HARD REDIRECT
       const roleLower = (userData.dashboardRole || userData.role || 'Student').toLowerCase();
       const dashboardRoutes = {
         'admin': '/admin-dashboard',
         'deputyheadteacher': '/deputy-dashboard',
+        'deputyhead': '/deputy-dashboard',
         'teacher': '/teacher-dashboard',
         'formteacher': '/form-teacher-dashboard',
+        'form teacher': '/form-teacher-dashboard',
         'headofdepartment': '/hod-dashboard',
+        'hod': '/hod-dashboard',
         'student': '/student-dashboard'
       };
 
-      const route = dashboardRoutes[roleLower];
-      if (route) {
-        console.log(`🔐 Login - Navigating to: ${route} (Dashboard Role: ${userData.dashboardRole})`);
-        navigate(route);
-      } else {
-        console.error(`🔐 Login - Unknown role: ${userData.dashboardRole}`);
-        setError(`Unknown user role: "${userData.dashboardRole}". Please contact support.`);
-        setLoading(false);
+      // Find the matching route
+      let route = dashboardRoutes[roleLower];
+      
+      // If not found, try to find by partial match
+      if (!route) {
+        for (const [key, value] of Object.entries(dashboardRoutes)) {
+          if (roleLower.includes(key) || key.includes(roleLower)) {
+            route = value;
+            break;
+          }
+        }
       }
+
+      // Default to student dashboard if no route found
+      if (!route) {
+        console.warn(`🔐 Login - Unknown role: ${roleLower}, defaulting to student dashboard`);
+        route = '/student-dashboard';
+      }
+
+      console.log(`🔐 Login - Navigating to: ${route}`);
+      
+      // ✅ USE HARD REDIRECT - This ensures the page actually navigates
+      window.location.href = route;
 
     } catch (err) {
       console.error('❌ Login error:', err);

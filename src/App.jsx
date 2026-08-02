@@ -10,7 +10,7 @@ import StudentDashboard from './components/Student/StudentDashboard';
 import HeadOfDepartmentDashboard from './components/HeadOfDepartment/HeadOfDepartmentDashboard';
 import FormTeacherDashboard from './components/FormTeacher/FormTeacherDashboard';
 import DeputyDashboard from './components/Deputy/DeputyDashboard';
-import { getCurrentUser, hasRole, getDashboardRole } from './utils/roleUtils';
+import { getCurrentUser, hasRole } from './utils/roleUtils';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {

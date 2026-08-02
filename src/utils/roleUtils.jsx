@@ -77,6 +77,7 @@ export const getDashboardRole = () => {
   const user = getCurrentUser();
   if (!user) return null;
   
+  // If user is a Form Teacher, they should go to Form Teacher Dashboard
   if (isFormTeacher()) {
     return 'FormTeacher';
   }
