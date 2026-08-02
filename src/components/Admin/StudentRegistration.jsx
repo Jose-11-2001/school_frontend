@@ -71,45 +71,7 @@ function StudentRegistration({ onStudentAdded }) {
             
             if (response.ok) {
                 data = await response.json();
-                console.log('Classes loaded from /api/Admin/classes:', data);
-            } else {
-                // Try alternative endpoint
-                response = await fetch('https://school-yathu.onrender.com/api/AdminSubjectAllocation/classes', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                if (response.ok) {
-                    data = await response.json();
-                    console.log('Classes loaded from /api/AdminSubjectAllocation/classes:', data);
-                }
-            }
-            
-            if (data.length === 0 && registeredStudents.length > 0) {
-                console.log('No classes from API, extracting from students...');
-                const studentClasses = registeredStudents
-                    .map(s => s.class)
-                    .filter(Boolean);
-                const uniqueClasses = [...new Set(studentClasses)];
-                
-                const classMap = {};
-                registeredStudents.forEach(s => {
-                    if (s.class && s.stream) {
-                        if (!classMap[s.class]) {
-                            classMap[s.class] = [];
-                        }
-                        if (!classMap[s.class].includes(s.stream)) {
-                            classMap[s.class].push(s.stream);
-                        }
-                    }
-                });
-                
-                data = uniqueClasses.map((name, index) => ({
-                    id: index + 1,
-                    name: name,
-                    stream: classMap[name]?.[0] || ''
-                }));
-                
-                console.log('Classes extracted from students:', data);
+                console.log('Classes loaded:', data);
             }
             
             const normalizedData = data.map(item => ({
@@ -120,45 +82,11 @@ function StudentRegistration({ onStudentAdded }) {
             
             setClasses(normalizedData);
             
-            if (normalizedData.length === 0) {
-                setMessage('No classes found. Please add classes in Class Management first.');
-                setMessageType('warning');
-                setTimeout(() => setMessage(''), 5000);
-            }
-            
         } catch (error) {
             console.error('Error loading classes:', error);
-            
-            if (registeredStudents.length > 0) {
-                const studentClasses = registeredStudents
-                    .map(s => s.class)
-                    .filter(Boolean);
-                const uniqueClasses = [...new Set(studentClasses)];
-                
-                const classMap = {};
-                registeredStudents.forEach(s => {
-                    if (s.class && s.stream) {
-                        if (!classMap[s.class]) {
-                            classMap[s.class] = [];
-                        }
-                        if (!classMap[s.class].includes(s.stream)) {
-                            classMap[s.class].push(s.stream);
-                        }
-                    }
-                });
-                
-                const data = uniqueClasses.map((name, index) => ({
-                    Name: name,
-                    Stream: classMap[name]?.[0] || '',
-                    id: index + 1
-                }));
-                
-                setClasses(data);
-            } else {
-                setMessage('Error loading classes. Please add classes in Class Management.');
-                setMessageType('error');
-                setTimeout(() => setMessage(''), 5000);
-            }
+            setMessage('Error loading classes');
+            setMessageType('error');
+            setTimeout(() => setMessage(''), 3000);
         }
     };
 
@@ -172,8 +100,6 @@ function StudentRegistration({ onStudentAdded }) {
             if (response.ok) {
                 const data = await response.json();
                 setRegisteredStudents(data);
-            } else {
-                console.error('Failed to load registered students');
             }
         } catch (error) {
             console.error('Error loading students:', error);
@@ -183,6 +109,33 @@ function StudentRegistration({ onStudentAdded }) {
     const loadAvailableSubjects = async () => {
         try {
             const token = localStorage.getItem('token');
+            
+            // First, check if subjects exist at all
+            const subjectsCheck = await fetch('https://school-yathu.onrender.com/api/Admin/subjects', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            let allSubjects = [];
+            if (subjectsCheck.ok) {
+                allSubjects = await subjectsCheck.json();
+                console.log('All subjects:', allSubjects);
+            }
+            
+            // If no subjects exist, show message
+            if (!allSubjects || allSubjects.length === 0) {
+                console.log('No subjects found in the system');
+                setAvailableSubjects({
+                    coreSubjects: [],
+                    humanitiesSubjects: [],
+                    scienceSubjects: []
+                });
+                setMessage('⚠️ No subjects available. Please add subjects in Manage Subjects first.');
+                setMessageType('warning');
+                setTimeout(() => setMessage(''), 5000);
+                return;
+            }
+
+            // Try to get subjects for the specific class
             const url = `https://school-yathu.onrender.com/api/StudentRegistration/available-subjects/${encodeURIComponent(formData.class)}/${encodeURIComponent(formData.stream)}${formData.root ? `?root=${encodeURIComponent(formData.root)}` : ''}`;
             
             console.log('Loading subjects from URL:', url);
@@ -191,16 +144,20 @@ function StudentRegistration({ onStudentAdded }) {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
-            // ✅ Check if response is ok before trying to parse JSON
+            // Check if response is ok
             if (response.ok) {
-                const text = await response.text(); // Get raw response first
+                const text = await response.text();
                 console.log('Raw response:', text);
                 
                 // Check if response is empty
                 if (!text || text.trim() === '') {
                     console.warn('Empty response from subjects API');
+                    // Use all subjects as fallback
+                    const coreSubjects = allSubjects
+                        .filter(s => s.type === 'Core' || s.type === 'core')
+                        .map(s => s.name);
                     setAvailableSubjects({
-                        coreSubjects: [],
+                        coreSubjects: coreSubjects.length > 0 ? coreSubjects : allSubjects.map(s => s.name),
                         humanitiesSubjects: [],
                         scienceSubjects: []
                     });
@@ -217,21 +174,18 @@ function StudentRegistration({ onStudentAdded }) {
                     });
                 } catch (parseError) {
                     console.error('Error parsing JSON:', parseError);
-                    console.log('Raw response that failed to parse:', text);
+                    // Fallback: use all subjects as core subjects
                     setAvailableSubjects({
-                        coreSubjects: [],
+                        coreSubjects: allSubjects.map(s => s.name),
                         humanitiesSubjects: [],
                         scienceSubjects: []
                     });
                 }
             } else {
                 console.error('Failed to load subjects:', response.status);
-                if (response.status === 404) {
-                    // Subjects endpoint not found - this is expected if no subjects are set up
-                    console.warn('No subjects found for this class/stream');
-                }
+                // Fallback: use all subjects
                 setAvailableSubjects({
-                    coreSubjects: [],
+                    coreSubjects: allSubjects.map(s => s.name),
                     humanitiesSubjects: [],
                     scienceSubjects: []
                 });
@@ -243,6 +197,9 @@ function StudentRegistration({ onStudentAdded }) {
                 humanitiesSubjects: [],
                 scienceSubjects: []
             });
+            setMessage('❌ Failed to load subjects');
+            setMessageType('error');
+            setTimeout(() => setMessage(''), 3000);
         }
     };
 
@@ -514,7 +471,7 @@ function StudentRegistration({ onStudentAdded }) {
                                         className="mr-2 w-4 h-4"
                                     />
                                     <span className="text-lg">📚</span>
-                                    <span className="ml-2">Humanities (History, Geography, Social Studies)</span>
+                                    <span className="ml-2">Humanities</span>
                                 </label>
                                 <label className="flex items-center cursor-pointer">
                                     <input
@@ -525,7 +482,7 @@ function StudentRegistration({ onStudentAdded }) {
                                         className="mr-2 w-4 h-4"
                                     />
                                     <span className="text-lg">🔬</span>
-                                    <span className="ml-2">Sciences (Physics, Chemistry, Biology)</span>
+                                    <span className="ml-2">Sciences</span>
                                 </label>
                             </div>
                         </div>
@@ -541,6 +498,12 @@ function StudentRegistration({ onStudentAdded }) {
                                 <div className="text-center py-4 text-gray-500">
                                     <p>No subjects available for this class.</p>
                                     <p className="text-sm text-gray-400 mt-1">Please add subjects in Manage Subjects.</p>
+                                    <button
+                                        onClick={() => window.location.href = '/admin-dashboard?tab=subjects'}
+                                        className="mt-2 text-blue-500 hover:text-blue-700 text-sm"
+                                    >
+                                        Go to Manage Subjects →
+                                    </button>
                                 </div>
                             ) : (
                                 <>
@@ -585,7 +548,7 @@ function StudentRegistration({ onStudentAdded }) {
 
                                     {!isUpperForm() && availableSubjects.coreSubjects?.length > 0 && (
                                         <div className="mt-2 text-sm text-gray-600 bg-yellow-50 p-2 rounded">
-                                            ℹ️ Note: Form 1 & Form 2 students take all subjects. No specialization needed.
+                                            ℹ️ Form 1 & Form 2 students take all core subjects automatically.
                                         </div>
                                     )}
                                 </>
@@ -619,12 +582,6 @@ function StudentRegistration({ onStudentAdded }) {
                             Clear
                         </button>
                     </div>
-                    
-                    {uniqueClasses.length === 0 && (
-                        <div className="text-center text-sm text-red-500 mt-2">
-                            Cannot register student. Please add classes first.
-                        </div>
-                    )}
 
                     <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                         <h4 className="font-semibold text-blue-800 mb-2">ℹ️ Info</h4>
