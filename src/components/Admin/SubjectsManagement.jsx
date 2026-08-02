@@ -79,9 +79,13 @@ function SubjectsManagement() {
       setName('');
       setCode('');
       setDepartmentId('');
-      await loadData(); // Reload data to show new subject
+      await loadData();
     } catch (error) {
       console.error('Error adding subject:', error);
+      
+      // Log the full error for debugging
+      console.error('Full error:', error.response?.data);
+      console.error('Error status:', error.response?.status);
       
       // Extract detailed error message
       let errorMessage = 'Failed to add subject';
@@ -95,15 +99,16 @@ function SubjectsManagement() {
         errorMessage = error.message;
       }
       
-      // Check for duplicate key error
-      if (errorMessage.toLowerCase().includes('duplicate') || 
-          errorMessage.toLowerCase().includes('already exists') ||
-          errorMessage.toLowerCase().includes('unique constraint')) {
-        setMessage(`❌ Subject code '${codeUpper}' already exists. Please use a different code.`);
-      } else {
-        setMessage(`❌ Error: ${errorMessage}`);
+      // Check for specific database errors
+      if (errorMessage.includes('column "Description" does not exist')) {
+        errorMessage = 'Database schema mismatch. Please run the SQL migration to add the Description column.';
+      } else if (errorMessage.toLowerCase().includes('duplicate') || 
+                 errorMessage.toLowerCase().includes('already exists') ||
+                 errorMessage.toLowerCase().includes('unique constraint')) {
+        errorMessage = `Subject code '${codeUpper}' already exists. Please use a different code.`;
       }
       
+      setMessage(`❌ Error: ${errorMessage}`);
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -145,7 +150,7 @@ function SubjectsManagement() {
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Manage Subjects</h2>
+          <h2 className="text-2xl font-bold text-gray-800">📚 Manage Subjects</h2>
           <p className="text-sm text-gray-500 mt-1">Add and manage all subjects in the system</p>
         </div>
         <div className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-full">

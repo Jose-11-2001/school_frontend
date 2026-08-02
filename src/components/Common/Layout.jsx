@@ -72,7 +72,7 @@ function Layout() {
               <div>
                 <span className="text-sm sm:text-lg font-bold hidden xs:inline">Mkondezi</span>
                 <span className="text-sm sm:text-lg font-bold"> School</span>
-                <span className="hidden sm:inline text-xs text-blue-200 ml-1">Grading System</span>
+                <span className="hidden sm:inline text-xs text-blue-200 ml-1">Management and Grading System</span>
               </div>
             </Link>
 

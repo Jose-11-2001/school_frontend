@@ -291,7 +291,7 @@ function SubjectAllocation() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">📚 Allocate Teachers to Subjects</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Allocate Teachers to Subjects</h2>
           <p className="text-sm text-gray-500 mt-1">
             Assign teachers (including HODs, Deputies, and Form Teachers) to subjects for each class
           </p>
@@ -341,7 +341,7 @@ function SubjectAllocation() {
         <>
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
-              <h3 className="text-lg font-semibold text-gray-800">📌 New Allocation</h3>
+              <h3 className="text-lg font-semibold text-gray-800">New Allocation</h3>
               <p className="text-sm text-gray-500">Assign teachers to subjects by class</p>
             </div>
             <div className="p-6">

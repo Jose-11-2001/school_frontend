@@ -8,7 +8,7 @@ import ResultsApproval from './ResultsApproval';
 import StudentList from './StudentList';
 import AdminUserManagement from './AdminUserManagement';
 import Rankings from '../Common/Rankings';
-import AdminSubjectAllocation from '../A/AdminSubjectAllocation';
+import AdminSubjectAllocation from './AdminSubjectAllocation';
 import StudentRegistration from './StudentRegistration';
 import SubjectAllocation from './SubjectAllocation';
 import SubjectAssignment from './SubjectAssignment';
