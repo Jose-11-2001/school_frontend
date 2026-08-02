@@ -228,9 +228,7 @@ function TeacherDashboard() {
               <span className="text-sm font-medium">Welcome,</span>
               <span className="text-sm font-bold">{getUserName()}</span>
             </div>
-            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm transition-colors">
-              Logout
-            </button>
+            
           </div>
         </nav>
 
