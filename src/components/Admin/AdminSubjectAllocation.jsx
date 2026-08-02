@@ -198,7 +198,7 @@ function AdminSubjectAllocation() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">📚 Student Subject Allocation</h2>
+          <h2 className="text-2xl font-bold text-gray-800"> Student Subject Allocation</h2>
           <p className="text-sm text-gray-500 mt-1">Assign subjects to students for the academic year</p>
         </div>
         <button
@@ -222,7 +222,7 @@ function AdminSubjectAllocation() {
       {/* Allocation Form */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200">
-          <h3 className="text-lg font-semibold text-gray-800">📌 Allocate Subjects to Student</h3>
+          <h3 className="text-lg font-semibold text-gray-800"> Allocate Subjects to Student</h3>
           <p className="text-sm text-gray-500">Select a student and assign subjects</p>
         </div>
         <div className="p-6">
@@ -380,7 +380,7 @@ function AdminSubjectAllocation() {
 
           {allocations.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
-              <div className="text-4xl mb-2">📋</div>
+              
               <p>No subject allocations yet for this class.</p>
               <p className="text-sm text-gray-400 mt-1">Use the form above to allocate subjects to students.</p>
             </div>
