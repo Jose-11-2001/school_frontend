@@ -22,12 +22,269 @@ function StudentDashboard() {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  // ... (keep all existing functions: loadStudentData, loadStudentSubjects, fetchStudentResults, getStudentClassLevel, getLetterGrade, getPoints, calculateStudentGrade, getPointsRemark, getGradeColor, handleLogout, handleGoBack, toggleMobileSidebar)
+  useEffect(() => {
+    const userData = getCurrentUser();
+    
+    if (!userData || !hasRole('Student')) {
+      navigate('/login');
+      return;
+    }
 
-  const classLevel = getStudentClassLevel();
-  const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
+    setUser(userData);
+    loadStudentData(userData);
+  }, [navigate]);
 
-  // Add download PDF function
+  useEffect(() => {
+    if (studentId) {
+      if (activeTab === 'my-subjects') {
+        loadStudentSubjects();
+      } else if (activeTab === 'results') {
+        fetchStudentResults();
+      }
+    }
+  }, [studentId, activeTab, selectedYear, selectedTerm]);
+
+  const loadStudentData = async (userData) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      
+      let student = null;
+      
+      // First try to get student by email
+      if (userData.email) {
+        try {
+          const emailResponse = await fetch(`https://school-yathu.onrender.com/api/Student/student-by-email?email=${encodeURIComponent(userData.email)}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (emailResponse.ok) {
+            student = await emailResponse.json();
+          }
+        } catch (e) {
+          console.log('Email lookup failed, trying other methods...');
+        }
+      }
+      
+      // If not found by email, try by name
+      if (!student && userData.name) {
+        try {
+          const nameResponse = await fetch(`https://school-yathu.onrender.com/api/Student/student-by-name?name=${encodeURIComponent(userData.name)}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (nameResponse.ok) {
+            student = await nameResponse.json();
+          }
+        } catch (e) {
+          console.log('Name lookup failed, trying other methods...');
+        }
+      }
+      
+      // If still not found, try the student API with user ID
+      if (!student && userData.id) {
+        try {
+          const response = await fetch(`https://school-yathu.onrender.com/api/Student/${userData.id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (response.ok) {
+            student = await response.json();
+          }
+        } catch (e) {
+          console.log('Student ID lookup failed...');
+        }
+      }
+      
+      // If student found, set the data
+      if (student) {
+        console.log('✅ Student data loaded:', student);
+        setStudentData(student);
+        setStudentId(student.id || student.studentId);
+      } else {
+        console.warn('⚠️ No student data found');
+        // Set fallback data from user
+        setStudentData({
+          id: userData.id || 0,
+          admissionNumber: userData.admissionNumber || 'N/A',
+          fullName: userData.name || 'N/A',
+          class: userData.class || 'N/A',
+          stream: userData.stream || 'N/A'
+        });
+        setStudentId(userData.id || 0);
+      }
+    } catch (error) {
+      console.error('Error loading student data:', error);
+      // Set fallback data
+      setStudentData({
+        id: userData.id || 0,
+        admissionNumber: userData.admissionNumber || 'N/A',
+        fullName: userData.name || 'N/A',
+        class: userData.class || 'N/A',
+        stream: userData.stream || 'N/A'
+      });
+      setStudentId(userData.id || 0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadStudentSubjects = async () => {
+    if (!studentId) return;
+    
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Try to get subjects by student ID
+      const response = await fetch(`https://school-yathu.onrender.com/api/Student/${studentId}/subjects`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSubjects(data.subjects || data || []);
+      } else {
+        // Try alternative endpoint
+        const altResponse = await fetch(`https://school-yathu.onrender.com/api/StudentSubject/my-subjects`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (altResponse.ok) {
+          const data = await altResponse.json();
+          setSubjects(data || []);
+        } else {
+          setSubjects([]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading subjects:', error);
+      setSubjects([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStudentResults = async () => {
+    if (!studentData?.admissionNumber) return;
+    
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(
+        `https://school-yathu.onrender.com/api/Student/student-results?admissionNumber=${studentData.admissionNumber}&year=${selectedYear}&term=${selectedTerm}`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setMarks(data.marks || data.results || []);
+        setRanking(data.ranking || null);
+      } else {
+        setMarks([]);
+        setRanking(null);
+      }
+    } catch (error) {
+      console.error('Error fetching results:', error);
+      setMarks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStudentClassLevel = () => {
+    if (!studentData) return null;
+    const className = studentData.class || '';
+    if (className.includes('Form 1') || className.includes('Form1')) return 'form1';
+    if (className.includes('Form 2') || className.includes('Form2')) return 'form2';
+    if (className.includes('Form 3') || className.includes('Form3')) return 'form3';
+    if (className.includes('Form 4') || className.includes('Form4')) return 'form4';
+    return null;
+  };
+
+  const getLetterGrade = (percentage) => {
+    if (percentage >= 80) return { grade: 'A', label: 'Excellent' };
+    if (percentage >= 65) return { grade: 'B', label: 'Good' };
+    if (percentage >= 50) return { grade: 'C', label: 'Average' };
+    if (percentage >= 45) return { grade: 'D', label: 'Below Average' };
+    if (percentage >= 40) return { grade: 'E', label: 'Poor' };
+    return { grade: 'F', label: 'Fail' };
+  };
+
+  const getPoints = (percentage) => {
+    if (percentage >= 85) return 1;
+    if (percentage >= 80) return 2;
+    if (percentage >= 65) return 3;
+    if (percentage >= 60) return 4;
+    if (percentage >= 55) return 5;
+    if (percentage >= 50) return 6;
+    if (percentage >= 45) return 7;
+    if (percentage >= 40) return 8;
+    return 9;
+  };
+
+  const calculateStudentGrade = (percentage) => {
+    const classLevel = getStudentClassLevel();
+    const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
+    
+    if (isUpperForm) {
+      const points = getPoints(percentage);
+      return { 
+        grade: `${points} point${points !== 1 ? 's' : ''}`, 
+        remark: getPointsRemark(points),
+        points: points,
+        isUpperForm: true
+      };
+    } else {
+      const { grade, label } = getLetterGrade(percentage);
+      return { 
+        grade: grade, 
+        remark: label,
+        points: null,
+        isUpperForm: false
+      };
+    }
+  };
+
+  const getPointsRemark = (points) => {
+    const remarks = {
+      1: 'Excellent performance!',
+      2: 'Very good performance!',
+      3: 'Good performance!',
+      4: 'Above average performance!',
+      5: 'Average performance.',
+      6: 'Satisfactory performance.',
+      7: 'Below average. Needs improvement!',
+      8: 'Poor performance!',
+      9: 'Failed. Must work harder!'
+    };
+    return remarks[points] || 'Performance needs improvement.';
+  };
+
+  const getGradeColor = (grade) => {
+    const colors = {
+      'A': 'text-green-600 bg-green-100 border-green-200',
+      'B': 'text-blue-600 bg-blue-100 border-blue-200',
+      'C': 'text-yellow-600 bg-yellow-100 border-yellow-200',
+      'D': 'text-orange-600 bg-orange-100 border-orange-200',
+      'E': 'text-red-600 bg-red-100 border-red-200',
+      'F': 'text-red-700 bg-red-200 border-red-300',
+      '1 point': 'text-green-600 bg-green-100 border-green-200',
+      '2 points': 'text-green-600 bg-green-100 border-green-200',
+      '3 points': 'text-blue-600 bg-blue-100 border-blue-200',
+      '4 points': 'text-blue-600 bg-blue-100 border-blue-200',
+      '5 points': 'text-yellow-600 bg-yellow-100 border-yellow-200',
+      '6 points': 'text-yellow-600 bg-yellow-100 border-yellow-200',
+      '7 points': 'text-orange-600 bg-orange-100 border-orange-200',
+      '8 points': 'text-red-600 bg-red-100 border-red-200',
+      '9 points': 'text-red-700 bg-red-200 border-red-300'
+    };
+    return colors[grade] || 'text-gray-600 bg-gray-100 border-gray-200';
+  };
+
   const handleDownloadPDF = () => {
     if (!studentData || marks.length === 0) {
       setMessage('No results available to download');
@@ -36,19 +293,19 @@ function StudentDashboard() {
     }
     
     const studentInfo = {
-      name: studentData.fullName,
-      admissionNumber: studentData.admissionNumber,
-      class: studentData.class,
-      stream: studentData.stream,
+      name: studentData.fullName || studentData.name || 'Student',
+      admissionNumber: studentData.admissionNumber || 'N/A',
+      class: studentData.class || 'N/A',
+      stream: studentData.stream || 'N/A',
       term: selectedTerm,
       year: selectedYear
     };
     
     const formattedMarks = marks.map(mark => ({
-      subjectName: mark.subjectName,
-      score: mark.overallPercentage || 0,
-      grade: mark.grade,
-      remark: mark.remark
+      subjectName: mark.subjectName || mark.subject || 'Subject',
+      score: mark.overallPercentage || mark.totalScore || 0,
+      grade: mark.grade || 'N/A',
+      remark: mark.remark || ''
     }));
     
     const rankingData = ranking || {
@@ -61,22 +318,120 @@ function StudentDashboard() {
     
     const classLevel = getStudentClassLevel();
     generateGradePDF(studentInfo, formattedMarks, rankingData, classLevel);
-    setMessage('PDF downloaded successfully!');
+    setMessage('✅ PDF downloaded successfully!');
     setTimeout(() => setMessage(''), 3000);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  const toggleMobileSidebar = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const classLevel = getStudentClassLevel();
+  const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
+
   const menuItems = [
-    { id: 'my-subjects', label: 'My Subjects' },
-    { id: 'results', label: 'My Results' },
-    { id: 'timetable', label: 'Timetable' },
-    { id: 'contacts', label: 'Contacts' },
+    { id: 'my-subjects', label: '📚 My Subjects' },
+    { id: 'results', label: '📊 My Results' },
+    { id: 'timetable', label: '📅 Timetable' },
+    { id: 'contacts', label: '📞 Contacts' },
   ];
 
   if (isUpperForm) {
-    menuItems.push({ id: 'subject-selection', label: 'Select Subjects' });
+    menuItems.push({ id: 'subject-selection', label: '📝 Select Subjects' });
   }
 
-  // Update the renderResults function to include Download PDF button
+  const renderMySubjects = () => {
+    if (loading) {
+      return (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
+          <p className="text-gray-600">Loading your subjects...</p>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6 border border-blue-200">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-gray-500">Student Name</p>
+              <p className="font-semibold text-lg text-blue-800">{studentData?.fullName || studentData?.name || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Admission Number</p>
+              <p className="font-semibold">{studentData?.admissionNumber || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Class</p>
+              <p className="font-semibold">{studentData?.class || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Stream</p>
+              <p className="font-semibold">{studentData?.stream || 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">📚 My Subjects</h2>
+              <p className="text-gray-600 mt-1">Total Subjects: {subjects.length}</p>
+            </div>
+            <button
+              onClick={loadStudentSubjects}
+              className="text-blue-500 hover:text-blue-700 text-sm"
+            >
+              🔄 Refresh
+            </button>
+          </div>
+          
+          {subjects.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <p className="text-gray-500 text-lg">No subjects allocated yet.</p>
+              <p className="text-sm text-gray-400 mt-2">Please contact the administrator to assign subjects to you.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {subjects.map((subject, index) => (
+                <div 
+                  key={index} 
+                  className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 hover:scale-105"
+                >
+                  <div className="text-lg font-semibold text-blue-800">{subject.name || subject.subjectName}</div>
+                  {subject.code && (
+                    <div className="text-sm text-blue-600 mt-1">Code: {subject.code}</div>
+                  )}
+                  {subject.teacherName && (
+                    <div className="text-sm text-gray-600 mt-2">
+                      <span className="font-medium">Teacher:</span> {subject.teacherName}
+                    </div>
+                  )}
+                  {subject.type && (
+                    <span className="inline-block mt-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                      {subject.type}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderResults = () => {
     if (loading) {
       return (
@@ -89,32 +444,241 @@ function StudentDashboard() {
 
     return (
       <div>
-        {/* ... existing results UI ... */}
-        
-        {/* Add Download PDF button in the header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-800">My Results</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">📊 My Results</h2>
+            <p className="text-sm text-gray-500 mt-1">{selectedTerm} {selectedYear}</p>
+          </div>
           <button
             onClick={handleDownloadPDF}
             disabled={marks.length === 0}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:bg-gray-400 transition-colors"
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:bg-gray-400 transition-colors flex items-center gap-2"
           >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
             Download PDF
           </button>
         </div>
-        
-        {/* ... rest of the results content ... */}
+
+        {/* Filter Controls */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="flex flex-wrap gap-4 items-end">
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">Year</label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {[2024, 2025, 2026, 2027].map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">Term</label>
+              <select
+                value={selectedTerm}
+                onChange={(e) => setSelectedTerm(e.target.value)}
+                className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Term 1</option>
+                <option>Term 2</option>
+                <option>Term 3</option>
+              </select>
+            </div>
+            <button 
+              onClick={fetchStudentResults} 
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Apply Filter
+            </button>
+          </div>
+        </div>
+
+        {message && (
+          <div className={`p-3 rounded-lg mb-4 ${
+            message.includes('✅') 
+              ? 'bg-green-50 text-green-700 border border-green-200' 
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}>
+            {message}
+          </div>
+        )}
+
+        {marks.length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-lg">
+            <p className="text-gray-500 text-lg">No marks available yet.</p>
+            <p className="text-sm text-gray-400 mt-2">Check back later when teachers publish results.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subject</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Test 1 (20%)</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Test 2 (20%)</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">End Term (60%)</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Overall %</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Grade</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {marks.map((mark, index) => {
+                  const percentage = mark.overallPercentage || mark.totalScore || 0;
+                  const gradeInfo = calculateStudentGrade(percentage);
+                  const gradeColor = getGradeColor(gradeInfo.grade);
+                  
+                  return (
+                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{index + 1}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {mark.subjectName || mark.subject}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {mark.test1 !== undefined ? mark.test1 : (mark.continuousTest1 || '-')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {mark.test2 !== undefined ? mark.test2 : (mark.continuousTest2 || '-')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {mark.endTerm !== undefined ? mark.endTerm : (mark.endTermExam || '-')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                        {percentage.toFixed(1)}%
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-3 py-1 rounded-full font-semibold ${gradeColor}`}>
+                          {gradeInfo.grade}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     );
   };
 
+  if (loading && !studentData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center bg-white p-8 rounded-lg shadow-lg">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* ... existing header and sidebar ... */}
-      
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-4 py-3 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <button onClick={toggleMobileSidebar} className="p-1 rounded-lg hover:bg-blue-700">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+          <h1 className="text-sm font-bold">Student Portal</h1>
+          <p className="text-xs text-blue-200">Mkondezi Secondary</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Notifications role="Student" />
+          <button onClick={handleLogout} className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 text-sm">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileSidebar} />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed lg:fixed z-50
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        transition-transform duration-300 ease-in-out
+        w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white shadow-xl
+        h-screen overflow-y-auto
+      `}>
+        <div className="sticky top-0 bg-gradient-to-b from-blue-800 to-blue-900 z-10">
+          <div className="flex items-center gap-4 p-4 border-b border-blue-700">
+            <button onClick={handleGoBack} className="hover:bg-blue-700 p-2 rounded-full transition-colors flex-shrink-0" title="Go back">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-xl font-bold">Student Portal</h1>
+              <p className="text-xs text-blue-200">Mkondezi Secondary</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-4">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveTab(item.id);
+                setMobileOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${
+                activeTab === item.id
+                  ? 'bg-blue-700 border-r-4 border-white text-white'
+                  : 'hover:bg-blue-700 text-blue-100'
+              }`}
+            >
+              <span className="text-sm font-medium">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
+          <div className="px-4 py-2 text-sm text-blue-200">
+            <p className="font-semibold">{user?.name}</p>
+            <p className="text-xs opacity-75">Student</p>
+          </div>
+          <button onClick={handleLogout} className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
-        {/* ... existing navbar ... */}
-        
+        <nav className="hidden lg:flex fixed top-0 right-0 left-64 z-40 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md px-6 py-3 justify-between items-center">
+          <div className="flex items-center gap-4">
+            <span className="bg-blue-700 px-3 py-1 rounded-full text-sm">Student</span>
+            {classLevel && (
+              <span className="bg-green-600 px-3 py-1 rounded-full text-sm">
+                {classLevel.toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-6">
+            <Notifications role="Student" />
+            <div className="h-6 w-px bg-blue-600" />
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Welcome,</span>
+              <span className="text-sm font-bold">{user?.name}</span>
+            </div>
+            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm transition-colors">
+              Logout
+            </button>
+          </div>
+        </nav>
+
         <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-16">
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 lg:p-6">
