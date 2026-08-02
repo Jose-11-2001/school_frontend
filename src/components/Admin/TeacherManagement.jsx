@@ -70,6 +70,17 @@ function TeacherManagement() {
   const handleAddTeacher = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMessage('');
+    
+    // Validate required fields
+    if (!formData.name || !formData.email || !formData.password) {
+      setMessage('Please fill in all required fields (Name, Email, Password)');
+      setMessageType('error');
+      setLoading(false);
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
     try {
       let formattedHireDate = null;
       if (formData.hireDate) {
@@ -79,17 +90,27 @@ function TeacherManagement() {
         }
       }
 
+      // Check if email already exists in the current list
+      const existingTeacher = teachers.find(t => t.email === formData.email);
+      if (existingTeacher) {
+        setMessage(`❌ Email "${formData.email}" already exists for teacher "${existingTeacher.name}". Please use a different email.`);
+        setMessageType('error');
+        setLoading(false);
+        setTimeout(() => setMessage(''), 5000);
+        return;
+      }
+
       const response = await adminAPI.addTeacher({
         email: formData.email,
         name: formData.name,
         password: formData.password,
-        phoneNumber: formData.phoneNumber,
-        employeeId: formData.employeeId,
-        qualification: formData.qualification,
+        phoneNumber: formData.phoneNumber || null,
+        employeeId: formData.employeeId || null,
+        qualification: formData.qualification || null,
         hireDate: formattedHireDate
       });
 
-      setMessage(`Teacher added successfully!\n\n Email: ${formData.email}\nPassword: ${formData.password}\n\nTeacher must change password on first login.`);
+      setMessage(`✅ Teacher added successfully!\n\nEmail: ${formData.email}\nPassword: ${formData.password}\n\nTeacher must change password on first login.`);
       setMessageType('success');
       setShowAddForm(false);
       setFormData({ email: '', name: '', password: '', phoneNumber: '', employeeId: '', qualification: '', hireDate: '' });
@@ -97,8 +118,22 @@ function TeacherManagement() {
       await loadTeachers();
     } catch (error) {
       console.error('Error:', error);
-      const errorMessage = error.response?.data?.message || 'Error adding teacher';
-      setMessage(`Error: ${errorMessage}`);
+      let errorMessage = 'Error adding teacher';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        errorMessage = Object.values(errors).flat().join(', ');
+      }
+      
+      // Check if it's a duplicate email error
+      if (errorMessage.toLowerCase().includes('email already exists') || 
+          errorMessage.toLowerCase().includes('duplicate')) {
+        setMessage(`❌ Email "${formData.email}" already exists. Please use a different email address.`);
+      } else {
+        setMessage(`❌ Error: ${errorMessage}`);
+      }
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -107,34 +142,45 @@ function TeacherManagement() {
   };
 
   const handleDeleteTeacher = async (id, name) => {
-    if (confirm(`Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
-      try {
-        await adminAPI.deleteTeacher(id);
-        setMessage(`Teacher "${name}" deleted successfully!`);
-        setMessageType('success');
-        await loadTeachers();
-      } catch (error) {
-        console.error('Error:', error);
-        const errorMessage = error.response?.data?.message || 'Failed to delete teacher';
-        setMessage(`Error: ${errorMessage}`);
-        setMessageType('error');
-      }
-      setTimeout(() => setMessage(''), 3000);
+    if (!confirm(`Are you sure you want to delete teacher "${name}"?\n\nThis action cannot be undone.`)) {
+      return;
     }
+
+    try {
+      await adminAPI.deleteTeacher(id);
+      setMessage(`✅ Teacher "${name}" deleted successfully!`);
+      setMessageType('success');
+      await loadTeachers();
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to delete teacher';
+      setMessage(`❌ Error: ${errorMessage}`);
+      setMessageType('error');
+    }
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const handleResetPassword = async (id, name) => {
-    if (confirm(`Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
-      try {
-        const response = await authAPI.resetPassword(id);
-        alert(`Password reset for ${name}\n\n New Password: ${response.data.newPassword}\n\nTeacher must change password on next login.`);
-        await loadTeachers();
-      } catch (error) {
-        console.error('Error:', error);
-        const errorMessage = error.response?.data?.message || 'Failed to reset password';
-        alert(`Error: ${errorMessage}`);
-      }
+    if (!confirm(`Reset password for teacher "${name}"?\n\nThey will need to change it on next login.`)) {
+      return;
     }
+
+    try {
+      const response = await authAPI.resetPassword(id);
+      alert(`✅ Password reset for ${name}\n\nNew Password: ${response.data.newPassword}\n\nTeacher must change password on next login.`);
+      await loadTeachers();
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to reset password';
+      alert(`❌ Error: ${errorMessage}`);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowAddForm(false);
+    setFormData({ email: '', name: '', password: '', phoneNumber: '', employeeId: '', qualification: '', hireDate: '' });
+    setMessage('');
+    setMessageType('');
   };
 
   if (loading && teachers.length === 0) {
@@ -199,11 +245,13 @@ function TeacherManagement() {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 w-full"
+                onChange={(e) => {
+                  setFormData({...formData, email: e.target.value});
+                }}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                 required
-                readOnly
               />
+              <p className="text-xs text-gray-400 mt-1">Must be unique. Auto-generated or custom.</p>
             </div>
             
             <div>
@@ -213,10 +261,22 @@ function TeacherManagement() {
               <input
                 type="text"
                 value={formData.password}
-                className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 w-full font-mono"
-                readOnly
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full font-mono"
+                required
               />
-              <p className="text-xs text-gray-500 mt-1">Auto-generated 8-character password</p>
+              <p className="text-xs text-gray-500 mt-1">Auto-generated 8-character password (you can change it)</p>
+              <button
+                type="button"
+                onClick={() => {
+                  const newPassword = generateRandomPassword();
+                  setFormData({...formData, password: newPassword});
+                  setGeneratedPassword(newPassword);
+                }}
+                className="text-xs text-blue-500 hover:text-blue-700 mt-1"
+              >
+                🔄 Generate new password
+              </button>
             </div>
             
             <div>
@@ -255,27 +315,34 @@ function TeacherManagement() {
             <div>
               <label className="block text-gray-700 mb-1 text-sm font-semibold">Hire Date</label>
               <input
-                type="text"
-                placeholder="YYYY-MM-DD (e.g., 2024-01-15)"
+                type="date"
                 value={formData.hireDate}
                 onChange={(e) => setFormData({...formData, hireDate: e.target.value})}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
-              <p className="text-xs text-gray-400 mt-1">Format: YYYY-MM-DD (e.g., 2024-01-15)</p>
+              <p className="text-xs text-gray-400 mt-1">Format: YYYY-MM-DD</p>
             </div>
             
             <div className="md:col-span-2 flex gap-3">
-              <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
-                Save Teacher
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Saving...' : 'Save Teacher'}
               </button>
-              <button type="button" onClick={() => setShowAddForm(false)} className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">
+              <button 
+                type="button" 
+                onClick={handleCancel}
+                className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors"
+              >
                 Cancel
               </button>
             </div>
           </form>
           <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
             <p className="text-sm text-yellow-800 flex items-center gap-2">
-              <span>i</span> Teacher will receive auto-generated email and password. They must change password on first login.
+              <span>ℹ️</span> Teacher will receive auto-generated email and password. They must change password on first login.
             </p>
           </div>
         </div>
