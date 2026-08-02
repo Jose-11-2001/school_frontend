@@ -649,9 +649,7 @@ function StudentDashboard() {
             <p className="font-semibold">{user?.name}</p>
             <p className="text-xs opacity-75">Student</p>
           </div>
-          <button onClick={handleLogout} className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm">
-            Logout
-          </button>
+          
         </div>
       </div>
 
