@@ -53,7 +53,6 @@ function StudentRegistration({ onStudentAdded }) {
         }
     }, [formData.class, formData.stream, formData.root]);
 
-    // ✅ FIXED: Load classes using /api/Admin/classes (capital A)
     const loadClasses = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -66,7 +65,6 @@ function StudentRegistration({ onStudentAdded }) {
             let data = [];
             let response;
             
-            // Try primary endpoint - ✅ FIXED
             response = await fetch('https://school-yathu.onrender.com/api/Admin/classes', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -186,17 +184,65 @@ function StudentRegistration({ onStudentAdded }) {
         try {
             const token = localStorage.getItem('token');
             const url = `https://school-yathu.onrender.com/api/StudentRegistration/available-subjects/${encodeURIComponent(formData.class)}/${encodeURIComponent(formData.stream)}${formData.root ? `?root=${encodeURIComponent(formData.root)}` : ''}`;
+            
+            console.log('Loading subjects from URL:', url);
+            
             const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const data = await response.json();
-            setAvailableSubjects({
-                coreSubjects: data.coreSubjects || [],
-                humanitiesSubjects: data.humanitiesSubjects || [],
-                scienceSubjects: data.scienceSubjects || []
-            });
+            
+            // ✅ Check if response is ok before trying to parse JSON
+            if (response.ok) {
+                const text = await response.text(); // Get raw response first
+                console.log('Raw response:', text);
+                
+                // Check if response is empty
+                if (!text || text.trim() === '') {
+                    console.warn('Empty response from subjects API');
+                    setAvailableSubjects({
+                        coreSubjects: [],
+                        humanitiesSubjects: [],
+                        scienceSubjects: []
+                    });
+                    return;
+                }
+                
+                // Try to parse JSON
+                try {
+                    const data = JSON.parse(text);
+                    setAvailableSubjects({
+                        coreSubjects: data.coreSubjects || [],
+                        humanitiesSubjects: data.humanitiesSubjects || [],
+                        scienceSubjects: data.scienceSubjects || []
+                    });
+                } catch (parseError) {
+                    console.error('Error parsing JSON:', parseError);
+                    console.log('Raw response that failed to parse:', text);
+                    setAvailableSubjects({
+                        coreSubjects: [],
+                        humanitiesSubjects: [],
+                        scienceSubjects: []
+                    });
+                }
+            } else {
+                console.error('Failed to load subjects:', response.status);
+                if (response.status === 404) {
+                    // Subjects endpoint not found - this is expected if no subjects are set up
+                    console.warn('No subjects found for this class/stream');
+                }
+                setAvailableSubjects({
+                    coreSubjects: [],
+                    humanitiesSubjects: [],
+                    scienceSubjects: []
+                });
+            }
         } catch (error) {
             console.error('Error loading subjects:', error);
+            setAvailableSubjects({
+                coreSubjects: [],
+                humanitiesSubjects: [],
+                scienceSubjects: []
+            });
         }
     };
 
@@ -239,7 +285,7 @@ function StudentRegistration({ onStudentAdded }) {
                 return;
             }
 
-            // ✅ FIXED: Step 1 - Create the student using /api/Student
+            // Step 1 - Create the student
             const studentResponse = await fetch('https://school-yathu.onrender.com/api/Student', {
                 method: 'POST',
                 headers: {
@@ -257,13 +303,13 @@ function StudentRegistration({ onStudentAdded }) {
             const studentData = await studentResponse.json();
             
             if (!studentResponse.ok) {
-                setMessage(` ${studentData.message || 'Error adding student'}`);
+                setMessage(`❌ ${studentData.message || 'Error adding student'}`);
                 setMessageType('error');
                 setLoading(false);
                 return;
             }
             
-            // ✅ FIXED: Step 2 - Create user account using /api/Auth/register (capital A)
+            // Step 2 - Create user account
             const userResponse = await fetch('https://school-yathu.onrender.com/api/Auth/register', {
                 method: 'POST',
                 headers: {
@@ -282,10 +328,10 @@ function StudentRegistration({ onStudentAdded }) {
             
             if (userResponse.ok) {
                 setMessage(
-                    ` Student "${formData.fullName}" added successfully!\n\n` +
+                    `✅ Student "${formData.fullName}" added successfully!\n\n` +
                     `Login Email: ${email}\n` +
                     `Temporary Password: ${password}\n\n` +
-                    ` Student must change password on first login.`
+                    `⚠️ Student must change password on first login.`
                 );
                 setMessageType('success');
                 setFormData({
@@ -301,12 +347,12 @@ function StudentRegistration({ onStudentAdded }) {
                 }
                 await loadClasses();
             } else {
-                setMessage(` Student added but user account creation failed: ${userData.message}`);
+                setMessage(`⚠️ Student added but user account creation failed: ${userData.message}`);
                 setMessageType('warning');
             }
         } catch (error) {
             console.error('Error:', error);
-            setMessage(` ${error.message || 'Network error'}`);
+            setMessage(`❌ ${error.message || 'Network error'}`);
             setMessageType('error');
         } finally {
             setLoading(false);
@@ -467,7 +513,7 @@ function StudentRegistration({ onStudentAdded }) {
                                         onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
                                         className="mr-2 w-4 h-4"
                                     />
-                                    <span className="text-lg"></span>
+                                    <span className="text-lg">📚</span>
                                     <span className="ml-2">Humanities (History, Geography, Social Studies)</span>
                                 </label>
                                 <label className="flex items-center cursor-pointer">
@@ -478,7 +524,7 @@ function StudentRegistration({ onStudentAdded }) {
                                         onChange={(e) => setFormData({...formData, root: e.target.value, selectedSubjectIds: []})}
                                         className="mr-2 w-4 h-4"
                                     />
-                                    <span className="text-lg"></span>
+                                    <span className="text-lg">🔬</span>
                                     <span className="ml-2">Sciences (Physics, Chemistry, Biology)</span>
                                 </label>
                             </div>
@@ -487,7 +533,7 @@ function StudentRegistration({ onStudentAdded }) {
 
                     {formData.class && formData.stream && (
                         <div className="border rounded-lg p-4 bg-gray-50">
-                            <h3 className="font-bold text-lg mb-3 text-gray-800">Subjects Allocation</h3>
+                            <h3 className="font-bold text-lg mb-3 text-gray-800">📖 Subjects Allocation</h3>
                             
                             {availableSubjects.coreSubjects?.length === 0 && 
                              availableSubjects.humanitiesSubjects?.length === 0 && 

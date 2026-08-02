@@ -7,11 +7,14 @@ import TeacherManagement from '../Admin/TeacherManagement';
 import AdminUserManagement from '../Admin/AdminUserManagement';
 import StudentRegistration from '../Admin/StudentRegistration';
 import MyAssignments from './MyAssignments';
-import SubjectAllocation from '../Admin/SubjectAllocation';
+import SubjectAllocation from '../Admin/SubjectAllocation'; // Use the enhanced version
 import StudentDetailsModal from '../Admin/StudentDetailsModal';
 import TeacherMarksEntry from '../Teacher/TeacherMarksEntry';
 import MySubjects from '../Teacher/MySubjects';
 import MyStudents from '../Teacher/MyStudents';
+import SchoolRankings from '../Admin/SchoolRankings';
+import DepartmentRankings from '../Admin/DepartmentRankings';
+import ResultsApproval from '../Admin/ResultsApproval';
 
 function DeputyDashboard() {
   const [user, setUser] = useState(null);
@@ -22,11 +25,14 @@ function DeputyDashboard() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [hasTeacherAccess, setHasTeacherAccess] = useState(false);
   const [stats, setStats] = useState({
-    totalAssignments: 0,
-    pendingAssignments: 0,
-    inProgressAssignments: 0,
-    completedAssignments: 0
+    totalStudents: 0,
+    totalTeachers: 0,
+    totalDepartments: 0,
+    totalSubjects: 0,
+    totalClasses: 0,
+    pendingApprovals: 0
   });
+  const [loadingStats, setLoadingStats] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,7 +48,31 @@ function DeputyDashboard() {
     loadStats();
   }, [navigate]);
 
+  // ✅ Use the same stats endpoint as Admin
   const loadStats = async () => {
+    setLoadingStats(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://school-yathu.onrender.com/api/Admin/statistics', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      } else {
+        // Fallback to deputy-specific stats if admin stats fail
+        await loadDeputyStats();
+      }
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      await loadDeputyStats();
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  // Fallback: Load deputy-specific stats
+  const loadDeputyStats = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('https://school-yathu.onrender.com/api/Deputy/dashboard-stats', {
@@ -50,10 +80,17 @@ function DeputyDashboard() {
       });
       if (response.ok) {
         const data = await response.json();
-        setStats(data);
+        setStats({
+          totalStudents: data.totalStudents || 0,
+          totalTeachers: data.totalTeachers || 0,
+          totalDepartments: data.totalDepartments || 0,
+          totalSubjects: data.totalSubjects || 0,
+          totalClasses: data.totalClasses || 0,
+          pendingApprovals: data.pendingApprovals || 0
+        });
       }
     } catch (error) {
-      console.error('Error loading stats:', error);
+      console.error('Error loading deputy stats:', error);
     }
   };
 
@@ -84,6 +121,7 @@ function DeputyDashboard() {
     navigate('/teacher-dashboard');
   };
 
+  // ✅ Updated menu items with more shared features
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'assignments', label: 'My Assignments' },
@@ -92,6 +130,9 @@ function DeputyDashboard() {
     { id: 'teachers', label: 'Teacher Management' },
     { id: 'users', label: 'Manage Users' },
     { id: 'subjects', label: 'Subject Allocation' },
+    { id: 'school-rankings', label: 'School Rankings' },
+    { id: 'department-rankings', label: 'Department Rankings' },
+    { id: 'approval', label: 'Results Approval' },
   ];
 
   // Teacher-specific tabs
@@ -203,7 +244,6 @@ function DeputyDashboard() {
               Switch to Teacher Dashboard
             </button>
           )}
-      
         </div>
       </div>
 
@@ -215,7 +255,7 @@ function DeputyDashboard() {
               Deputy Head Teacher
             </span>
             <span className="text-sm text-blue-200">
-              {stats.pendingAssignments} Pending | {stats.totalAssignments} Total
+              {stats.pendingApprovals || 0} Pending | {stats.totalStudents || 0} Students
             </span>
             {hasTeacherAccess && (
               <span className="bg-green-600 px-3 py-1 rounded-full text-sm">
@@ -246,59 +286,80 @@ function DeputyDashboard() {
             {activeTab === 'dashboard' && (
               <div>
                 <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <p className="text-sm text-blue-600">Total Assignments</p>
-                    <p className="text-2xl font-bold text-blue-700">{stats.totalAssignments}</p>
+                {loadingStats ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                   </div>
-                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                    <p className="text-sm text-yellow-600">Pending</p>
-                    <p className="text-2xl font-bold text-yellow-700">{stats.pendingAssignments}</p>
-                  </div>
-                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                    <p className="text-sm text-orange-600">In Progress</p>
-                    <p className="text-2xl font-bold text-orange-700">{stats.inProgressAssignments}</p>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-600">Completed</p>
-                    <p className="text-2xl font-bold text-green-700">{stats.completedAssignments}</p>
-                  </div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg border">
-                  <h3 className="font-semibold text-gray-700 mb-3">Quick Actions</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <button 
-                      onClick={() => setActiveTab('assignments')}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
-                    >
-                      View Assignments
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('student-registration')}
-                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
-                    >
-                      Add Student
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('teachers')}
-                      className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors text-sm"
-                    >
-                      Add Teacher
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('students')}
-                      className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-colors text-sm"
-                    >
-                      View Students
-                    </button>
-                  </div>
-                </div>
-                {hasTeacherAccess && (
-                  <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-700">
-                      You have teacher access. You can switch to teacher mode to enter marks and manage your students.
-                    </p>
-                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-600">Total Students</p>
+                        <p className="text-2xl font-bold text-blue-700">{stats.totalStudents || 0}</p>
+                      </div>
+                      <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                        <p className="text-sm text-purple-600">Total Teachers</p>
+                        <p className="text-2xl font-bold text-purple-700">{stats.totalTeachers || 0}</p>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <p className="text-sm text-green-600">Total Subjects</p>
+                        <p className="text-2xl font-bold text-green-700">{stats.totalSubjects || 0}</p>
+                      </div>
+                      <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                        <p className="text-sm text-orange-600">Pending Approvals</p>
+                        <p className="text-2xl font-bold text-orange-700">{stats.pendingApprovals || 0}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                        <p className="text-sm text-indigo-600">Total Departments</p>
+                        <p className="text-2xl font-bold text-indigo-700">{stats.totalDepartments || 0}</p>
+                      </div>
+                      <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                        <p className="text-sm text-teal-600">Total Classes</p>
+                        <p className="text-2xl font-bold text-teal-700">{stats.totalClasses || 0}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 rounded-lg border">
+                      <h3 className="font-semibold text-gray-700 mb-3">Quick Actions</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button 
+                          onClick={() => setActiveTab('assignments')}
+                          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                        >
+                          View Assignments
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('student-registration')}
+                          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
+                        >
+                          Add Student
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('teachers')}
+                          className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors text-sm"
+                        >
+                          Add Teacher
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('students')}
+                          className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-colors text-sm"
+                        >
+                          View Students
+                        </button>
+                      </div>
+                    </div>
+
+                    {hasTeacherAccess && (
+                      <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <p className="text-sm text-green-700">
+                          You have teacher access. You can switch to teacher mode to enter marks and manage your students.
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -315,6 +376,9 @@ function DeputyDashboard() {
             {activeTab === 'teachers' && <TeacherManagement />}
             {activeTab === 'users' && <AdminUserManagement />}
             {activeTab === 'subjects' && <SubjectAllocation />}
+            {activeTab === 'school-rankings' && <SchoolRankings />}
+            {activeTab === 'department-rankings' && <DepartmentRankings />}
+            {activeTab === 'approval' && <ResultsApproval />}
             {activeTab === 'my-students' && <MyStudents />}
             {activeTab === 'my-subjects' && <MySubjects />}
             {activeTab === 'enter-marks' && <TeacherMarksEntry />}
