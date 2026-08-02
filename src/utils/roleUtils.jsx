@@ -67,17 +67,35 @@ export const isFormTeacher = () => {
   return user.isFormTeacher === true || hasRole('FormTeacher');
 };
 
+export const isHeadOfDepartment = () => {
+  const user = getCurrentUser();
+  if (!user) return false;
+  return user.isHeadOfDepartment === true || hasRole('HeadOfDepartment');
+};
+
+export const isDeputyHeadTeacher = () => {
+  const user = getCurrentUser();
+  if (!user) return false;
+  return user.isDeputyHeadTeacher === true || hasRole('DeputyHeadTeacher');
+};
+
 export const canAccessTeacherDashboard = () => {
   const user = getCurrentUser();
   if (!user) return false;
-  return hasRole('Teacher') || isFormTeacher();
+  return hasRole('Teacher') || isFormTeacher() || isHeadOfDepartment() || isDeputyHeadTeacher();
 };
 
 export const getDashboardRole = () => {
   const user = getCurrentUser();
   if (!user) return null;
   
-  // If user is a Form Teacher, they should go to Form Teacher Dashboard
+  // Priority order: Deputy > HOD > Form Teacher > Teacher
+  if (isDeputyHeadTeacher()) {
+    return 'DeputyHeadTeacher';
+  }
+  if (isHeadOfDepartment()) {
+    return 'HeadOfDepartment';
+  }
   if (isFormTeacher()) {
     return 'FormTeacher';
   }
@@ -111,7 +129,7 @@ export const hasTeacherAllocations = () => {
   if (user.hasTeacherAllocations !== undefined) {
     return user.hasTeacherAllocations;
   }
-  return hasRole('Teacher') || isFormTeacher();
+  return hasRole('Teacher') || isFormTeacher() || isHeadOfDepartment() || isDeputyHeadTeacher();
 };
 
 export const setTeacherAllocations = (hasAllocations) => {
@@ -125,19 +143,7 @@ export const setTeacherAllocations = (hasAllocations) => {
 export const canSwitchToTeacherMode = () => {
   const user = getCurrentUser();
   if (!user) return false;
-  return hasRole('Teacher') || isFormTeacher();
-};
-
-export const isHeadOfDepartment = () => {
-  const user = getCurrentUser();
-  if (!user) return false;
-  return user.isHeadOfDepartment === true || hasRole('HeadOfDepartment');
-};
-
-export const isDeputyHeadTeacher = () => {
-  const user = getCurrentUser();
-  if (!user) return false;
-  return user.isDeputyHeadTeacher === true || hasRole('DeputyHeadTeacher');
+  return hasRole('Teacher') || isFormTeacher() || isHeadOfDepartment() || isDeputyHeadTeacher();
 };
 
 export const isAdmin = () => {

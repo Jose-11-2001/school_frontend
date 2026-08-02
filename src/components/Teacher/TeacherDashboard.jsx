@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, hasRole, getUserName, isFormTeacher } from '../../utils/roleUtils';
+import { getCurrentUser, hasRole, getUserName, isFormTeacher, isHeadOfDepartment, isDeputyHeadTeacher } from '../../utils/roleUtils';
 import Notifications from '../Common/Notifications';
 import TeacherMarksEntry from './TeacherMarksEntry';
 import MySubjects from './MySubjects';
@@ -8,12 +8,21 @@ import Rankings from '../Common/Rankings';
 import MyStudents from './MyStudents';
 import Timetable from '../Common/Timetable';
 import ReportGenerator from '../Common/ReportGenerator';
+import FormTeacherClasses from '../FormTeacher/FormTeacherClasses';
+import SubjectApprovals from '../FormTeacher/SubjectApprovals';
+import ClassResults from '../FormTeacher/ClassResults';
+import { Link } from 'react-router-dom';
 
 function TeacherDashboard() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('students');
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Check for additional roles
+  const isFormTeacherFlag = isFormTeacher();
+  const isHOD = isHeadOfDepartment();
+  const isDeputy = isDeputyHeadTeacher();
 
   useEffect(() => {
     const userData = getCurrentUser();
@@ -40,7 +49,20 @@ function TeacherDashboard() {
     setMobileOpen(!mobileOpen);
   };
 
-  const isFormTeacherFlag = isFormTeacher();
+  // Navigate to specific dashboard with role check
+  const navigateToDashboard = (role, path) => {
+    const roleCheck = {
+      'FormTeacher': isFormTeacherFlag,
+      'HeadOfDepartment': isHOD,
+      'DeputyHeadTeacher': isDeputy
+    };
+
+    if (roleCheck[role]) {
+      navigate(path);
+    } else {
+      alert(`You are not assigned as ${role}. Please contact the administrator.`);
+    }
+  };
 
   const menuItems = [
     { id: 'students', label: 'My Students' },
@@ -69,6 +91,7 @@ function TeacherDashboard() {
             </svg>
           </button>
           <h1 className="text-sm font-bold">Teacher Portal</h1>
+          <p className="text-xs text-blue-200">Mkondezi Secondary</p>
         </div>
         <div className="flex items-center gap-2">
           <Notifications role="Teacher" />
@@ -100,10 +123,53 @@ function TeacherDashboard() {
             </button>
             <div>
               <h1 className="text-xl font-bold">Teacher Portal</h1>
-              {isFormTeacherFlag && (
-                <span className="text-xs bg-green-500 px-2 py-0.5 rounded-full">Form Teacher</span>
-              )}
+              <p className="text-xs text-blue-200">Mkondezi Secondary</p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {isFormTeacherFlag && (
+                  <span className="text-xs bg-green-500 px-2 py-0.5 rounded-full">Form Teacher</span>
+                )}
+                {isHOD && (
+                  <span className="text-xs bg-purple-500 px-2 py-0.5 rounded-full">HOD</span>
+                )}
+                {isDeputy && (
+                  <span className="text-xs bg-blue-500 px-2 py-0.5 rounded-full">Deputy</span>
+                )}
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Role Navigation Buttons */}
+        <div className="px-4 py-2 border-b border-blue-700">
+          <p className="text-xs text-blue-300 mb-2">Switch to Dashboard:</p>
+          <div className="space-y-1">
+            {isFormTeacherFlag && (
+              <button
+                onClick={() => navigateToDashboard('FormTeacher', '/form-teacher-dashboard')}
+                className="w-full text-left text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded transition-colors"
+              >
+                Form Teacher Dashboard
+              </button>
+            )}
+            {isHOD && (
+              <button
+                onClick={() => navigateToDashboard('HeadOfDepartment', '/hod-dashboard')}
+                className="w-full text-left text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded transition-colors"
+              >
+                Head of Department Dashboard
+              </button>
+            )}
+            {isDeputy && (
+              <button
+                onClick={() => navigateToDashboard('DeputyHeadTeacher', '/deputy-dashboard')}
+                className="w-full text-left text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded transition-colors"
+              >
+                Deputy Head Teacher Dashboard
+              </button>
+            )}
+            {!isFormTeacherFlag && !isHOD && !isDeputy && (
+              <p className="text-xs text-blue-400 italic">No additional roles assigned</p>
+            )}
           </div>
         </div>
 
@@ -127,7 +193,14 @@ function TeacherDashboard() {
         </nav>
 
         <div className="sticky bottom-0 bg-gradient-to-t from-blue-800 to-transparent p-4 border-t border-blue-700">
+          <div className="px-4 py-2 text-sm text-blue-200">
+            <p className="font-semibold">{user?.name}</p>
+            <p className="text-xs opacity-75">Teacher</p>
+          </div>
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-red-600 hover:text-white rounded-lg transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
             Logout
           </button>
         </div>
@@ -141,6 +214,12 @@ function TeacherDashboard() {
             {isFormTeacherFlag && (
               <span className="bg-green-600 px-3 py-1 rounded-full text-sm">Form Teacher</span>
             )}
+            {isHOD && (
+              <span className="bg-purple-600 px-3 py-1 rounded-full text-sm">HOD</span>
+            )}
+            {isDeputy && (
+              <span className="bg-blue-600 px-3 py-1 rounded-full text-sm">Deputy</span>
+            )}
           </div>
           <div className="flex items-center gap-6">
             <Notifications role="Teacher" />
@@ -149,6 +228,9 @@ function TeacherDashboard() {
               <span className="text-sm font-medium">Welcome,</span>
               <span className="text-sm font-bold">{getUserName()}</span>
             </div>
+            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm transition-colors">
+              Logout
+            </button>
           </div>
         </nav>
 
