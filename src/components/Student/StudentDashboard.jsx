@@ -340,14 +340,14 @@ function StudentDashboard() {
   const isUpperForm = (classLevel === 'form3' || classLevel === 'form4');
 
   const menuItems = [
-    { id: 'my-subjects', label: '📚 My Subjects' },
-    { id: 'results', label: '📊 My Results' },
-    { id: 'timetable', label: '📅 Timetable' },
-    { id: 'contacts', label: '📞 Contacts' },
+    { id: 'my-subjects', label: ' My Subjects' },
+    { id: 'results', label: ' My Results' },
+    { id: 'timetable', label: ' Timetable' },
+    { id: 'contacts', label: ' Contacts' },
   ];
 
   if (isUpperForm) {
-    menuItems.push({ id: 'subject-selection', label: '📝 Select Subjects' });
+    menuItems.push({ id: 'subject-selection', label: ' Select Subjects' });
   }
 
   const renderMySubjects = () => {
@@ -386,7 +386,7 @@ function StudentDashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">📚 My Subjects</h2>
+              <h2 className="text-2xl font-bold text-gray-800"> My Subjects</h2>
               <p className="text-gray-600 mt-1">Total Subjects: {subjects.length}</p>
             </div>
             <button
@@ -446,7 +446,7 @@ function StudentDashboard() {
       <div>
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">📊 My Results</h2>
+            <h2 className="text-2xl font-bold text-gray-800"> My Results</h2>
             <p className="text-sm text-gray-500 mt-1">{selectedTerm} {selectedYear}</p>
           </div>
           <button
@@ -673,9 +673,6 @@ function StudentDashboard() {
               <span className="text-sm font-medium">Welcome,</span>
               <span className="text-sm font-bold">{user?.name}</span>
             </div>
-            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-lg text-sm transition-colors">
-              Logout
-            </button>
           </div>
         </nav>
 
